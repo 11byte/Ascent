@@ -1,5 +1,5 @@
 "use client";
-import ScrollScene from "@/components/ScrollScene";
+import ScrollScene from "@src/components/ScrollScene";
 
 export default function Home() {
   return (
