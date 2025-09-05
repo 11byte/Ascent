@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -24,10 +25,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Sticky Sign In / Sign Up buttons in top-right corner */}
+        <div className="absolute top-0 right-0 z-100 flex justify-end p-4 bg-[#0200368f] rounded-4xl m-2 w-[980%]">
+          <button className="px-4 py-2 bg-[#020033] text-white rounded-3xl hover:bg-[#2a286170] backdrop-blur-3xl transition border border-[wheat] hover:border-[#b9b9b9] mr-2">
+            Sign In
+          </button>
+          <button className="px-4 py-2 bg-[#330025] text-white rounded-3xl hover:bg-[#66465e] transition border border-[wheat] hover:border-[#b9b9b9]">
+            Sign Up
+          </button>
+        </div>
+
+        {/* Page Content */}
+        <main>{children}</main>
       </body>
     </html>
   );
