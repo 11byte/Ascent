@@ -42,11 +42,13 @@ const Navbar = () => {
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? isDarkMode 
-            ? 'bg-gray-900/10 backdrop-blur-md shadow-lg border-b border-gray-700' 
-            : 'bg-neutral-light/5 backdrop-blur-md shadow-lg border-b border-neutral-200'
-          : 'bg-transparent'
+          ? 'bg-white/20 backdrop-blur-xl shadow-2xl border-b border-white/30' 
+          : 'bg-white/10 backdrop-blur-lg border-b border-white/20'
       }`}
+      style={{
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20 relative">
@@ -83,8 +85,8 @@ const Navbar = () => {
                   width="160"
                   height="120"
                   viewBox="0 0 160 120"
-                  className="drop-shadow-lg"
-                  style={{ marginTop: '-20px' }} // Pull triangle up to connect with navbar top
+                  className="drop-shadow-2xl"
+                  style={{ marginTop: '-20px' }}
                 >
                   {/* Outer inverted triangle (base at top, point down) */}
                   <path
@@ -117,10 +119,10 @@ const Navbar = () => {
                 
                 {/* Phase Text in center of triangle */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ marginTop: '0px' }}>
-                  <span className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-neutral-dark'}`}>
+                  <span className="font-bold text-lg text-white drop-shadow-lg">
                     Phase
                   </span>
-                  <span className={`font-bold text-4xl ${isDarkMode ? 'text-red-400' : 'text-primary-red'} -mt-1`}>
+                  <span className="font-bold text-4xl text-white drop-shadow-lg -mt-1">
                     2
                   </span>
                 </div>
@@ -135,31 +137,25 @@ const Navbar = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="hidden lg:flex items-center z-10"
           >
-            <div className={`${
-              isDarkMode 
-                ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600' 
-                : 'bg-gradient-to-r from-neutral-100 to-neutral-200 border-neutral-300'
-            } rounded-xl px-6 py-3 border shadow-sm hover:shadow-md transition-all duration-300`}>
+            <div 
+              className="bg-white/20 rounded-2xl px-6 py-3 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
+              style={{
+                backdropFilter: 'blur(16px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              }}
+            >
               <div className="flex items-center space-x-3">
                 {/* User Avatar */}
-                <div className={`w-8 h-8 ${
-                  isDarkMode 
-                    ? 'bg-gradient-to-br from-red-500 to-cyan-500' 
-                    : 'bg-gradient-to-br from-red-500 to-cyan-500'
-                } rounded-full flex items-center justify-center`}>
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 
                 {/* User Info */}
                 <div className="flex flex-col">
-                  <span className={`text-sm font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-neutral-dark'
-                  }`}>
+                  <span className="text-sm font-semibold text-white drop-shadow-sm">
                     Paresh-0007
                   </span>
-                  <span className={`text-xs font-medium ${
-                    isDarkMode ? 'text-cyan-400' : 'text-accent-teal'
-                  }`}>
+                  <span className="text-xs font-medium text-cyan-200 drop-shadow-sm">
                     1000 pts
                   </span>
                 </div>
@@ -170,11 +166,11 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`lg:hidden p-2 rounded-md transition-colors duration-200 z-10 ${
-              isDarkMode 
-                ? 'text-white hover:text-red-400 hover:bg-gray-800' 
-                : 'text-neutral-dark hover:text-primary-red hover:bg-neutral-100'
-            }`}
+            className="lg:hidden p-2 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 transition-all duration-200 z-10 text-white hover:bg-white/30 shadow-lg"
+            style={{
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -189,23 +185,23 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className={`lg:hidden border-t shadow-lg ${
-              isDarkMode 
-                ? 'bg-gray-900 border-gray-700' 
-                : 'bg-white border-neutral-200'
-            }`}
+            className="lg:hidden border-t border-white/30 shadow-2xl"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
           >
             <div className="px-4 py-6">
               {/* Mobile Phase Indicator */}
               <div className="flex items-center justify-center mb-6">
                 <div className="flex flex-col items-center space-y-2">
                   <div className="relative">
-                    <svg width="80" height="60" viewBox="0 0 80 60">
-                      {/* Mobile version - also connected to top */}
+                    <svg width="80" height="60" viewBox="0 0 80 60" className="drop-shadow-xl">
                       <path
                         d="M40 55 L5 0 L75 0 Z"
                         fill={isDarkMode ? "#EF4444" : "#E53E3E"}
-                        opacity="0.2"
+                        opacity="0.3"
                         stroke={isDarkMode ? "#EF4444" : "#E53E3E"}
                         strokeWidth="2"
                       />
@@ -221,14 +217,10 @@ const Navbar = () => {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-sm font-bold ${
-                        isDarkMode ? 'text-white' : 'text-neutral-dark'
-                      }`}>
+                      <span className="text-sm font-bold text-white drop-shadow-lg">
                         Phase
                       </span>
-                      <span className={`text-xl font-bold ${
-                        isDarkMode ? 'text-red-400' : 'text-primary-red'
-                      } -mt-1`}>
+                      <span className="text-xl font-bold text-white drop-shadow-lg -mt-1">
                         2
                       </span>
                     </div>
@@ -237,26 +229,22 @@ const Navbar = () => {
               </div>
 
               {/* Mobile User Info */}
-              <div className={`rounded-lg p-4 text-center ${
-                isDarkMode ? 'bg-gray-800' : 'bg-neutral-100'
-              }`}>
+              <div 
+                className="rounded-2xl p-4 text-center bg-white/20 border border-white/30 shadow-xl"
+                style={{
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                }}
+              >
                 <div className="flex items-center justify-center space-x-3">
-                  <div className={`w-10 h-10 ${
-                    isDarkMode 
-                      ? 'bg-gradient-to-br from-red-500 to-cyan-500' 
-                      : 'bg-gradient-to-br from-primary-red to-accent-teal'
-                  } rounded-full flex items-center justify-center`}>
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className={`font-semibold ${
-                      isDarkMode ? 'text-white' : 'text-neutral-dark'
-                    }`}>
+                    <div className="font-semibold text-white drop-shadow-sm">
                       Paresh-0007
                     </div>
-                    <div className={`text-sm font-medium ${
-                      isDarkMode ? 'text-cyan-400' : 'text-accent-teal'
-                    }`}>
+                    <div className="text-sm font-medium text-cyan-200 drop-shadow-sm">
                       1000 pts
                     </div>
                   </div>

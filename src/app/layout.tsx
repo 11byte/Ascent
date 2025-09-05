@@ -31,9 +31,7 @@ export default function RootLayout({
       <head />
       <body className={inter.className}>
         <NavbarWrapper />
-        <main className="pt-16 lg:pt-20">
           {children}
-        </main>
       </body>
     </html>
   );
