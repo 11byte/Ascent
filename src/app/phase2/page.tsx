@@ -1,11 +1,11 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { FogLiftSection } from '@src/components/animations/FogLiftSection'
-import { AppLauncher } from '@src/components/home/AppLauncher'
-import { HomeBackground } from '@src/components/home/HomeBackground'
-import { WidgetSystem } from '@src/components/widgets/WidgetSystem'
-import { usePhase2 } from "@src/context/phase2Context"
+import { FogLiftSection } from '@components/animations/FogLiftSection'
+import { AppLauncher } from '@components/home/AppLauncher'
+import { HomeBackground } from '@components/home/HomeBackground'
+import { WidgetSystem } from '@components/widgets/WidgetSystem'
+import { usePhase2 } from "@context/phase2Context"
 
 export default function Home() {
   const { username } = usePhase2()
@@ -52,7 +52,7 @@ export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
-      <HomeBackground />
+      <HomeBackground username='Paresh'/>
 
       {/* Main Content */}
       <FogLiftSection className="min-h-screen relative z-10 pt-20">

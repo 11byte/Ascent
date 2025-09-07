@@ -1,8 +1,8 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
-import NavbarWrapper from "@src/components/navbar/Navbar-Wrapper";
+import Navbar from "../components/Navig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +14,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const inter = Inter({ subsets: ['latin'] })
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  weight: ["700"],
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: 'Ascent - Phase 2: The Fog Lifts',
@@ -28,9 +32,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head />
-      <body className={inter.className}>
-          {children}
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} antialiased`}
+      >
+        <main>{children}</main>
       </body>
     </html>
   );
