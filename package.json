@@ -24,6 +24,7 @@
     "gsap": "^3.13.0",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.542.0",
     "morgan": "^1.10.1",
     "next": "15.4.5",
     "prisma": "^6.15.0",
