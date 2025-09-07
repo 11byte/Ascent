@@ -5,7 +5,24 @@ import Link from 'next/link'
 import { Menu, X, User } from 'lucide-react'
 import Image from 'next/image'
 
-const Navbar = () => {
+const Navbar = ({
+  phaseNo=2,
+  username="Paresh",
+  points=1000,
+  triangle=true,
+  tBorder={
+    light:"#E53E3E", 
+    dark:"#EF4444"
+  },
+  tColor={
+    dark:"#06B6D4",
+    light: "#14B8A6"
+  },
+  tDepthColor={
+    dark:"#3B82F6",
+    light:"#059669"
+  }
+}) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -72,11 +89,12 @@ const Navbar = () => {
           </motion.div>
 
           {/* Center - Extended Triangle (Connected to Top) */}
-          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 hidden lg:block">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: -20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+          {triangle && (
+            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 hidden lg:block">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: -20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
               className="relative flex flex-col items-center"
             >
               {/* Extended Inverted Triangle (Base touches navbar top) */}
@@ -92,19 +110,19 @@ const Navbar = () => {
                   <path
                     d="M80 110 L10 0 L150 0 Z"
                     fill="url(#triangleGradient)"
-                    stroke={isDarkMode ? "#EF4444" : "#E53E3E"}
+                    stroke={isDarkMode ? tBorder.dark : tBorder.light}
                     strokeWidth="3"
                   />
                   {/* Inner inverted triangle */}
                   <path
                     d="M80 100 L26 15 L135 15 Z"
-                    fill={isDarkMode ? "#06B6D4" : "#14B8A6"}
+                    fill={isDarkMode ? tColor.dark : tColor.light}
                     opacity="0.9"
                   />
                   {/* Additional accent triangle for depth */}
                   <path
                     d="M80 90 L40 25 L120 25 Z"
-                    fill={isDarkMode ? "#3B82F6" : "#059669"}
+                    fill={isDarkMode ? tDepthColor.dark : tDepthColor.light}
                     opacity="0.6"
                   />
                   <defs>
@@ -123,12 +141,13 @@ const Navbar = () => {
                     Phase
                   </span>
                   <span className="font-bold text-4xl text-white drop-shadow-lg -mt-1">
-                    2
+                    {phaseNo}
                   </span>
                 </div>
               </div>
             </motion.div>
           </div>
+          )}
 
           {/* Right - User Profile Box */}
           <motion.div
@@ -138,7 +157,7 @@ const Navbar = () => {
             className="hidden lg:flex items-center z-10"
           >
             <div 
-              className="bg-white/20 rounded-2xl px-6 py-3 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
+              className="bg-white/20 rounded-full px-6 py-3 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
               style={{
                 backdropFilter: 'blur(16px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(16px) saturate(180%)',
@@ -153,10 +172,10 @@ const Navbar = () => {
                 {/* User Info */}
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-white drop-shadow-sm">
-                    Paresh-0007
+                    {username}
                   </span>
                   <span className="text-xs font-medium text-cyan-200 drop-shadow-sm">
-                    1000 pts
+                    {points} pts
                   </span>
                 </div>
               </div>
@@ -194,25 +213,26 @@ const Navbar = () => {
           >
             <div className="px-4 py-6">
               {/* Mobile Phase Indicator */}
-              <div className="flex items-center justify-center mb-6">
+              { triangle && (
+                <div className="flex items-center justify-center mb-6">
                 <div className="flex flex-col items-center space-y-2">
                   <div className="relative">
                     <svg width="80" height="60" viewBox="0 0 80 60" className="drop-shadow-xl">
                       <path
                         d="M40 55 L5 0 L75 0 Z"
-                        fill={isDarkMode ? "#EF4444" : "#E53E3E"}
+                        fill={isDarkMode ? tBorder.dark : tBorder.light}
                         opacity="0.3"
-                        stroke={isDarkMode ? "#EF4444" : "#E53E3E"}
+                        stroke={isDarkMode ? tBorder.dark : tBorder.light}
                         strokeWidth="2"
                       />
                       <path
                         d="M40 45 L15 8 L65 8 Z"
-                        fill={isDarkMode ? "#06B6D4" : "#14B8A6"}
+                        fill={isDarkMode ? tColor.dark : tColor.light}
                         opacity="0.8"
                       />
                       <path
                         d="M40 35 L25 12 L56 12 Z"
-                        fill={isDarkMode ? "#3B82F6" : "#059669"}
+                        fill={isDarkMode ? tDepthColor.dark : tDepthColor.light}
                         opacity="0.6"
                       />
                     </svg>
@@ -221,16 +241,17 @@ const Navbar = () => {
                         Phase
                       </span>
                       <span className="text-xl font-bold text-white drop-shadow-lg -mt-1">
-                        2
+                        {phaseNo}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Mobile User Info */}
               <div 
-                className="rounded-2xl p-4 text-center bg-white/20 border border-white/30 shadow-xl"
+                className="rounded-full p-4 text-center bg-white/20 border border-white/30 shadow-xl"
                 style={{
                   backdropFilter: 'blur(16px) saturate(180%)',
                   WebkitBackdropFilter: 'blur(16px) saturate(180%)',
@@ -242,10 +263,10 @@ const Navbar = () => {
                   </div>
                   <div>
                     <div className="font-semibold text-white drop-shadow-sm">
-                      Paresh-0007
+                      {username}
                     </div>
                     <div className="text-sm font-medium text-cyan-200 drop-shadow-sm">
-                      1000 pts
+                      {points} pts
                     </div>
                   </div>
                 </div>

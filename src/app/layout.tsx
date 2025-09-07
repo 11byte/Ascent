@@ -30,7 +30,6 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body className={inter.className}>
-        <NavbarWrapper />
           {children}
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import FeatureCard from "@/components/FeatureCard";
+import FeatureCard from "@src/components/FeatureCard";
 
 export default function Phase1Home() {
   const features = [
