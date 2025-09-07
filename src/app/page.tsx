@@ -1,7 +1,7 @@
 "use client";
-import ScrollScene from "@/components/ScrollScene";
-import Landing from "@/components/Landing";
-import Navbar from "../components/Navig";
+import ScrollScene from "@components/ScrollScene";
+import Landing from "@components/Landing";
+import Navbar from "@components/Navig";
 
 export default function Home() {
   return (
