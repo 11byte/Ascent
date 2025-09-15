@@ -26,7 +26,7 @@ const Login = () => {
 
       setMsg("✅ Logged in successfully! Redirecting...");
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = "/phase1";
       }, 1500);
     } catch (error: any) {
       setMsg(error.message || "Something went wrong");
