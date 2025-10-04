@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import Lenis from "@studio-freight/lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,7 +15,64 @@ export default function Landing() {
   const horizontalRef = useRef<HTMLDivElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
 
+  // Horizontal panels data
+  const panels = [
+    {
+      id: "phase-1",
+      bg: "#ffffffa8",
+      lottie: "/jetpack.lottie",
+      items: [
+        "Timeline",
+        "Behaviour tracking",
+        "2D virtual campus",
+        "Tech NewsLetter",
+      ],
+      phaseLabel: "Phase-1",
+    },
+    {
+      id: "phase-2",
+      bg: "#ffffff94",
+      lottie: "/p2.lottie",
+      items: [
+        "Technical clubs",
+        "Bounty Board",
+        "Macro Hackathons",
+        "Leet Tracker",
+      ],
+      phaseLabel: "Phase-2",
+    },
+    {
+      id: "phase-3",
+      bg: "#ffffff75",
+      lottie: "/p3.lottie",
+      items: ["Git Tracker", "Career Roadmap", "DSA leader boards"],
+      phaseLabel: "Phase-3",
+    },
+    {
+      id: "phase-4",
+      bg: "#ffffff52",
+      lottie: "/p4.lottie",
+      items: ["Interview Pods", "Skill Tree", ". . ."],
+      phaseLabel: "Phase-4",
+    },
+  ];
+
   useEffect(() => {
+    // --- Lenis Init ---
+    const lenis = new Lenis({
+      smoothWheel: true,
+      lerp: 0.1,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+
     if (
       !containerRef.current ||
       !nebulaRef.current ||
@@ -24,8 +82,7 @@ export default function Landing() {
     )
       return;
 
-    // --- Nebula BG ---
-    // --- Nebula BG --- (optional parallax)
+    // --- Nebula BG parallax ---
     gsap.to(nebulaRef.current, {
       scale: 1.2,
       scrollTrigger: {
@@ -64,12 +121,10 @@ export default function Landing() {
       });
     });
 
-    // --- Horizontal Scroll Sections ---
+    // --- Horizontal Scroll ---
     const sections = gsap.utils.toArray<HTMLDivElement>(".panel");
     const totalSections = sections.length;
 
-    // Horizontal scroll
-    // Horizontal scroll
     gsap.to(sections, {
       xPercent: -100 * (totalSections - 1),
       ease: "none",
@@ -85,7 +140,7 @@ export default function Landing() {
         start: "top-=80 top",
         end: () => "+=" + horizontalRef.current!.offsetWidth,
         onUpdate: (self) => {
-          const progress = self.progress; // 0 → 1
+          const progress = self.progress;
           let gradient = "";
 
           if (progress < 0.25) {
@@ -103,7 +158,8 @@ export default function Landing() {
         },
       },
     });
-    // Optional parallax scale for nebula during horizontal scroll
+
+    // Parallax scale for nebula during horizontal scroll
     ScrollTrigger.create({
       trigger: horizontalRef.current,
       start: "top top",
@@ -111,11 +167,17 @@ export default function Landing() {
       scrub: true,
       onUpdate: (self) => {
         gsap.to(nebulaRef.current, {
-          scale: 1.1 + self.progress * 0.1, // slightly grows as you scroll
+          scale: 1.1 + self.progress * 0.1,
           overwrite: "auto",
         });
       },
     });
+
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove((time) => lenis.raf(time * 1000));
+      ScrollTrigger.killAll();
+    };
   }, []);
 
   return (
@@ -250,122 +312,36 @@ export default function Landing() {
           }}
         />
 
-        {/* Panels */}
-        <section className="panel min-w-full h-full flex items-center justify-center bg-[#ffffffa8] ">
-          <DotLottieReact
-            className="w-[600px]"
-            src="/jetpack.lottie"
-            loop
-            autoplay
-          />
-          <motion.div className="fixed left-20 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-            Timeline
-          </motion.div>
+        {/* Panels mapped dynamically */}
+        {panels.map((panel, idx) => (
+          <section
+            key={panel.id}
+            className="panel min-w-full h-full flex items-center justify-center"
+            style={{ background: panel.bg }}
+          >
+            <DotLottieReact
+              className={`w-[${600 + idx * 100}px]`}
+              src={panel.lottie}
+              loop
+              autoplay
+            />
 
-          <motion.div className="p-5 absolute left-80 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center align-middle justify-center text-gray-700 text-xl font-semibold ml-10">
-            Behaviour tracking
-          </motion.div>
+            {panel.items.map((item, i) => (
+              <motion.div
+                key={i}
+                className={`absolute left-${
+                  20 + i * 60
+                } top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10`}
+              >
+                {item}
+              </motion.div>
+            ))}
 
-          <center>
-            <motion.div className="  absolute left-140 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              2D virtual campus
+            <motion.div className="absolute left-100 bottom-3 w-100 h-20 rounded-full text-5xl text-fuchsia-100 font-[Orbitron] bg-[#fff5] shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center font-semibold ml-10">
+              {panel.phaseLabel}
             </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-200 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Tech NewsLetter
-            </motion.div>
-          </center>
-          <motion.div className=" absolute left-100 bottom-3 w-100 h-20 rounded-full text-5xl text-fuchsia-100 font-[Orbitron] bg-[#fff5] shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center font-semibold ml-10">
-            Phase-1
-          </motion.div>
-        </section>
-        <section className="panel min-w-full h-full flex items-center justify-center bg-[#ffffff94] ">
-          <DotLottieReact
-            className="w-[700px]"
-            src="/p2.lottie"
-            loop
-            autoplay
-          />
-          <center>
-            <motion.div className="  fixed left-20 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Technical clubs
-            </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-80 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Bounty Board
-            </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-140 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Macro Hackathons
-            </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-200 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Leet Tracker
-            </motion.div>
-          </center>
-          <motion.div className=" absolute left-100 bottom-3 w-100 h-20 rounded-full text-5xl text-fuchsia-100 font-[Orbitron] bg-[#fff5] shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center font-semibold ml-10">
-            Phase-2
-          </motion.div>
-        </section>
-        <section className="panel min-w-full h-full flex items-center justify-center bg-[#ffffff75] ">
-          <DotLottieReact
-            className="w-[800px]"
-            src="/p3.lottie"
-            loop
-            autoplay
-          />
-          <center>
-            <motion.div className=" fixed left-20 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Git Tracker
-            </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-80 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Career Roadmap
-            </motion.div>
-          </center>
-
-          <center>
-            <motion.div className="  absolute left-140 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              DSA leader boards
-            </motion.div>
-          </center>
-          <motion.div className=" absolute left-100 bottom-3 w-100 h-20 rounded-full text-5xl text-fuchsia-100 font-[Orbitron] bg-[#fff5] shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center font-semibold ml-10">
-            Phase-3
-          </motion.div>
-        </section>
-        <section className="panel min-w-full h-full flex items-center justify-center bg-[#ffffff52] ">
-          <DotLottieReact
-            className="w-[800px]"
-            src="/p4.lottie"
-            loop
-            autoplay
-          />
-          <center>
-            <motion.div className="fixed left-20 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-              Interview Pods
-            </motion.div>
-          </center>
-          <motion.div className=" absolute left-80 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-            Skill Tree
-          </motion.div>
-
-          <motion.div className=" absolute left-140 top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10">
-            . . .
-          </motion.div>
-          <motion.div className=" absolute left-100 bottom-3 w-100 h-20 rounded-full text-5xl text-fuchsia-100 font-[Orbitron] bg-[#fff5] shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center font-semibold ml-10">
-            Phase-4
-          </motion.div>
-        </section>
+          </section>
+        ))}
       </motion.div>
 
       {/* Styles */}
@@ -373,12 +349,7 @@ export default function Landing() {
         .nebula {
           position: absolute;
           inset: 0;
-          background: 
-      /* Dark metallic base with 60% darkness on top */ linear-gradient(
-              to bottom,
-              #000 60%,
-              transparent 100%
-            ),
+          background: linear-gradient(to bottom, #000 60%, transparent 100%),
             radial-gradient(
               circle at 30% 30%,
               rgba(75, 0, 130, 0.5),
@@ -394,14 +365,12 @@ export default function Landing() {
               rgba(255, 20, 147, 0.5),
               transparent 85%
             );
-
           background-blend-mode: overlay, screen, screen, screen;
           filter: contrast(1.2) brightness(0.9) saturate(1.15);
           opacity: 0.95;
           overflow: hidden;
         }
 
-        /* Metallic brushed texture */
         .nebula::after {
           content: "";
           position: absolute;
@@ -411,7 +380,6 @@ export default function Landing() {
           opacity: 0.12;
         }
 
-        /* Shimmer highlight that also adds gloss */
         .nebula::before {
           content: "";
           position: absolute;
@@ -433,7 +401,7 @@ export default function Landing() {
             filter: brightness(1);
           }
           25% {
-            filter: brightness(1.25); /* glossy reflection peak */
+            filter: brightness(1.25);
           }
           50% {
             filter: brightness(1);

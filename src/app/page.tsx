@@ -2,6 +2,7 @@
 import ScrollScene from "@components/ScrollScene";
 import Landing from "@components/Landing";
 import Navbar from "@components/Navig";
+import NavbarWrapper from "@components/navbar/Navbar-Wrapper";
 
 export default function Home() {
   return (

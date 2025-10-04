@@ -142,7 +142,7 @@ export default function PremiumBlogPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center"
+      className="min-h-screen w-full flex flex-col items-center pt-10"
       style={{ backgroundColor: COLORS.cream, ...bgTexture }}
     >
       {/* Masthead */}
