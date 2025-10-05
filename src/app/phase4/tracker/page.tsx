@@ -3,21 +3,21 @@ import EnhancedBehaviorTracker from "@/components/EnhancedBehaviorTracker";
 import { HomeBackground } from "@components/home/HomeBackground";
 import { motion } from "framer-motion";
 
-const phase1Theme = {
-  tBorder: { light: "#77BEF0", dark: "#77BEF0" },
-  tColor: { light: "#FFCB61", dark: "#FFCB61" },
-  tDepthColor: { light: "#EA5B6F", dark: "#EA5B6F" }
+const phase4Theme = {
+  tBorder: { light: "#F3F3E0", dark: "#F3F3E0" },
+  tColor: { light: "#183B4E", dark: "#183B4E" },
+  tDepthColor: { light: "#DDA853", dark: "#DDA853" }
 };
 
-export default function Phase1TrackerPage() {
+export default function Phase4TrackerPage() {
   return (
     <div className="min-h-screen relative overflow-hidden pt-24">
       {/* Glassy, animated background */}
-      <HomeBackground username="Paresh" background="#00008B" />
+      <HomeBackground username="Paresh" background="#0B262B" />
       {/* Frosted glass overlay */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0 }}
+        animate={{ opacity: 0.8 }}
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
           background:
@@ -29,7 +29,7 @@ export default function Phase1TrackerPage() {
       {/* Main content container */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-10">
         {/* Optionally, add a header/badge here for phase info */}
-        <EnhancedBehaviorTracker phase="phase1" theme={phase1Theme} />
+        <EnhancedBehaviorTracker phase="phase4" theme={phase4Theme} />
       </div>
     </div>
   );

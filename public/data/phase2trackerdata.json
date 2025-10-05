@@ -1,0 +1,314 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Which advanced technology concept interests you most for deeper exploration?",
+      "options": [
+        "🧬 Machine Learning Algorithms & Neural Networks",
+        "⚡ Full-Stack Development & Modern Frameworks",
+        "🛡️ Advanced Threat Detection & Penetration Testing",
+        "🔍 Big Data Processing & Statistical Modeling",
+        "🌐 Edge Computing & Advanced IoT Architectures"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 2,
+      "question": "How do you prefer to tackle complex technical problems?",
+      "options": [
+        "📊 Analyze data and metrics first",
+        "🔄 Use iterative prototyping",
+        "📚 Study existing solutions and best practices",
+        "🎯 Focus on user requirements and feedback",
+        "🧪 Experiment with cutting-edge technologies"
+      ],
+      "category": "approach"
+    },
+    {
+      "id": 3,
+      "question": "What type of technical project would you find most engaging?",
+      "options": [
+        "🤖 Building a recommendation system with ML",
+        "🏗️ Architecting a scalable web application",
+        "🔐 Developing security tools and protocols",
+        "📈 Creating predictive analytics dashboards",
+        "🔗 Designing interconnected smart systems"
+      ],
+      "category": "interest"
+    },
+    {
+      "id": 4,
+      "question": "In a team project, you naturally tend to:",
+      "options": [
+        "🎯 Define project scope and requirements",
+        "⚙️ Focus on technical implementation details",
+        "🔍 Identify potential risks and edge cases",
+        "📊 Analyze performance and optimization opportunities",
+        "🔧 Integrate different system components"
+      ],
+      "category": "behavior"
+    },
+    {
+      "id": 5,
+      "question": "Which technical skill development excites you most?",
+      "options": [
+        "🧠 Advanced algorithms and AI model training",
+        "🎨 Modern UI/UX design with advanced frameworks",
+        "🛡️ Security auditing and vulnerability assessment",
+        "📉 Advanced statistical analysis and visualization",
+        "🔌 Hardware-software integration and optimization"
+      ],
+      "category": "preference"
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "type": "ranking",
+      "title": "Technology Stack Preferences",
+      "description": "Rank these technology stacks based on your interest in learning them (1 = most interested)",
+      "data": {
+        "stacks": [
+          "🐍 Python + TensorFlow + Jupyter (AI/ML Stack)",
+          "⚛️ React + Node.js + MongoDB (MERN Stack)",
+          "🐧 Linux + Kali + Metasploit (Security Stack)",
+          "📊 R/Python + Pandas + Tableau (Data Science Stack)",
+          "🔧 Arduino + Raspberry Pi + MQTT (IoT Stack)"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "scenario",
+      "title": "Technical Challenge Selection",
+      "description": "Choose which technical challenge you'd be most excited to work on:",
+      "data": {
+        "scenarios": [
+          {
+            "title": "Develop a Smart Study Assistant",
+            "description": "Build an AI that adapts to individual learning patterns and provides personalized recommendations",
+            "domain": "AI/ML",
+            "difficulty": "Intermediate",
+            "skills": ["Python", "Machine Learning", "Natural Language Processing"]
+          },
+          {
+            "title": "Create a Real-Time Collaboration Platform",
+            "description": "Build a platform where teams can collaborate on projects with live updates and version control",
+            "domain": "Web Dev",
+            "difficulty": "Intermediate", 
+            "skills": ["React", "WebSockets", "Database Design"]
+          },
+          {
+            "title": "Design a Network Security Monitor",
+            "description": "Develop a system that detects and alerts about suspicious network activities",
+            "domain": "Cybersecurity",
+            "difficulty": "Intermediate",
+            "skills": ["Network Protocols", "Python", "Security Analysis"]
+          },
+          {
+            "title": "Build a Predictive Analytics Dashboard",
+            "description": "Create a system that predicts trends from large datasets and visualizes insights",
+            "domain": "Data Analytics",
+            "difficulty": "Intermediate",
+            "skills": ["Statistical Analysis", "Data Visualization", "Machine Learning"]
+          },
+          {
+            "title": "Develop a Smart Campus System",
+            "description": "Create an integrated IoT solution for energy management and space optimization",
+            "domain": "IoT",
+            "difficulty": "Intermediate",
+            "skills": ["Embedded Systems", "Wireless Communication", "Data Processing"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "matching",
+      "title": "Advanced Tools & Technologies",
+      "description": "Match each tool/technology with its primary use case in modern development:",
+      "data": {
+        "technologies": [
+          "Docker", "TensorFlow", "Burp Suite", "Apache Spark", "MQTT"
+        ],
+        "useCases": [
+          "Container Orchestration", "Deep Learning", "Web Security Testing", "Big Data Processing", "IoT Messaging"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "preference",
+      "title": "Learning Path Priority",
+      "description": "Which learning path would you prioritize for the next 6 months?",
+      "data": {
+        "paths": [
+          {
+            "title": "Advanced AI & Machine Learning",
+            "description": "Deep dive into neural networks, computer vision, and NLP",
+            "timeCommitment": "15-20 hours/week",
+            "difficulty": "High"
+          },
+          {
+            "title": "Full-Stack Development Mastery",
+            "description": "Master modern frameworks, databases, and deployment strategies",
+            "timeCommitment": "12-15 hours/week", 
+            "difficulty": "Medium-High"
+          },
+          {
+            "title": "Cybersecurity Specialization",
+            "description": "Focus on ethical hacking, security analysis, and incident response",
+            "timeCommitment": "10-15 hours/week",
+            "difficulty": "High"
+          },
+          {
+            "title": "Data Science & Analytics",
+            "description": "Advanced statistics, big data tools, and business intelligence",
+            "timeCommitment": "12-18 hours/week",
+            "difficulty": "Medium-High"
+          },
+          {
+            "title": "IoT & Embedded Systems",
+            "description": "Hardware programming, sensor networks, and edge computing",
+            "timeCommitment": "10-15 hours/week",
+            "difficulty": "Medium-High"
+          }
+        ]
+      }
+    }
+  ],
+  "skillAssessments": [
+    {
+      "id": 1,
+      "domain": "Programming Concepts",
+      "questions": [
+        {
+          "question": "What is the main advantage of using version control systems like Git?",
+          "options": [
+            "Faster code execution",
+            "Better memory management",
+            "Track changes and collaborate effectively",
+            "Automatic bug fixing"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "question": "In object-oriented programming, what is encapsulation?",
+          "options": [
+            "Combining data and methods that operate on that data",
+            "Creating multiple instances of a class",
+            "Inheriting properties from a parent class",
+            "Executing multiple functions simultaneously"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "question": "What is the purpose of an API (Application Programming Interface)?",
+          "options": [
+            "To design user interfaces",
+            "To allow different software applications to communicate",
+            "To optimize database performance",
+            "To handle user authentication"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "domain": "System Design",
+      "questions": [
+        {
+          "question": "What is the main benefit of microservices architecture?",
+          "options": [
+            "Faster development time",
+            "Lower memory usage",
+            "Better scalability and maintainability",
+            "Simplified deployment process"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "question": "In database design, what is normalization primarily used for?",
+          "options": [
+            "Increasing query speed",
+            "Reducing data redundancy and improving data integrity",
+            "Encrypting sensitive data",
+            "Creating backup copies"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "domain": "Technology Trends",
+      "questions": [
+        {
+          "question": "What is Edge Computing primarily designed to address?",
+          "options": [
+            "Reducing latency by processing data closer to the source",
+            "Improving graphics processing power",
+            "Enhancing network security",
+            "Increasing storage capacity"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "question": "Which technology is fundamental to blockchain?",
+          "options": [
+            "Artificial Intelligence",
+            "Cryptographic hashing",
+            "Quantum computing",
+            "Virtual reality"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    }
+  ],
+  "domainChallenges": [
+    {
+      "id": 1,
+      "domain": "AI/ML",
+      "challenge": "Ethical AI Development",
+      "type": "analytical",
+      "prompt": "You're developing an AI system for student grade prediction. What ethical considerations would you address? How would you ensure fairness across different student backgrounds? Describe your approach to making the AI transparent and accountable."
+    },
+    {
+      "id": 2,
+      "domain": "Web Development",
+      "challenge": "Scalable Architecture Design",
+      "type": "problem-solving",
+      "prompt": "Design the architecture for a social learning platform that could handle 100,000+ concurrent users. Consider database design, caching strategies, load balancing, and real-time features. Explain your technology choices and scaling strategies."
+    },
+    {
+      "id": 3,
+      "domain": "Cybersecurity",
+      "challenge": "Security Incident Response",
+      "type": "problem-solving",
+      "prompt": "Your organization's network shows signs of a potential data breach - unusual network traffic, failed login attempts, and suspicious file access. Outline your incident response plan, including immediate actions, investigation steps, and recovery procedures."
+    },
+    {
+      "id": 4,
+      "domain": "Data Analytics",
+      "challenge": "Business Intelligence Solution",
+      "type": "analytical",
+      "prompt": "A university wants to improve student retention rates. You have access to academic records, attendance data, library usage, and campus activity participation. Design an analytics solution that identifies at-risk students and suggests intervention strategies."
+    },
+    {
+      "id": 5,
+      "domain": "IoT",
+      "challenge": "Smart City Infrastructure",
+      "type": "creative",
+      "prompt": "Design an IoT solution for traffic management in a smart city. Consider sensors, data processing, real-time decision making, and integration with existing infrastructure. How would your system adapt to changing traffic patterns and emergency situations?"
+    },
+    {
+      "id": 6,
+      "domain": "Cross-Domain",
+      "challenge": "Integration Challenge",
+      "type": "problem-solving",
+      "prompt": "Create a system that combines AI, web development, and IoT to solve a real-world problem. Choose a specific use case (like smart healthcare, precision agriculture, or energy management) and explain how these technologies would work together to create value."
+    }
+  ]
+}

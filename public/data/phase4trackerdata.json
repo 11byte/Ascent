@@ -1,0 +1,466 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "As a technology visionary, which paradigm shift would you lead to transform human-computer interaction?",
+      "options": [
+        "🧠 Brain-computer interfaces enabling direct thought-to-digital translation",
+        "🌐 Immersive spatial computing replacing traditional interfaces entirely",
+        "🤖 Artificial General Intelligence as collaborative intellectual partners",
+        "⚛️ Quantum-enhanced computing for solving currently impossible problems",
+        "🧬 Biological-digital hybrid systems merging organic and artificial intelligence"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 2,
+      "question": "In shaping the future of technology, your strategic focus centers on:",
+      "options": [
+        "🌍 Solving existential challenges facing humanity",
+        "🚀 Pushing the absolute boundaries of what's technologically possible",
+        "⚖️ Ensuring equitable access to transformative technologies",
+        "🔮 Creating entirely new categories of human experience",
+        "🌱 Developing sustainable, regenerative technological ecosystems"
+      ],
+      "category": "approach"
+    },
+    {
+      "id": 3,
+      "question": "Your vision for technology's role in society emphasizes:",
+      "options": [
+        "🧠 Augmenting human intelligence to solve complex global problems",
+        "🌐 Creating seamless integration between physical and digital realms",
+        "🛡️ Establishing unbreakable trust and security in all digital interactions",
+        "📊 Enabling data-driven decisions for optimal resource allocation globally",
+        "🔗 Building autonomous systems that enhance rather than replace human agency"
+      ],
+      "category": "interest"
+    },
+    {
+      "id": 4,
+      "question": "When facing fundamental technological limitations, you:",
+      "options": [
+        "🔬 Pioneer entirely new scientific approaches and methodologies",
+        "🧩 Orchestrate complex interdisciplinary collaborations",
+        "💡 Reimagine the problem from first principles",
+        "🌊 Create breakthrough solutions by combining seemingly unrelated fields",
+        "⚡ Develop intermediate stepping-stone technologies to reach ultimate goals"
+      ],
+      "category": "behavior"
+    },
+    {
+      "id": 5,
+      "question": "Your approach to technological ethics and responsibility prioritizes:",
+      "options": [
+        "🌍 Long-term species and planetary survival considerations",
+        "🤝 Democratizing advanced capabilities for global benefit",
+        "🔍 Transparent, explainable, and auditable technology systems",
+        "🌱 Regenerative technologies that improve environmental and social systems",
+        "⚖️ Proactive governance frameworks that anticipate future challenges"
+      ],
+      "category": "behavior"
+    },
+    {
+      "id": 6,
+      "question": "In building tomorrow's technology ecosystem, you focus on:",
+      "options": [
+        "🧪 Fundamental research that could revolutionize multiple fields",
+        "🏗️ Platform technologies that enable ecosystem-wide innovation",
+        "🛡️ Robust, antifragile systems that improve under stress",
+        "📈 Exponential technologies with compounding positive impact",
+        "🌐 Global coordination mechanisms for planetary-scale challenges"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 7,
+      "question": "Your legacy in technology would ideally be remembered for:",
+      "options": [
+        "🌟 Breakthrough discoveries that expanded human knowledge and capability",
+        "🌍 Technologies that solved critical global challenges",
+        "🚀 Opening entirely new frontiers for human exploration and development",
+        "⚖️ Ensuring technology served humanity's highest values and aspirations",
+        "🌱 Creating a sustainable, harmonious relationship between technology and nature"
+      ],
+      "category": "interest"
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "type": "ranking",
+      "title": "Technological Moonshot Prioritization",
+      "description": "Rank these technological moonshots by their potential to transform civilization within 30 years:",
+      "data": {
+        "moonshots": [
+          "🧠 Achieving Artificial General Intelligence with human-level reasoning",
+          "⚛️ Practical quantum computers solving NP-hard problems at scale",
+          "🧬 Biological age reversal and engineered longevity",
+          "🌌 Fusion energy providing unlimited clean power",
+          "🚀 Sustainable space colonization and interplanetary civilization",
+          "🧠 Brain-computer interfaces enabling augmented cognition",
+          "🌍 Atmospheric carbon capture reversing climate change",
+          "🔬 Room-temperature superconductors revolutionizing energy transmission",
+          "🤖 Autonomous systems managing global resource distribution",
+          "⚛️ Quantum internet enabling unhackable global communications"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "scenario",
+      "title": "Civilization-Scale Technology Leadership",
+      "description": "Choose the most impactful technology leadership opportunity to shape humanity's future:",
+      "data": {
+        "scenarios": [
+          {
+            "title": "Lead Global AI Safety Consortium",
+            "description": "Coordinate international efforts to ensure AGI development benefits all humanity while preventing existential risks",
+            "domain": "AI Safety & Governance",
+            "difficulty": "Civilization-Scale",
+            "impact": "Species-level",
+            "timeframe": "10-20 years",
+            "skills": ["AGI Research", "Global Diplomacy", "Risk Assessment", "Ethical Frameworks"]
+          },
+          {
+            "title": "Architect Planetary Computing Infrastructure",
+            "description": "Design and implement Earth-scale quantum-classical hybrid systems for climate modeling and resource optimization",
+            "domain": "Quantum Systems",
+            "difficulty": "Breakthrough",
+            "impact": "Planetary",
+            "timeframe": "15-25 years",
+            "skills": ["Quantum Computing", "Global Systems", "Climate Science", "Optimization"]
+          },
+          {
+            "title": "Pioneer Interplanetary Technology Ecosystem",
+            "description": "Develop self-sustaining technological civilization capabilities for Mars and beyond",
+            "domain": "Space Technology",
+            "difficulty": "Frontier",
+            "impact": "Multi-planetary",
+            "timeframe": "20-40 years",
+            "skills": ["Aerospace Engineering", "Closed-loop Systems", "Advanced Manufacturing", "Life Support"]
+          },
+          {
+            "title": "Create Universal Brain-Computer Interface",
+            "description": "Develop safe, accessible neural interfaces that augment human intelligence and enable direct knowledge transfer",
+            "domain": "Neurotechnology",
+            "difficulty": "Revolutionary",
+            "impact": "Cognitive",
+            "timeframe": "15-30 years",
+            "skills": ["Neuroscience", "Advanced Materials", "Signal Processing", "Bioethics"]
+          },
+          {
+            "title": "Design Post-Scarcity Economic Systems",
+            "description": "Build technology-enabled abundance systems that eliminate poverty and resource conflicts globally",
+            "domain": "Economic Technology",
+            "difficulty": "Paradigm-Shifting",
+            "impact": "Socioeconomic",
+            "timeframe": "20-50 years",
+            "skills": ["Complex Systems", "Economics", "Automation", "Social Engineering"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "matching",
+      "title": "Emerging Technology Convergence",
+      "description": "Match breakthrough technologies with their most transformative convergence opportunities:",
+      "data": {
+        "technologies": [
+          "Quantum Computing + AI", "Synthetic Biology + Nanotechnology", "Brain-Computer Interfaces + AR/VR", "Fusion Energy + Space Technology", "Advanced Materials + Robotics"
+        ],
+        "convergences": [
+          "Quantum-Enhanced Machine Learning", "Programmable Living Systems", "Augmented Cognition Environments", "Interplanetary Energy Infrastructure", "Self-Assembling Autonomous Systems"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "preference",
+      "title": "Technological Singularity Preparation",
+      "description": "How would you prepare humanity for potential technological singularity scenarios?",
+      "data": {
+        "strategies": [
+          {
+            "title": "Gradual Intelligence Augmentation",
+            "description": "Incrementally enhance human cognitive capabilities to keep pace with AI advancement",
+            "approach": "Human-AI Symbiosis",
+            "timeline": "Gradual (20-40 years)",
+            "focus": "Preserving human agency while amplifying capabilities"
+          },
+          {
+            "title": "Robust AI Alignment Research",
+            "description": "Ensure advanced AI systems remain beneficial and aligned with human values",
+            "approach": "Technical Safety",
+            "timeline": "Urgent (5-15 years)",
+            "focus": "Preventing negative outcomes from rapid AI advancement"
+          },
+          {
+            "title": "Global Governance Frameworks",
+            "description": "Establish international institutions to manage transformative technology transitions",
+            "approach": "Institutional Preparation",
+            "timeline": "Medium-term (10-25 years)",
+            "focus": "Coordinated global response to technological disruption"
+          },
+          {
+            "title": "Distributed Civilization Architecture",
+            "description": "Build resilient, decentralized systems that maintain human flourishing across multiple scales",
+            "approach": "Systemic Resilience",
+            "timeline": "Long-term (15-35 years)",
+            "focus": "Antifragile civilization design"
+          },
+          {
+            "title": "Consciousness and Identity Preservation",
+            "description": "Understand and protect the essential qualities that make us human through technological transformation",
+            "approach": "Philosophical-Technical",
+            "timeline": "Ongoing (10-50 years)",
+            "focus": "Maintaining human meaning and purpose"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "scenario",
+      "title": "Global Challenge Technology Solutions",
+      "description": "Select the most promising technology approach to address interconnected global challenges:",
+      "data": {
+        "approaches": [
+          {
+            "title": "Integrated Climate-Technology System",
+            "description": "Deploy AI-orchestrated global network of carbon capture, renewable energy, and geoengineering technologies",
+            "challenges": ["Climate Change", "Energy Transition", "Environmental Restoration"],
+            "technologies": ["AI Coordination", "Advanced Materials", "Atmospheric Engineering"],
+            "complexity": "Planetary System"
+          },
+          {
+            "title": "Universal Healthcare AI Platform",
+            "description": "Create AI-powered global health system providing personalized prevention, diagnosis, and treatment",
+            "challenges": ["Health Inequality", "Disease Prevention", "Aging Population"],
+            "technologies": ["Medical AI", "Biotechnology", "Global Coordination"],
+            "complexity": "Global Infrastructure"
+          },
+          {
+            "title": "Automated Abundance Economy",
+            "description": "Build fully automated production and distribution systems eliminating scarcity and poverty",
+            "challenges": ["Economic Inequality", "Resource Scarcity", "Job Displacement"],
+            "technologies": ["Advanced Robotics", "AI Planning", "Closed-loop Manufacturing"],
+            "complexity": "Economic Transformation"
+          },
+          {
+            "title": "Cognitive Enhancement Ecosystem",
+            "description": "Develop brain-computer interfaces and AI tutors providing universal access to enhanced learning and intelligence",
+            "challenges": ["Education Inequality", "Skills Gap", "Cognitive Limitations"],
+            "technologies": ["Brain-Computer Interfaces", "Personalized AI", "Knowledge Transfer"],
+            "complexity": "Cognitive Augmentation"
+          }
+        ]
+      }
+    }
+  ],
+  "skillAssessments": [
+    {
+      "id": 1,
+      "domain": "Quantum Computing Fundamentals",
+      "questions": [
+        {
+          "question": "What fundamental property enables quantum computers to potentially solve certain problems exponentially faster?",
+          "options": [
+            "Higher clock speeds than classical computers",
+            "Quantum superposition and entanglement",
+            "More efficient algorithms only",
+            "Parallel processing capabilities"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "Which quantum algorithm demonstrates potential exponential speedup over classical algorithms?",
+          "options": [
+            "Grover's algorithm for database search",
+            "Shor's algorithm for integer factorization",
+            "Quantum teleportation protocol",
+            "Quantum key distribution"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What is the primary challenge in maintaining quantum coherence?",
+          "options": [
+            "High energy requirements",
+            "Complex programming models",
+            "Decoherence due to environmental interference",
+            "Limited quantum gate operations"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "domain": "AI Safety & Alignment",
+      "questions": [
+        {
+          "question": "What is the 'alignment problem' in AI safety?",
+          "options": [
+            "Ensuring AI systems perform accurately",
+            "Making AI systems pursue intended goals without harmful side effects",
+            "Coordinating multiple AI systems",
+            "Aligning AI development timelines"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "Which approach is considered crucial for safe AGI development?",
+          "options": [
+            "Faster training methods",
+            "Interpretability and explainability",
+            "More computational power",
+            "Proprietary algorithms"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What does 'value loading' refer to in AI alignment?",
+          "options": [
+            "Loading training data efficiently",
+            "Instilling human values into AI systems",
+            "Optimizing computational values",
+            "Loading AI models into production"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "domain": "Systems Thinking & Complexity",
+      "questions": [
+        {
+          "question": "In complex adaptive systems, what is 'emergence'?",
+          "options": [
+            "The system's ability to adapt quickly",
+            "Properties arising from interactions that aren't present in individual components",
+            "The system's response to external changes",
+            "The process of system evolution over time"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What characterizes 'antifragile' systems?",
+          "options": [
+            "Systems that are highly resistant to change",
+            "Systems that maintain stability under stress",
+            "Systems that improve and grow stronger from stressors",
+            "Systems that can be easily repaired"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "question": "In network theory, what determines system resilience?",
+          "options": [
+            "The number of nodes only",
+            "The efficiency of the shortest paths",
+            "The distribution of connections and redundant pathways",
+            "The speed of information flow"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "domain": "Future Technology Assessment",
+      "questions": [
+        {
+          "question": "What is the primary consideration in assessing transformative technology risks?",
+          "options": [
+            "Technical feasibility only",
+            "Economic impact assessment",
+            "Long-term existential and societal implications",
+            "Short-term market adoption rates"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "question": "Which factor is most critical for successful technology convergence?",
+          "options": [
+            "Similar development timelines",
+            "Complementary capabilities addressing shared challenges",
+            "Common funding sources",
+            "Identical technical architectures"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What defines a 'moonshot' technology project?",
+          "options": [
+            "High budget requirements",
+            "Government funding",
+            "10x improvement over existing solutions with uncertain feasibility",
+            "Space-related applications"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    }
+  ],
+  "domainChallenges": [
+    {
+      "id": 1,
+      "domain": "AI Safety & AGI",
+      "challenge": "Civilizational AI Governance Protocol",
+      "type": "analytical",
+      "prompt": "Design a comprehensive global governance framework for managing the transition to Artificial General Intelligence. Address international coordination, safety verification protocols, benefit distribution, democratic oversight, and prevention of AI arms races. How would you balance rapid beneficial development with existential risk mitigation? Consider technical standards, institutional mechanisms, and enforcement strategies that could work across different political systems and cultural contexts."
+    },
+    {
+      "id": 2,
+      "domain": "Quantum Computing",
+      "challenge": "Quantum-Classical Hybrid Civilization",
+      "type": "problem-solving",
+      "prompt": "Architect a global computing infrastructure that seamlessly integrates quantum and classical systems to solve humanity's most complex challenges. Design the hardware distribution, networking protocols, software abstractions, and governance mechanisms. Address quantum error correction, classical-quantum interfaces, security in a post-quantum world, and equitable access to quantum capabilities. How would this infrastructure enable breakthroughs in climate modeling, drug discovery, optimization, and scientific simulation?"
+    },
+    {
+      "id": 3,
+      "domain": "Space Technology",
+      "challenge": "Self-Sustaining Interplanetary Civilization",
+      "type": "creative",
+      "prompt": "Design a complete technological ecosystem for establishing permanent, self-sustaining human settlements beyond Earth. Address life support systems, manufacturing capabilities, energy generation, communication networks, transportation, governance structures, and emergency resilience. Consider the psychological, social, and biological challenges of long-term space habitation. How would you ensure technological and cultural evolution while maintaining connection to Earth? What backup systems would protect against catastrophic failures?"
+    },
+    {
+      "id": 4,
+      "domain": "Biotechnology",
+      "challenge": "Engineered Longevity & Human Enhancement",
+      "type": "analytical",
+      "prompt": "Develop a comprehensive approach to human biological enhancement that could extend healthy lifespan to 200+ years while improving cognitive and physical capabilities. Address genetic engineering, regenerative medicine, cognitive augmentation, and social implications. How would you ensure safety, equitable access, and manage the societal transformations that extreme longevity would create? Consider economic systems, intergenerational relationships, environmental impact, and the meaning of human identity in an enhanced future."
+    },
+    {
+      "id": 5,
+      "domain": "Climate Technology",
+      "challenge": "Planetary Restoration Megasystem",
+      "type": "problem-solving",
+      "prompt": "Design an integrated planetary-scale technology system to reverse climate change and restore Earth's ecosystems within 30 years. Include atmospheric carbon removal, ocean restoration, biodiversity recovery, renewable energy transition, and climate adaptation. Address coordination across nations, financing mechanisms, monitoring systems, and unintended consequences. How would you balance technological intervention with natural regeneration? What safeguards would prevent geoengineering disasters while ensuring rapid enough action to avoid tipping points?"
+    },
+    {
+      "id": 6,
+      "domain": "Consciousness & Cognition",
+      "challenge": "Universal Cognitive Enhancement Platform",
+      "type": "creative",
+      "prompt": "Create a brain-computer interface system that safely augments human intelligence while preserving individual identity and free will. Address neural interface technologies, cognitive enhancement algorithms, knowledge transfer mechanisms, and ethical boundaries. How would you prevent cognitive inequality, protect mental privacy, and ensure enhanced humans remain fundamentally human? Consider the implications for education, creativity, decision-making, and the future of human consciousness itself."
+    },
+    {
+      "id": 7,
+      "domain": "Synthesis Challenge",
+      "challenge": "Post-Scarcity Civilization Architecture",
+      "type": "creative",
+      "prompt": "Design a complete technological and social system that achieves true post-scarcity abundance for all of humanity. Integrate advanced AI, robotics, fusion energy, nanotechnology, space resources, and biotechnology to eliminate poverty, environmental destruction, and resource conflicts. Address the transition from current economic systems, new forms of human purpose and meaning, governance in an abundant world, and protection against technological dependence. How would you maintain human agency, creativity, and growth in a world where material needs are automatically fulfilled?"
+    },
+    {
+      "id": 8,
+      "domain": "Existential Risk Management",
+      "challenge": "Civilization Resilience Protocol",
+      "type": "analytical",
+      "prompt": "Develop a comprehensive strategy to protect human civilization against all major existential risks (AI, nuclear war, pandemics, climate change, asteroid impacts, supervolcanoes, etc.) while enabling continued technological and social progress. Design early warning systems, prevention mechanisms, response protocols, and recovery capabilities. Address international coordination, resource allocation, technological solutions, and governance structures. How would you balance security with freedom, and ensure that protection systems don't become threats themselves? Consider both Earth-based resilience and space-based backup systems."
+    }
+  ]
+}

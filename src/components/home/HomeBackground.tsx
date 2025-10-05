@@ -124,9 +124,7 @@ const particlesConfig = {
   retina_detect: true
 }
 
-export const HomeBackground = (userData = {
-    username: "Paresh-0007",
-  }) => {
+export const HomeBackground = ({username = "Paresh-0007", background = "#000000",}) => {
   const particlesRef = useRef<HTMLDivElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [loadError, setLoadError] = useState(false)
@@ -171,7 +169,7 @@ export const HomeBackground = (userData = {
           setIsLoaded(true)
           setLoadError(false)
           
-          console.log(`✅ Particles.js initialized for ${userData.username}`)
+          console.log(`✅ Particles.js initialized for ${username}`)
 
           // Setup cleanup function
           cleanup = () => {
@@ -242,7 +240,7 @@ export const HomeBackground = (userData = {
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       {/* Pure Black Background Base */}
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0" style={{ background }} />
 
       {/* Minimal Phase 2 Accent Overlays on Pure Black */}
       <div 
@@ -286,7 +284,7 @@ export const HomeBackground = (userData = {
       {/* Subtle User Data Integration */}
       <div className="absolute bottom-4 left-4 opacity-10 pointer-events-none">
         <div className="text-xs font-mono text-white/40">
-          // Phase 2 initialized for {userData.username}
+          // Phase 2 initialized for {username}
         </div>
       </div>
 

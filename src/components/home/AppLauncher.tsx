@@ -26,7 +26,7 @@ interface App {
   link: string;
 }
 
-export const AppLauncher = () => {
+export const AppLauncher = ({phase="phase1"}) => {
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +40,7 @@ export const AppLauncher = () => {
         color: "from-blue-500 to-blue-600",
         description: "Track your development journey",
         category: "productivity",
-        link: "/phase1/timeline",
+        link: `/${phase}/timeline`,
       },
       {
         id: "blogs",
@@ -49,7 +49,7 @@ export const AppLauncher = () => {
         color: "from-green-500 to-green-600",
         description: "Read and write technical blogs",
         category: "learning",
-        link: "/phase1/blog",
+        link: `/${phase}/blog`,
       },
       {
         id: "tracker",
@@ -58,7 +58,7 @@ export const AppLauncher = () => {
         color: "from-purple-500 to-purple-600",
         description: "Daily Data Feed",
         category: "learning",
-        link: "/phase1/tracker",
+        link: `/${phase}/tracker`,
       },
       {
         id: "marathons",
@@ -67,7 +67,7 @@ export const AppLauncher = () => {
         color: "from-yellow-500 to-orange-500",
         description: "Participate in coding marathons",
         category: "development",
-        link: "/phase1/timeline",
+        link: `/${phase}/timeline`,
       },
       {
         id: "leetspace",
@@ -76,7 +76,7 @@ export const AppLauncher = () => {
         color: "from-red-500 to-red-600",
         description: "Practice coding problems",
         category: "development",
-        link: "/phase1/timeline",
+        link: `/${phase}/timeline`,
       },
       {
         id: "gittrack",
@@ -85,7 +85,7 @@ export const AppLauncher = () => {
         color: "from-gray-600 to-gray-700",
         description: "Monitor your Git activity",
         category: "productivity",
-        link: "/phase1/timeline",
+        link: `/${phase}/githubtracker`,
       },
       {
         id: "bountyhub",
@@ -94,7 +94,7 @@ export const AppLauncher = () => {
         color: "from-emerald-500 to-emerald-600",
         description: "Discover coding bounties",
         category: "development",
-        link: "/phase1/timeline",
+        link: `/${phase}/timeline`,
       },
     ],
     []

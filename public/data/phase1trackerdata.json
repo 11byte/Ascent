@@ -1,0 +1,210 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Which technology area sparks your curiosity the most?",
+      "options": [
+        "🧠 AI & Machine Learning - Creating smart systems",
+        "🌐 Web Development - Building interactive websites",
+        "🔐 Cybersecurity - Protecting digital assets",
+        "📊 Data Analytics - Finding patterns in data",
+        "⚙️ IoT & Hardware - Connecting physical devices"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 2,
+      "question": "How do you prefer to learn new concepts?",
+      "options": [
+        "📹 Watching tutorial videos",
+        "📖 Reading documentation and books",
+        "🎮 Interactive coding challenges",
+        "👥 Group discussions and collaboration",
+        "🔬 Hands-on experimentation"
+      ],
+      "category": "behavior"
+    },
+    {
+      "id": 3,
+      "question": "What motivates you to explore technology?",
+      "options": [
+        "🌟 Solving real-world problems",
+        "🎨 Creating something beautiful",
+        "🧩 Understanding how things work",
+        "💰 Career opportunities",
+        "🏆 Personal achievement and recognition"
+      ],
+      "category": "interest"
+    },
+    {
+      "id": 4,
+      "question": "When facing a technical challenge, you typically:",
+      "options": [
+        "🔍 Research extensively before starting",
+        "🚀 Jump in and learn by doing",
+        "👥 Ask for help from others",
+        "📋 Break it down into smaller steps",
+        "💡 Try creative, unconventional approaches"
+      ],
+      "category": "approach"
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "type": "ranking",
+      "title": "Tech Domain Preferences",
+      "description": "Rank these technology domains from most interesting (1) to least interesting (5)",
+      "data": {
+        "domains": [
+          "🤖 Artificial Intelligence & Machine Learning",
+          "🌐 Web & Mobile Development", 
+          "🔒 Cybersecurity & Ethical Hacking",
+          "📈 Data Science & Analytics",
+          "🔧 IoT & Embedded Systems"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "matching",
+      "title": "Tech Tools & Applications",
+      "description": "Match each technology with its primary application",
+      "data": {
+        "technologies": ["Python", "React", "Wireshark", "Tableau", "Arduino"],
+        "applications": ["Data Analysis", "Web UI", "Network Security", "Data Visualization", "Hardware Control"]
+      }
+    },
+    {
+      "id": 3,
+      "type": "scenario",
+      "title": "Project Choice",
+      "description": "You have free time for a personal project. Which would you choose?",
+      "data": {
+        "scenarios": [
+          {
+            "title": "Build a Simple Chatbot",
+            "description": "Create an AI assistant for your daily tasks",
+            "domain": "AI/ML",
+            "difficulty": "Beginner"
+          },
+          {
+            "title": "Design a Personal Website",
+            "description": "Showcase your portfolio with modern web technologies",
+            "domain": "Web Dev",
+            "difficulty": "Beginner"
+          },
+          {
+            "title": "Create a Password Manager",
+            "description": "Build a secure tool to manage your passwords",
+            "domain": "Cybersecurity",
+            "difficulty": "Beginner"
+          },
+          {
+            "title": "Analyze Your Social Media Data",
+            "description": "Discover patterns in your digital footprint",
+            "domain": "Data Analytics",
+            "difficulty": "Beginner"
+          },
+          {
+            "title": "Smart Home Automation",
+            "description": "Control home devices with sensors and microcontrollers",
+            "domain": "IoT",
+            "difficulty": "Beginner"
+          }
+        ]
+      }
+    }
+  ],
+  "skillAssessments": [
+    {
+      "id": 1,
+      "domain": "Programming Basics",
+      "questions": [
+        {
+          "question": "What does 'debugging' mean in programming?",
+          "options": [
+            "Writing new code",
+            "Finding and fixing errors in code",
+            "Deleting old code",
+            "Testing code performance"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "Which of these is a programming language?",
+          "options": [
+            "HTML",
+            "CSS", 
+            "JavaScript",
+            "All of the above"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "domain": "Technology Awareness",
+      "questions": [
+        {
+          "question": "What is artificial intelligence primarily used for?",
+          "options": [
+            "Making computers think like humans",
+            "Creating websites",
+            "Securing networks",
+            "Storing data"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "question": "What does IoT stand for?",
+          "options": [
+            "Internet of Things",
+            "Input of Technology",
+            "Integration of Tools",
+            "Interface of Tablets"
+          ],
+          "correctAnswer": 0
+        }
+      ]
+    }
+  ],
+  "domainChallenges": [
+    {
+      "id": 1,
+      "domain": "AI/ML",
+      "challenge": "Design a Smart Assistant",
+      "type": "creative",
+      "prompt": "Imagine you're creating a personal AI assistant for students. What features would you include to help them study better? Describe 3 key features and explain how they would work."
+    },
+    {
+      "id": 2,
+      "domain": "Web Development",
+      "challenge": "Plan a Social Platform",
+      "type": "creative", 
+      "prompt": "Design a social platform specifically for engineering students. What unique features would you include? How would you organize the user interface? Describe the main sections and functionality."
+    },
+    {
+      "id": 3,
+      "domain": "Cybersecurity",
+      "challenge": "Security Awareness",
+      "type": "problem-solving",
+      "prompt": "Your friend received a suspicious email claiming they won a lottery. The email asks for personal information. What warning signs would you point out, and what advice would you give them about online safety?"
+    },
+    {
+      "id": 4,
+      "domain": "Data Analytics",
+      "challenge": "Data Storytelling",
+      "type": "analytical",
+      "prompt": "You have data about student study habits (hours studied, subjects, grades, sleep hours). What interesting patterns might you look for? How would you present your findings to help other students improve their performance?"
+    },
+    {
+      "id": 5,
+      "domain": "IoT",
+      "challenge": "Smart Campus Solution",
+      "type": "creative",
+      "prompt": "Design an IoT solution to make your college campus smarter and more efficient. What sensors and devices would you use? How would they interact? Describe one specific problem your solution would solve."
+    }
+  ]
+}
