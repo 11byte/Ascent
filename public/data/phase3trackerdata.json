@@ -1,0 +1,365 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Which specialized domain would you choose for advanced research and development?",
+      "options": [
+        "🧠 Deep Learning & Computer Vision for autonomous systems",
+        "🏗️ Distributed Systems & Cloud-Native Architecture",
+        "🔒 Advanced Cryptography & Zero-Trust Security",
+        "🔬 Predictive Modeling & Advanced Statistical Methods",
+        "🌐 Edge AI & Real-time Embedded Systems"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 2,
+      "question": "In complex system design, your approach typically prioritizes:",
+      "options": [
+        "🎯 Performance optimization and efficiency",
+        "🛡️ Security and reliability first",
+        "📈 Scalability and future-proofing",
+        "🔄 Maintainability and code quality",
+        "💡 Innovation and cutting-edge features"
+      ],
+      "category": "approach"
+    },
+    {
+      "id": 3,
+      "question": "Which advanced technical challenge excites you most?",
+      "options": [
+        "🤖 Building autonomous AI agents with multi-modal capabilities",
+        "⚡ Architecting high-performance distributed systems",
+        "🔐 Designing next-generation security protocols",
+        "📊 Developing real-time analytics for massive datasets",
+        "🔗 Creating seamless human-computer interaction systems"
+      ],
+      "category": "interest"
+    },
+    {
+      "id": 4,
+      "question": "When evaluating emerging technologies for adoption, you focus on:",
+      "options": [
+        "📈 Proven ROI and business impact",
+        "🔧 Technical elegance and implementation quality",
+        "🌍 Long-term sustainability and ethics",
+        "🚀 Innovation potential and competitive advantage",
+        "👥 Community support and ecosystem maturity"
+      ],
+      "category": "behavior"
+    },
+    {
+      "id": 5,
+      "question": "Your ideal technical leadership role would involve:",
+      "options": [
+        "🧪 Leading R&D for breakthrough AI technologies",
+        "🏛️ Architecting enterprise-scale technology solutions",
+        "🛡️ Defining organizational security strategy and standards",
+        "📈 Driving data strategy and analytics transformation",
+        "🔮 Pioneering next-generation computing paradigms"
+      ],
+      "category": "preference"
+    },
+    {
+      "id": 6,
+      "question": "In cross-functional collaboration, you excel at:",
+      "options": [
+        "🔬 Translating complex technical concepts for stakeholders",
+        "⚖️ Balancing technical debt with feature development",
+        "🎯 Aligning security requirements with business objectives",
+        "📊 Presenting data insights to drive strategic decisions",
+        "🌉 Bridging hardware and software development teams"
+      ],
+      "category": "behavior"
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "type": "ranking",
+      "title": "Advanced Technology Impact Assessment",
+      "description": "Rank these emerging technologies by their potential impact on society in the next decade:",
+      "data": {
+        "technologies": [
+          "🧠 Artificial General Intelligence (AGI)",
+          "⚛️ Quantum Computing Applications",
+          "🔒 Blockchain & Decentralized Systems",
+          "🧬 Biotechnology & Computational Biology",
+          "🌐 Augmented Reality & Metaverse Platforms",
+          "🚗 Autonomous Systems & Robotics",
+          "🔋 Sustainable Energy & Smart Grids"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "scenario",
+      "title": "Advanced Technical Leadership Challenge",
+      "description": "Choose the most compelling technical leadership opportunity:",
+      "data": {
+        "scenarios": [
+          {
+            "title": "Lead AI Ethics & Safety Research",
+            "description": "Develop frameworks for responsible AI deployment in critical systems like healthcare and autonomous vehicles",
+            "domain": "AI/ML",
+            "difficulty": "Expert",
+            "impact": "Global",
+            "skills": ["Advanced ML", "Ethics", "Policy", "System Safety"]
+          },
+          {
+            "title": "Architect Next-Gen Cloud Infrastructure",
+            "description": "Design and implement planet-scale distributed systems with quantum-resistant security",
+            "domain": "Systems",
+            "difficulty": "Expert",
+            "impact": "Industry",
+            "skills": ["Distributed Systems", "Security", "Performance", "Architecture"]
+          },
+          {
+            "title": "Pioneer Zero-Trust Security Framework",
+            "description": "Create comprehensive security architecture for future of work and digital transformation",
+            "domain": "Cybersecurity", 
+            "difficulty": "Expert",
+            "impact": "Enterprise",
+            "skills": ["Security Architecture", "Risk Assessment", "Compliance", "Innovation"]
+          },
+          {
+            "title": "Develop Predictive Analytics Platform",
+            "description": "Build AI-powered platform for real-time decision making across multiple industries",
+            "domain": "Data Science",
+            "difficulty": "Expert",
+            "impact": "Cross-Industry",
+            "skills": ["Advanced Analytics", "AI/ML", "System Design", "Domain Expertise"]
+          },
+          {
+            "title": "Create Autonomous System Ecosystem",
+            "description": "Design interconnected autonomous systems for smart cities and sustainable development",
+            "domain": "IoT/Embedded",
+            "difficulty": "Expert",
+            "impact": "Societal",
+            "skills": ["Embedded Systems", "AI", "Networking", "Sustainability"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "matching",
+      "title": "Advanced Technology Stack Mastery",
+      "description": "Match cutting-edge technologies with their optimal use cases:",
+      "data": {
+        "technologies": [
+          "Kubernetes + Istio", "PyTorch + CUDA", "Rust + WebAssembly", "Apache Kafka + ksqlDB", "TensorFlow Lite + EdgeTPU"
+        ],
+        "useCases": [
+          "Microservices Orchestration", "GPU-Accelerated ML", "High-Performance Web Apps", "Real-time Data Streaming", "Edge AI Inference"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "preference",
+      "title": "Research & Development Focus",
+      "description": "Which R&D direction would you prioritize for breakthrough innovation?",
+      "data": {
+        "directions": [
+          {
+            "title": "Neuromorphic Computing & Brain-Computer Interfaces",
+            "description": "Developing computing systems that mimic neural structures and direct brain-computer communication",
+            "timeframe": "5-10 years",
+            "difficulty": "Breakthrough",
+            "applications": ["Medical devices", "Cognitive enhancement", "Efficient AI hardware"]
+          },
+          {
+            "title": "Quantum-Classical Hybrid Systems",
+            "description": "Creating practical applications that leverage both quantum and classical computing advantages",
+            "timeframe": "3-7 years", 
+            "difficulty": "Cutting-edge",
+            "applications": ["Cryptography", "Optimization", "Scientific simulation"]
+          },
+          {
+            "title": "Autonomous Swarm Intelligence",
+            "description": "Developing self-organizing systems of autonomous agents for complex problem solving",
+            "timeframe": "2-5 years",
+            "difficulty": "Advanced",
+            "applications": ["Smart cities", "Environmental monitoring", "Disaster response"]
+          },
+          {
+            "title": "Privacy-Preserving AI Architectures",
+            "description": "Building AI systems that maintain privacy while enabling collaborative machine learning",
+            "timeframe": "1-3 years",
+            "difficulty": "Advanced",
+            "applications": ["Healthcare", "Finance", "Personal assistants"]
+          },
+          {
+            "title": "Sustainable Computing Paradigms",
+            "description": "Developing energy-efficient computing architectures for environmental sustainability",
+            "timeframe": "2-5 years",
+            "difficulty": "Advanced",
+            "applications": ["Green data centers", "Edge computing", "Carbon-neutral AI"]
+          }
+        ]
+      }
+    }
+  ],
+  "skillAssessments": [
+    {
+      "id": 1,
+      "domain": "Advanced System Architecture",
+      "questions": [
+        {
+          "question": "In a distributed system, what is the primary trade-off described by the CAP theorem?",
+          "options": [
+            "Consistency, Availability, and Partition tolerance",
+            "Capacity, Accuracy, and Performance",
+            "Concurrency, Authentication, and Privacy",
+            "Caching, Availability, and Persistence"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "question": "Which pattern is most effective for handling eventual consistency in microservices?",
+          "options": [
+            "Two-phase commit protocol",
+            "Saga pattern with compensation",
+            "Distributed locks",
+            "Synchronous API calls"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What is the main advantage of using Event Sourcing in complex domains?",
+          "options": [
+            "Faster query performance",
+            "Simplified data modeling",
+            "Complete audit trail and temporal queries",
+            "Reduced storage requirements"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "domain": "AI/ML Advanced Concepts",
+      "questions": [
+        {
+          "question": "What is the primary challenge addressed by Federated Learning?",
+          "options": [
+            "Reducing model training time",
+            "Training on distributed data without centralizing it",
+            "Improving model accuracy",
+            "Reducing computational costs"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "In transformer architectures, what is the main purpose of the attention mechanism?",
+          "options": [
+            "Reducing computational complexity",
+            "Enabling parallel processing",
+            "Allowing the model to focus on relevant parts of the input",
+            "Preventing overfitting"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "question": "What does 'catastrophic forgetting' refer to in neural networks?",
+          "options": [
+            "Complete loss of model weights",
+            "Inability to learn new tasks without forgetting previous ones",
+            "Memory overflow during training",
+            "Gradient vanishing problem"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "domain": "Advanced Security Concepts",
+      "questions": [
+        {
+          "question": "What is the primary goal of Zero Trust Architecture?",
+          "options": [
+            "Eliminating all security measures",
+            "Never trust, always verify access requests",
+            "Using only open-source security tools",
+            "Centralizing all security controls"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "In post-quantum cryptography, what is the main concern being addressed?",
+          "options": [
+            "Current algorithms are too slow",
+            "Quantum computers could break current encryption",
+            "Need for stronger passwords",
+            "Reducing computational overhead"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "question": "What is homomorphic encryption primarily used for?",
+          "options": [
+            "Faster encryption/decryption",
+            "Performing computations on encrypted data",
+            "Generating stronger keys",
+            "Simplifying key management"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    }
+  ],
+  "domainChallenges": [
+    {
+      "id": 1,
+      "domain": "AI/ML",
+      "challenge": "AI Governance Framework Design",
+      "type": "analytical",
+      "prompt": "Design a comprehensive AI governance framework for a multinational corporation deploying AI systems across healthcare, finance, and autonomous vehicles. Address ethical considerations, regulatory compliance, bias mitigation, explainability requirements, and continuous monitoring. How would you balance innovation with responsible AI practices?"
+    },
+    {
+      "id": 2,
+      "domain": "Systems Architecture",
+      "challenge": "Global Scale Infrastructure Design",
+      "type": "problem-solving",
+      "prompt": "Architect a globally distributed system capable of handling 1 billion+ users with real-time collaboration features, ensuring sub-100ms latency worldwide. Consider data consistency, fault tolerance, security, compliance with regional data laws, and cost optimization. Design your approach to handle traffic spikes 10x normal load."
+    },
+    {
+      "id": 3,
+      "domain": "Cybersecurity",
+      "challenge": "Next-Generation Threat Defense",
+      "type": "creative",
+      "prompt": "Design a proactive cybersecurity system that anticipates and prevents unknown threats using AI. Consider behavioral analysis, threat intelligence, automated response systems, and human-AI collaboration. How would you address adversarial AI attacks and maintain security in a quantum computing era?"
+    },
+    {
+      "id": 4,
+      "domain": "Data Science",
+      "challenge": "Real-time Global Analytics Platform",
+      "type": "problem-solving",
+      "prompt": "Create an analytics platform that processes petabytes of real-time data from IoT devices, social media, financial markets, and scientific instruments to provide actionable insights within seconds. Address data quality, privacy, scalability, and the challenge of extracting meaningful patterns from noisy, high-velocity data streams."
+    },
+    {
+      "id": 5,
+      "domain": "IoT/Embedded",
+      "challenge": "Sustainable Smart City Ecosystem",
+      "type": "creative",
+      "prompt": "Design an integrated IoT ecosystem for a carbon-neutral smart city of 5 million people. Include energy management, transportation optimization, waste reduction, air quality monitoring, and citizen services. Address interoperability, security, privacy, energy efficiency, and long-term sustainability. How would your system adapt to climate change and population growth?"
+    },
+    {
+      "id": 6,
+      "domain": "Cross-Domain Innovation",
+      "challenge": "Breakthrough Technology Integration",
+      "type": "creative",
+      "prompt": "Propose a groundbreaking application that combines quantum computing, AI, blockchain, and IoT to solve a major global challenge (climate change, healthcare, education, or poverty). Explain the unique value proposition, technical feasibility, implementation roadmap, and potential societal impact. Address the current limitations and your strategy to overcome them."
+    },
+    {
+      "id": 7,
+      "domain": "Research & Development",
+      "challenge": "Future Computing Paradigm",
+      "type": "analytical",
+      "prompt": "Envision and design a new computing paradigm that could replace or complement current digital computing in the next 20 years. Consider biological computing, photonic processing, neuromorphic systems, or quantum-classical hybrids. Analyze the fundamental principles, potential applications, development challenges, and societal implications of your proposed paradigm."
+    }
+  ]
+}

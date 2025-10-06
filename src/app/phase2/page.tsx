@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
-      <HomeBackground username="Paresh" />
+      <HomeBackground username="Paresh" background="#000000" />
 
       {/* Main Content */}
       <FogLiftSection className="min-h-screen relative z-10 pt-20">
@@ -142,7 +142,7 @@ export default function Home() {
       <WidgetSystem />
 
       {/* App Launcher */}
-      <AppLauncher />
+      <AppLauncher phase="phase2" />
     </div>
   );
 }

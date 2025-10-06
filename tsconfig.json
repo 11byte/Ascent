@@ -22,18 +22,16 @@
     // --- Path Resolution Configuration ---
     "baseUrl": "./src", // This tells TypeScript to start looking inside the 'src' folder
     "paths": {
+      "@components/*": ["./src/components/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@context/*": ["./src/context/*"],
+      "@/components/*": ["./src/components/*"],
       // The most versatile alias: Maps @/ to the src/ folder.
       // E.g., @/app/page.tsx or @/components/ui/button.tsx
       "@/*": ["./*"], 
-      
-      // Your existing component-specific aliases (Defined relative to baseUrl = src)
-      "@components/*": ["./components/*"],
-      "@styles/*": ["./styles/*"],
-      "@utils/*": ["./utils/*"],
-      "@hooks/*": ["./hooks/*"],
-      "@services/*": ["./services/*"],
-      "@context/*": ["./context/*"],
-      
       // We must define app explicitly since Next.js uses it heavily
       "@/app/*": ["./app/*"] 
     }
