@@ -9,7 +9,7 @@ import React from 'react';
 import Link from 'next/link';
 
 // 🏆 FINAL, CORRECTED PATH: Use the direct path to the sibling 'technical-clubs' folder
-import { Button } from "../technical-clubs/ui/button"; 
+import { Button } from "../technical-clubs/components/ui/button";
 
 // --- MOCK DATA ---
 const mockStats = {
@@ -124,17 +124,15 @@ export default function LeetCodeTrackerPage() {
                     <p className="text-sm text-gray-400 mt-2">Days of Contribution: {stats.contributionDays}</p>
                     
                     {/* FIX: Simplified structure and removed deprecated legacyBehavior */}
-                    <Link href="/phase3/leaderboard" passHref> 
-                        <Button 
-                            asChild 
-                            variant="default" 
+                    <Link href="/phase3/leaderboard">
+                        <Button
+                            variant="default"
                             className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
                         >
-                            {/* FIX: Ensure content is wrapped in a single element */}
-                            <span className="flex items-center justify-center space-x-2"> 
+                            <span className="flex items-center justify-center space-x-2">
                                 <span>View Global Leaderboard</span>
                                 <ArrowRight className="w-4 h-4" />
-                            </span> 
+                            </span>
                         </Button>
                     </Link>
                 </motion.div>
