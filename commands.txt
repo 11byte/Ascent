@@ -1,0 +1,8 @@
+Docker:
+docker ps (to check running images)
+docker-compose up -d (compile yml file and start running images)
+docker-compose down (stop containers)
+
+docker stop $(docker ps -q)  (stop all containers)
+
+docker start $(docker ps -a -q)   (start all containers)

@@ -2,8 +2,16 @@ import { Router, Request, Response } from "express";
 import { prisma } from "../utils/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+const { sendEvent } = require("../utils/producer");
 
 const router = Router();
+
+router.post("/api/blog", async (req, res) => {
+  const blogData = req.body;
+  // Save to Postgres via Prisma
+  await sendEvent("student.blog", blogData);
+  res.json({ status: "ok" });
+});
 
 router.post("/signup", async (req: Request, res: Response) => {
   console.log("📩 Signup request received:", req.body);

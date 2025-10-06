@@ -33,12 +33,7 @@ export default function Landing() {
       id: "phase-2",
       bg: "#ffffff94",
       lottie: "/p2.lottie",
-      items: [
-        "Technical clubs",
-        "Bounty Board",
-        "Macro Hackathons",
-        "Leet Tracker",
-      ],
+      items: ["Technical clubs", "Bounty Board", "MacroThons", "Leet Tracker"],
       phaseLabel: "Phase-2",
     },
     {
@@ -301,7 +296,7 @@ export default function Landing() {
         transition={{ duration: 1.5, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
         ref={horizontalRef}
-        className="relative w-[90%] ml-[-20px] h-[90vh] overflow-hidden flex rounded-tr-[600px] rounded-br-[600px] -mt-[300px]"
+        className="relative w-[90%] ml-[-20px] h-[90vh] overflow-hidden flex rounded-tr-[600px] rounded-br-[600px] font-[Orbitron] -mt-[300px]"
       >
         {/* Border overlay */}
         <div
@@ -331,7 +326,7 @@ export default function Landing() {
                 key={i}
                 className={`absolute left-${
                   20 + i * 60
-                } top-1 w-32 h-32 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10`}
+                } top-1 w-42 h-42 rounded-full bg-gradient-to-br from-white to-gray-300 shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center justify-center text-gray-700 text-xl font-semibold ml-10`}
               >
                 {item}
               </motion.div>
