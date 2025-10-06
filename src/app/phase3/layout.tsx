@@ -1,5 +1,5 @@
-import NavbarWrapper from "@components/navbar/Navbar-Wrapper";
-import { Phase2Provider } from "@context/phase2Context";
+import NavbarWrapper from "../../components/navbar/Navbar-Wrapper";
+import { Phase2Provider } from "../../context/phase2Context";
 
 export default function Phase3Layout({
   children,

@@ -1,12 +1,12 @@
 "use client";
-import EnhancedBehaviorTracker from "@/components/EnhancedBehaviorTracker";
-import { HomeBackground } from "@components/home/HomeBackground";
+import EnhancedBehaviorTracker from "../../../components/EnhancedBehaviorTracker";
+import { HomeBackground } from "../../../components/home/HomeBackground";
 import { motion } from "framer-motion";
 
 const phase1Theme = {
   tBorder: { light: "#77BEF0", dark: "#77BEF0" },
   tColor: { light: "#FFCB61", dark: "#FFCB61" },
-  tDepthColor: { light: "#EA5B6F", dark: "#EA5B6F" }
+  tDepthColor: { light: "#EA5B6F", dark: "#EA5B6F" },
 };
 
 export default function Phase1TrackerPage() {

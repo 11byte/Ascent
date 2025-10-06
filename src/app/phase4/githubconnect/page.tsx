@@ -1,5 +1,5 @@
-'use client';
-import GitHubConnect from "@/components/GithubConnect";
+"use client";
+import GitHubConnect from "../../../components/GithubConnect";
 
 export default function Phase1GitHubConnectPage() {
   const userId = "YOUR_USER_ID"; // Replace with actual user id from your auth system

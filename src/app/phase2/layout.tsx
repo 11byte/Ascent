@@ -1,5 +1,5 @@
-import NavbarWrapper from "@components/navbar/Navbar-Wrapper";
-import { Phase2Provider } from "@context/phase2Context";
+import NavbarWrapper from "../../components/navbar/Navbar-Wrapper";
+import { Phase2Provider } from "../../context/phase2Context";
 
 export default function Phase2Layout({
   children,
@@ -26,9 +26,7 @@ export default function Phase2Layout({
           light: "#059669",
         }}
       />
-      <Phase2Provider value={{ username: "Paresh" }}>
-        {children}
-      </Phase2Provider>
+      <Phase2Provider value={{ username: "Paresh" }}>{children}</Phase2Provider>
     </div>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { FogLiftSection } from "@components/animations/FogLiftSection";
-import { AppLauncher } from "@components/home/AppLauncher";
-import { HomeBackground } from "@components/home/HomeBackground";
-import { WidgetSystem } from "@components/widgets/WidgetSystem";
-import { usePhase2 } from "@context/phase2Context";
+import { FogLiftSection } from "../../components/animations/FogLiftSection";
+import { AppLauncher } from "../../components/home/AppLauncher";
+import { HomeBackground } from "../../components/home/HomeBackground";
+import { WidgetSystem } from "../../components/widgets/WidgetSystem";
+import { usePhase2 } from "../../context/phase2Context";
 import Lenis from "@studio-freight/lenis";
 
 export default function Home() {
@@ -142,7 +142,7 @@ export default function Home() {
       <WidgetSystem />
 
       {/* App Launcher */}
-      <AppLauncher phase="phase3"/>
+      <AppLauncher phase="phase3" />
     </div>
   );
 }

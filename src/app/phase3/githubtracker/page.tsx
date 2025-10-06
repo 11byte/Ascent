@@ -1,25 +1,27 @@
-'use client';
-import GitHubTracker from "@/components/GithubTracker";
-import { HomeBackground } from "@components/home/HomeBackground";
+"use client";
+import GitHubTracker from "../../../components/GithubTracker";
+import { HomeBackground } from "../../../components/home/HomeBackground";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const phase3Theme = {
   tBorder: { light: "#3338A0", dark: "#3338A0" },
   tColor: { light: "#FCC61D", dark: "#FCC61D" },
-  tDepthColor: { light: "#F7F7F7", dark: "#F7F7F7" }
+  tDepthColor: { light: "#F7F7F7", dark: "#F7F7F7" },
 };
 
 export default function Phase3GitHubTrackerPage() {
   const userId = "Paresh-0007"; // Replace with actual user id from your auth context
-  const [token, setToken] = useState<string | null>('add your token here');
+  const [token, setToken] = useState<string | null>("add your token here");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) {
-      fetch(`https://localhost:5000/api/github/usertokenexist/?userId=${userId}`)
-        .then(res => res.json())
-        .then(data => setToken(data.token || null))
+      fetch(
+        `https://localhost:5000/api/github/usertokenexist/?userId=${userId}`
+      )
+        .then((res) => res.json())
+        .then((data) => setToken(data.token || null))
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -70,7 +72,12 @@ export default function Phase3GitHubTrackerPage() {
             </a>
           </div>
         ) : (
-          <GitHubTracker githubToken={token} userId={userId} phase="phase3" theme={phase3Theme} />
+          <GitHubTracker
+            githubToken={token}
+            userId={userId}
+            phase="phase3"
+            theme={phase3Theme}
+          />
         )}
       </div>
     </div>
