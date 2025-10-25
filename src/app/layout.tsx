@@ -21,9 +21,9 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: 'Ascent - Phase 2: The Fog Lifts',
-  description: 'Welcome to Phase 2 of our journey',
-}
+  title: "Ascent - Phase 2: The Fog Lifts",
+  description: "Welcome to Phase 2 of our journey",
+};
 
 export default function RootLayout({
   children,
