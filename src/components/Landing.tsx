@@ -362,7 +362,7 @@ export default function Landing() {
               }}
               className=" text-rose-500 text-5xl m-0"
             >
-              Why ASCENT ???
+              Student Monitoring Dashboards
             </motion.h3>
           </div>
         </motion.div>
@@ -384,8 +384,18 @@ export default function Landing() {
     )
   `,
           }}
-          className="justify-center border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl max-w-[75%] transition-all"
+          className="justify-center border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto py-15 rounded-4xl max-w-[75%] transition-all"
         >
+          <motion.h3
+            style={{
+              fontFamily: "Orbitron",
+              fontWeight: "bold",
+              fontStyle: "italic",
+            }}
+            className=" text-rose-500 text-5xl m-0"
+          >
+            Phases Of Software
+          </motion.h3>
           <div
             ref={cardsRef}
             className="relative w-[95%] h-[100vh] flex items-center justify-center "

@@ -1,8 +1,7 @@
 "use client";
-import GitHubTracker from "../../../components/GithubTracker";
 import { HomeBackground } from "../../../components/home/HomeBackground";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import GitHubTracker from "../../../components/GithubTracker";
 
 const phase1Theme = {
   tBorder: { light: "#77BEF0", dark: "#77BEF0" },
@@ -11,31 +10,12 @@ const phase1Theme = {
 };
 
 export default function Phase1GitHubTrackerPage() {
-  const userId = "Paresh-0007";
-  const [token, setToken] = useState<string | null>(
-    "github_pat_11A5OVD6Q0BJndKTYqQbom_2R5xuRuGZNgWwWFakefNwfbVDwE1Q1UzUUy37yH8u6X7MG2DKW6gwK2uges"
-  );
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!token) {
-      fetch(
-        `https://localhost:5000/api/github/usertokenexist/?userId=${userId}`
-      )
-        .then((res) => res.json())
-        .then((data) => setToken(data.token || null))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, [userId, token]);
-
-  // Show background + glass overlay
   return (
     <div className="min-h-screen relative overflow-hidden pt-24">
-      {/* Glassy, animated background */}
-      <HomeBackground username={userId} background="#00008B" />
-      {/* Frosted glass overlay */}
+      {/* Background */}
+      <HomeBackground username="GitHub Tracker" background="#00008B" />
+
+      {/* Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0 }}
@@ -47,40 +27,10 @@ export default function Phase1GitHubTrackerPage() {
           WebkitBackdropFilter: "blur(18px) saturate(120%)",
         }}
       />
-      {/* Main content container */}
+
+      {/* Main content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-10">
-        {/* Optionally, add a header/badge here for phase info */}
-        {loading ? (
-          <div className="flex justify-center items-center h-96">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              style={{
-                border: `4px solid ${phase1Theme.tBorder.light}`,
-                borderTopColor: "transparent",
-                borderRadius: "50%",
-              }}
-              className="w-16 h-16"
-            />
-          </div>
-        ) : !token ? (
-          <div className="text-center mt-20">
-            <p>You need to connect your GitHub account to use the tracker.</p>
-            <a
-              href="/phase1/githubconnect/"
-              className="px-6 py-3 rounded-xl bg-black text-white font-bold mt-4 inline-block"
-            >
-              Connect to GitHub
-            </a>
-          </div>
-        ) : (
-          <GitHubTracker
-            githubToken={token}
-            userId={userId}
-            phase="phase1"
-            theme={phase1Theme}
-          />
-        )}
+        <GitHubTracker theme={phase1Theme} />
       </div>
     </div>
   );

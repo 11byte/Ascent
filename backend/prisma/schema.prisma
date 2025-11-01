@@ -8,8 +8,12 @@ generator client {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  name String
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String  
+  name         String
+  githubId     String?  @unique
+  githubToken  String?
 }
+
+

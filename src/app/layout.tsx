@@ -21,8 +21,13 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "Ascent - Phase 2: The Fog Lifts",
+  title: "Ascent: AI SaaS for Engineering Institutes",
   description: "Welcome to Phase 2 of our journey",
+  icons: {
+    icon: [{ url: "/logo-ascent.png", type: "image/png", sizes: "32x32" }],
+    shortcut: { url: "/logo-ascent.png" },
+    apple: { url: "/logo-ascent.png" },
+  },
 };
 
 export default function RootLayout({
@@ -35,6 +40,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} antialiased`}
       >
+        <Navbar />
         <main>{children}</main>
       </body>
     </html>
