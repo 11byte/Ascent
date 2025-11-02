@@ -3,24 +3,23 @@ import { useEffect } from "react";
 import Navbar from "./Navbar";
 import AOS from "aos";
 
-const NavbarWrapper = (
-  {
-  phaseNo=2,
-  username="Paresh",
-  points=1000,
-  triangle=true,
-  tBorder={
-    light:"#E53E3E", 
-    dark:"#EF4444"
+const NavbarWrapper = ({
+  phaseNo = 2,
+  username = "User",
+  points = 1000,
+  triangle = true,
+  tBorder = {
+    light: "#E53E3E",
+    dark: "#EF4444",
   },
-  tColor={
-    dark:"#06B6D4",
-    light: "#14B8A6"
+  tColor = {
+    dark: "#06B6D4",
+    light: "#14B8A6",
   },
-  tDepthColor={
-    dark:"#3B82F6",
-    light:"#059669"
-  }
+  tDepthColor = {
+    dark: "#3B82F6",
+    light: "#059669",
+  },
 }) => {
   useEffect(() => {
     AOS.init({

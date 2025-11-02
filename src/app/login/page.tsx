@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-
+  const [isHovered, setIsHovered] = useState(false);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
@@ -39,6 +40,49 @@ const Login = () => {
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#f4f4f4] via-[#e6e6e6] to-[#dcdcdc] relative overflow-hidden">
       {/* Subtle metallic shine effect */}
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.6)_20%,transparent_50%,rgba(255,255,255,0.6)_80%)] opacity-40 animate-[metallicShimmer_6s_linear_infinite]" />
+      {/* Home btn */}
+      <motion.button
+        onClick={() => (window.location.href = "http://localhost:3000")}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="
+        absolute
+        left-[15px]
+        top-[15px]
+        flex
+        items-center
+        justify-center
+        text-2xl
+        font-[Orbitron]
+        font-extrabold
+        text-white
+        cursor-pointer
+        disabled:opacity-60
+        overflow-hidden
+      "
+        animate={{
+          width: isHovered ? 120 : 60,
+          height: isHovered ? 45 : 60,
+          clipPath: isHovered
+            ? "inset(0% round 50px)"
+            : "polygon(50% 0%, 80% 10%, 95% 35%, 95% 65%, 80% 90%, 50% 100%, 20% 90%, 5% 65%, 5% 35%, 20% 10%)",
+          transition: { type: "spring", stiffness: 300, damping: 20 },
+        }}
+        style={{
+          background: "black",
+          boxShadow: "0 0 0 2px rgba(0,0,0,1)",
+        }}
+      >
+        <p
+          className="m-0 absolute z-20 leading-none"
+          style={{
+            fontSize: isHovered ? "100%" : "130%",
+            marginBottom: isHovered ? "0px" : "5px",
+          }}
+        >
+          {isHovered ? "Home" : "⌂"}
+        </p>
+      </motion.button>
 
       <div className="w-full max-w-md px-6 relative z-10">
         <form

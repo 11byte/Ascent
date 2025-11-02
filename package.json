@@ -41,6 +41,7 @@
     "react-dom": "^19.1.0",
     "react-lottie-player": "^2.1.0",
     "react-parallax-tilt": "^1.7.309",
+    "react-tinder-card": "^1.6.4",
     "react-tsparticles": "^2.12.2",
     "recharts": "^3.3.0",
     "tailwind-merge": "^3.3.1",

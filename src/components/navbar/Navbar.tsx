@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Navbar = ({
   phaseNo = 2,
-  username = "Paresh",
+  username = "User",
   points = 1000,
   triangle = true,
   tBorder = {
@@ -79,11 +79,11 @@ const Navbar = ({
             <Link href="/" className="block">
               <div className="relative w-[150px] h-[150px] lg:w-[150px] lg:h-[150px]">
                 <Image
-                  src={"/logo.png"}
+                  src={"/logo-ascent.png"}
                   alt="Ascent Logo"
-                  width={150}
-                  height={150}
-                  className="object-contain mt-4"
+                  width={50}
+                  height={50}
+                  className="object-contain top-9 left-[-120px] absolute"
                   priority
                 />
               </div>
@@ -181,7 +181,7 @@ const Navbar = ({
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="hidden lg:flex items-center z-10 h-[20px]"
+            className="hidden lg:flex items-center z-10 h-[20px] absolute right-[-120px]"
           >
             <div
               className="bg-white/20 rounded-full px-4 py-0.5 mb-2 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"

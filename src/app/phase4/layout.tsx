@@ -9,7 +9,7 @@ export default function Phase4Layout({
     <div>
       <NavbarWrapper
         phaseNo={4}
-        username="Paresh"
+        username="User"
         points={7777}
         triangle={true}
         tBorder={{
