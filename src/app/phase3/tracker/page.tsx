@@ -12,23 +12,19 @@ const phase3Theme = {
 export default function Phase3TrackerPage() {
   return (
     <div className="min-h-screen relative overflow-hidden pt-24">
-      {/* Glassy, animated background */}
       <HomeBackground username="Paresh" background="#000016" />
-      {/* Frosted glass overlay */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.8 }}
+        animate={{ opacity: 0.6 }}
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(135deg, rgba(119,190,240,0.2) 0%, rgba(234,91,111,0.2) 100%)",
-          backdropFilter: "blur(18px) saturate(120%)",
-          WebkitBackdropFilter: "blur(18px) saturate(120%)",
+            "linear-gradient(135deg, rgba(51,56,160,0.14) 0%, rgba(252,198,29,0.14) 100%)",
+          backdropFilter: "blur(16px) saturate(120%)",
+          WebkitBackdropFilter: "blur(16px) saturate(120%)",
         }}
       />
-      {/* Main content container */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 py-10">
-        {/* Optionally, add a header/badge here for phase info */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-10">
         <EnhancedBehaviorTracker phase="phase3" theme={phase3Theme} />
       </div>
     </div>
