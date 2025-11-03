@@ -38,3 +38,32 @@ body {
 .final-img {
   transition: all 0.3s ease;
 }
+
+@import "nprogress/nprogress.css";
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: #e11d48 !important; /* rose-600 */
+  height: 4px !important;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.6);
+}
+
+/* Glowing moving "peg" at the end */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  opacity: 1;
+  transform: rotate(3deg) translate(0, -4px);
+  box-shadow: 0 0 10px #e11d48, 0 0 5px #fb7185;
+}
+
+/* Optional: Hide spinner */
+#nprogress .spinner {
+  display: none !important;
+}

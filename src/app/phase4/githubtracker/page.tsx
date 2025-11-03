@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import GitHubTracker from "../../../components/GithubTracker";
 
 const phase4Theme = {
-  tBorder: { light: "#E8E3D4", dark: "#E8E3D4" }, // Soft ivory gold — refined light tone
-  tColor: { light: "#fff", dark: "black" }, // Deep teal for contrast & clarity
-  tDepthColor: { light: "#CBAF68", dark: "#CBAF68" }, // Muted golden amber — luxurious highlight
+  tBorder: { light: "#E8E3D4", dark: "#E8E3D4" },
+  tColor: { light: "#fff", dark: "black" },
+  tDepthColor: { light: "#CBAF68", dark: "#CBAF68" },
 };
 
 export default function Phase4GitHubTrackerPage() {

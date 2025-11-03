@@ -1,8 +1,8 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navig";
+import ClientProgressBar from "../components/ClientProgressBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,15 +32,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} antialiased`}
       >
         <Navbar />
+        <ClientProgressBar />
         <main>{children}</main>
       </body>
     </html>

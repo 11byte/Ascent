@@ -109,4 +109,47 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to fetch GitHub data" });
   }
 });
+
+router.get("/leetcode/:username", async (req: Request, res: Response) => {
+  const { username } = req.params;
+
+  if (!username) {
+    return res.status(400).json({ error: "Username is required" });
+  }
+
+  try {
+    // Public LeetCode Stats API (no authentication required)
+    const response = await fetch(
+      `https://leetcode-stats-api.herokuapp.com/${username}`
+    );
+
+    if (!response.ok) {
+      return res.status(500).json({ error: "Failed to fetch LeetCode data" });
+    }
+
+    const data = await response.json();
+
+    // Structure the data for frontend clarity
+    const formatted = {
+      username: data.username || username,
+      totalSolved: data.totalSolved || 0,
+      totalQuestions: data.totalQuestions || 0,
+      easySolved: data.easySolved || 0,
+      totalEasy: data.totalEasy || 0,
+      mediumSolved: data.mediumSolved || 0,
+      totalMedium: data.totalMedium || 0,
+      hardSolved: data.hardSolved || 0,
+      totalHard: data.totalHard || 0,
+      ranking: data.ranking || "N/A",
+      contributionPoints: data.contributionPoints || 0,
+      reputation: data.reputation || 0,
+    };
+
+    return res.json(formatted);
+  } catch (err) {
+    console.error("LeetCode API Error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

@@ -14,7 +14,6 @@ import {
   X,
   Search,
 } from "lucide-react";
-import Lenis from "@studio-freight/lenis";
 
 interface App {
   id: string;
@@ -26,7 +25,7 @@ interface App {
   link: string;
 }
 
-export const AppLauncher = ({phase="phase1"}) => {
+export const AppLauncher = ({ phase = "phase1" }) => {
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -119,29 +118,6 @@ export const AppLauncher = ({phase="phase1"}) => {
   };
 
   // 🔁 Initialize Lenis on launcher open
-  useEffect(() => {
-    if (!isLauncherOpen) return;
-
-    const lenis = new Lenis({
-      wrapper: scrollContainerRef.current ?? undefined,
-      content:
-        scrollContainerRef.current?.querySelector("[data-lenis-scroll]") ??
-        undefined,
-      smoothWheel: true,
-      lerp: 0.1,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, [isLauncherOpen]);
 
   return (
     <>
@@ -173,12 +149,14 @@ export const AppLauncher = ({phase="phase1"}) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 overflow-hidden"
             onClick={toggleLauncher}
+            onWheel={(e) => e.stopPropagation()} // ✅ Allow trackpad/mouse scroll inside
+            onTouchMove={(e) => e.stopPropagation()} // ✅ Allow touch scroll
           >
             {/* Background Blur */}
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 background: "rgba(0, 0, 0, 0.4)",
                 backdropFilter: "blur(20px) saturate(180%)",
@@ -224,11 +202,7 @@ export const AppLauncher = ({phase="phase1"}) => {
                   </motion.button>
                 </div>
 
-                {/* Scrollable Content */}
-                <div
-                  className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6"
-                  data-lenis-scroll
-                >
+                <div className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6">
                   {/* Search Bar */}
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
