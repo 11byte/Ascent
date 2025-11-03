@@ -1,5 +1,5 @@
 
-# 🚀 Ascent – The AI-Powered Student Success Platform
+# 🚀 Ascent – AI driven SaaS for engineering institutes to provision Student Ecosystem
 
 > **Ascent** is a next-generation, AI-powered SaaS platform designed to revolutionize student engagement, institutional efficiency, and career readiness in modern engineering institutions.  
 > It transforms fragmented digital systems into a unified, intelligent ecosystem that evolves with each student through their academic journey.
