@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -21,8 +21,9 @@ interface App {
   icon: React.ReactNode;
   color: string;
   description: string;
-  category: "development" | "learning" | "productivity";
+  category: "development" | "learning" | "productivity" | string;
   link: string;
+  phases: string[]; // ✅ Added — list of phases where the app should appear
 }
 
 export const AppLauncher = ({ phase = "phase1" }) => {
@@ -30,6 +31,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ Define apps and assign them to specific phases
   const apps: App[] = useMemo(
     () => [
       {
@@ -40,6 +42,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Track your development journey",
         category: "productivity",
         link: `/${phase}/timeline`,
+        phases: ["phase1", "phase2", "phase3", "phase4"], // ✅ visible in these phases
       },
       {
         id: "blogs",
@@ -49,6 +52,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Read and write technical blogs",
         category: "learning",
         link: `/${phase}/blog`,
+        phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
         id: "tracker",
@@ -58,6 +62,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Daily Data Feed",
         category: "learning",
         link: `/${phase}/tracker`,
+        phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
         id: "marathons",
@@ -66,7 +71,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         color: "from-yellow-500 to-orange-500",
         description: "Participate in coding marathons",
         category: "development",
-        link: `/${phase}/timeline`,
+        link: `/${phase}/macrothon`,
+        phases: ["phase3", "phase4"],
       },
       {
         id: "leetspace",
@@ -75,7 +81,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         color: "from-red-500 to-red-600",
         description: "Practice coding problems",
         category: "development",
-        link: `/${phase}/timeline`,
+        link: `/${phase}/leetTracker`,
+        phases: ["phase2", "phase3", "phase4"],
       },
       {
         id: "gittrack",
@@ -85,6 +92,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Monitor your Git activity",
         category: "productivity",
         link: `/${phase}/githubtracker`,
+        phases: ["phase3", "phase4"],
       },
       {
         id: "bountyhub",
@@ -93,31 +101,32 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         color: "from-emerald-500 to-emerald-600",
         description: "Discover coding bounties",
         category: "development",
-        link: `/${phase}/timeline`,
+        link: `/${phase}/bountyhub`,
+        phases: ["phase2", "phase3", "phase4"],
       },
     ],
-    []
+    [phase]
   );
 
+  // ✅ Filter by both phase and search query
   const filteredApps = useMemo(() => {
-    if (!searchQuery) return apps;
-    return apps.filter(
+    const phaseFiltered = apps.filter((app) => app.phases.includes(phase));
+    if (!searchQuery) return phaseFiltered;
+    return phaseFiltered.filter(
       (app) =>
         app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [apps, searchQuery]);
+  }, [apps, searchQuery, phase]);
 
   const toggleLauncher = () => {
     setIsLauncherOpen(!isLauncherOpen);
-    setSearchQuery(""); // Reset search when closing
+    setSearchQuery("");
   };
 
   const handleAppClick = (app: App) => {
     console.log(`Opening ${app.name}...`);
   };
-
-  // 🔁 Initialize Lenis on launcher open
 
   return (
     <>
@@ -151,20 +160,14 @@ export const AppLauncher = ({ phase = "phase1" }) => {
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-40 overflow-hidden"
             onClick={toggleLauncher}
-            onWheel={(e) => e.stopPropagation()} // ✅ Allow trackpad/mouse scroll inside
-            onTouchMove={(e) => e.stopPropagation()} // ✅ Allow touch scroll
           >
-            {/* Background Blur */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: "rgba(0, 0, 0, 0.4)",
                 backdropFilter: "blur(20px) saturate(180%)",
-                WebkitBackdropFilter: "blur(20px) saturate(180%)",
               }}
             />
-
-            {/* App Grid Container */}
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -174,40 +177,34 @@ export const AppLauncher = ({ phase = "phase1" }) => {
               onClick={(e) => e.stopPropagation()}
               ref={scrollContainerRef}
             >
-              <div
-                className="w-full max-w-5xl max-h-[calc(100vh-8rem)] overflow-hidden rounded-3xl border border-white/30 shadow-2xl"
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  backdropFilter: "blur(25px) saturate(200%)",
-                  WebkitBackdropFilter: "blur(25px) saturate(200%)",
-                }}
-              >
-                {/* Header */}
+              <div className="w-full max-w-5xl max-h-[calc(100vh-8rem)] overflow-hidden rounded-3xl border border-white/30 shadow-2xl bg-white/10 backdrop-blur-2xl">
                 <div className="flex justify-between items-center p-6 border-b border-white/20">
                   <div>
-                    <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                    <h2 className="text-3xl font-bold text-white">
                       Applications
                     </h2>
-                    <p className="text-white/60 text-sm mt-1">
-                      Phase 2 Development Suite
+                    <p className="text-white/60 text-sm mt-1 capitalize">
+                      {phase.replace("phase", "Phase ")} Development Suite
                     </p>
                   </div>
                   <motion.button
                     onClick={toggleLauncher}
                     whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all duration-200 backdrop-blur-sm"
+                    className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
                   >
                     <X className="w-5 h-5 text-white" />
                   </motion.button>
                 </div>
 
-                <div className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6">
-                  {/* Search Bar */}
+                <div
+                  className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6"
+                  onWheel={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                >
+                  {/* Search */}
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
                     className="mb-8"
                   >
                     <div className="relative">
@@ -217,55 +214,36 @@ export const AppLauncher = ({ phase = "phase1" }) => {
                         placeholder="Search applications..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-accent-teal focus:bg-white/20 transition-all duration-200"
-                        autoComplete="off"
+                        className="w-full bg-white/10 border border-white/20 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-accent-teal"
                       />
                     </div>
                   </motion.div>
 
-                  {/* Apps Grid */}
+                  {/* App Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredApps.map((app, index) => (
                       <motion.div
                         key={app.id}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03, duration: 0.3 }}
+                        transition={{ delay: index * 0.03 }}
                         whileHover={{ scale: 1.05, y: -4 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleAppClick(app)}
                         className="group cursor-pointer"
                       >
                         <Link href={app.link}>
-                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all duration-100 hover:bg-white/20 hover:shadow-xl">
+                          <div className="bg-white/10 rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all hover:bg-white/20 hover:shadow-xl">
                             <div
-                              className={`w-16 h-16 bg-gradient-to-br ${app.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}
+                              className={`w-16 h-16 bg-gradient-to-br ${app.color} rounded-xl flex items-center justify-center mb-4 shadow-lg`}
                             >
-                              <div className="text-white drop-shadow-md">
-                                {app.icon}
-                              </div>
+                              <div className="text-white">{app.icon}</div>
                             </div>
-
-                            <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-accent-teal transition-colors duration-200 drop-shadow-sm">
+                            <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-accent-teal">
                               {app.name}
                             </h3>
-                            <p className="text-white/60 text-sm group-hover:text-white/80 transition-colors duration-200 line-clamp-2">
+                            <p className="text-white/60 text-sm line-clamp-2">
                               {app.description}
                             </p>
-
-                            <div className="mt-3">
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full ${
-                                  app.category === "development"
-                                    ? "bg-red-500/20 text-red-200"
-                                    : app.category === "learning"
-                                    ? "bg-purple-500/20 text-purple-200"
-                                    : "bg-blue-500/20 text-blue-200"
-                                }`}
-                              >
-                                {app.category}
-                              </span>
-                            </div>
                           </div>
                         </Link>
                       </motion.div>
@@ -280,7 +258,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
                       className="text-center py-12"
                     >
                       <p className="text-white/60 text-lg">
-                        No applications found matching "{searchQuery}"
+                        No applications found for this phase.
                       </p>
                     </motion.div>
                   )}

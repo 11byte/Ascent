@@ -1,22 +1,22 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { prisma } from "../utils/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { sendEvent } from "../utils/producer"; // Kafka producer
 
 const router = Router();
 
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
-const REDIRECT_URI = "http://localhost:3000/phase2/githubtracker"; // your frontend redirect URL
+const REDIRECT_URI = "http://localhost:3000/phase2/githubtracker";
 
 /* =====================================================
    TEMPORARY AUTH MIDDLEWARE (Skip real verification)
 ===================================================== */
-function verifyToken(req: Request, res: Response, next: Function) {
+function verifyToken(req: Request, res: Response, next: NextFunction) {
   try {
     console.log("🧪 Skipping JWT verification for testing");
-    // Pretend the logged-in user has ID = 1
-    (req as any).user = { id: 1 };
+    (req as any).user = { id: 1 }; // Simulate user
     next();
   } catch (err) {
     return res.status(401).json({ error: "Token verification failed" });
@@ -36,7 +36,6 @@ router.post("/signup", async (req: Request, res: Response) => {
     if (exists) return res.status(409).json({ error: "Email already in use" });
 
     const hash = await bcrypt.hash(password, 12);
-
     const newUser = await prisma.user.create({
       data: { email, name: name ?? "", password: hash },
       select: { id: true, email: true, name: true },
@@ -80,24 +79,26 @@ router.post("/login", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+/* =====================================================
+   3️⃣ GitHub Data Fetch
+===================================================== */
 router.get("/github/data/:username", async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
-
     if (!username)
       return res.status(400).json({ error: "GitHub username required" });
 
-    // Fetch GitHub user info
     const userResponse = await fetch(
       `https://api.github.com/users/${username}`
     );
-    if (!userResponse.ok) {
-      const msg = await userResponse.text();
-      return res.status(userResponse.status).json({ error: msg });
-    }
+    if (!userResponse.ok)
+      return res
+        .status(userResponse.status)
+        .json({ error: await userResponse.text() });
+
     const userData = await userResponse.json();
 
-    // Fetch user's public repos
     const repoResponse = await fetch(
       `https://api.github.com/users/${username}/repos`
     );
@@ -110,26 +111,22 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
   }
 });
 
+/* =====================================================
+   4️⃣ LeetCode Data Fetch
+===================================================== */
 router.get("/leetcode/:username", async (req: Request, res: Response) => {
   const { username } = req.params;
-
-  if (!username) {
-    return res.status(400).json({ error: "Username is required" });
-  }
+  if (!username) return res.status(400).json({ error: "Username is required" });
 
   try {
-    // Public LeetCode Stats API (no authentication required)
     const response = await fetch(
       `https://leetcode-stats-api.herokuapp.com/${username}`
     );
-
-    if (!response.ok) {
+    if (!response.ok)
       return res.status(500).json({ error: "Failed to fetch LeetCode data" });
-    }
 
     const data = await response.json();
 
-    // Structure the data for frontend clarity
     const formatted = {
       username: data.username || username,
       totalSolved: data.totalSolved || 0,

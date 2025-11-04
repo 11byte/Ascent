@@ -7,13 +7,74 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  password     String  
-  name         String
-  githubId     String?  @unique
-  githubToken  String?
+// ---------------- Enums ----------------
+enum BlogDomain {
+  AI
+  ML
+  Cyber
+  DevOps
+  Blockchain
+  Cloud
+  General
 }
 
+// ---------------- Models ----------------
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  name     String
 
+  // Optional social auth
+  githubId    String? @unique
+  githubToken String?
+
+  // Relationships
+  blogs        Blog[]            @relation("UserBlogs")
+  interactions BlogInteraction[] @relation("UserInteractions")
+  skills       Skill[]
+  achievements Achievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Blog {
+  id      Int        @id @default(autoincrement())
+  title   String
+  content String
+  topic   BlogDomain @default(General) // Domain/topic for user interest tracking
+
+  author   User? @relation("UserBlogs", fields: [authorId], references: [id])
+  authorId Int?
+
+  createdAt DateTime @default(now())
+}
+
+model BlogInteraction {
+  id         Int      @id @default(autoincrement())
+  blogTitle  String
+  interested Boolean
+  domain     String
+  user       User?    @relation("UserInteractions", fields: [userId], references: [id])
+  userId     Int?
+  createdAt  DateTime @default(now())
+}
+
+model Skill {
+  id        Int      @id @default(autoincrement())
+  name      String
+  level     String? // beginner, intermediate, advanced
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  createdAt DateTime @default(now())
+}
+
+model Achievement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+  createdAt   DateTime @default(now())
+}

@@ -17,7 +17,6 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "kafkajs": "^2.2.4",
-    "node-fetch": "^3.3.2"
+    "kafkajs": "^2.2.4"
   }
 }
