@@ -77,7 +77,7 @@ const Navbar = ({
             className="flex-shrink-0 z-10"
           >
             <Link href="/" className="block">
-              <div className="relative w-[150px] h-[150px] lg:w-[150px] lg:h-[150px]">
+              <div className="relative w-[10px] h-[50px] lg:w-[50px] lg:h-[150px] mb-2 ">
                 <Image
                   src={"/logo-ascent.png"}
                   alt="Ascent Logo"
