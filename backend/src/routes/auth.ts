@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { prisma } from "../utils/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendEvent } from "../utils/producer"; // Kafka producer
+import { sendEventToKafka } from "../utils/producer";
 
 const router = Router();
 
@@ -142,9 +142,12 @@ router.post("/login", async (req: Request, res: Response) => {
 router.get("/github/data/:username", async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
+    const userId = req.query.userId || "guest"; // optional param for context
+
     if (!username)
       return res.status(400).json({ error: "GitHub username required" });
 
+    // ✅ Fetch GitHub user profile
     const userResponse = await fetch(
       `https://api.github.com/users/${username}`
     );
@@ -152,21 +155,63 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
       return res
         .status(userResponse.status)
         .json({ error: await userResponse.text() });
-
     const userData = await userResponse.json();
 
+    // ✅ Fetch repositories
     const repoResponse = await fetch(
       `https://api.github.com/users/${username}/repos`
     );
     const repos = await repoResponse.json();
+    console.log("github fetched");
 
+    // ✅ Build the payload to send to Kafka
+    const payload = {
+      userId,
+      github: {
+        profile: {
+          username: userData.login,
+          name: userData.name,
+          bio: userData.bio,
+          followers: userData.followers,
+          following: userData.following,
+          public_repos: userData.public_repos,
+          location: userData.location,
+          avatar_url: userData.avatar_url,
+          html_url: userData.html_url,
+        },
+        repos: repos.map((r: any) => ({
+          name: r.name,
+          description: r.description,
+          language: r.language,
+          stargazers_count: r.stargazers_count,
+          forks_count: r.forks_count,
+          html_url: r.html_url,
+          updated_at: r.updated_at,
+        })),
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    // ✅ Send data to Kafka
+    try {
+      await sendEventToKafka(
+        "github-tracker-events",
+        userId as string,
+        "githubTracker",
+        payload
+      );
+      console.log(`📤 Sent GitHub data for ${username} to Kafka pipeline`);
+    } catch (kafkaErr) {
+      console.error("⚠️ Kafka pipeline send failed:", kafkaErr);
+    }
+
+    // ✅ Finally, respond to frontend
     res.json({ ok: true, user: userData, repos });
   } catch (err) {
-    console.error("GitHub fetch error:", err);
+    console.error("❌ GitHub fetch error:", err);
     res.status(500).json({ error: "Failed to fetch GitHub data" });
   }
 });
-
 /* =====================================================
    4️⃣ LeetCode Data Fetch
 ===================================================== */

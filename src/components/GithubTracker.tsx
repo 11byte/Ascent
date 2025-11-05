@@ -66,20 +66,32 @@ export default function GitHubTracker({ theme }: { theme: TrackerTheme }) {
     if (!username) return setError("Please enter a GitHub username.");
     setLoading(true);
     setError("");
+
     try {
-      const [userRes, reposRes, eventsRes] = await Promise.all([
-        fetch(`https://api.github.com/users/${username}`),
-        fetch(`https://api.github.com/users/${username}/repos?per_page=100`),
-        fetch(`https://api.github.com/users/${username}/events?per_page=100`),
-      ]);
-      if (userRes.status === 404) throw new Error("User not found.");
-      const user = await userRes.json();
-      const repos = await reposRes.json();
-      const events = await eventsRes.json();
-      setGhData({ user, repos, events });
+      const userId = localStorage.getItem("userId") || "guest";
+
+      const res = await fetch(
+        `http://localhost:5000/tracker/github/data/${username}?userId=${userId}`
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to fetch GitHub data");
+      }
+
+      const data = await res.json();
+
+      console.log("✅ GitHub data received from backend:", data);
+
+      setGhData({
+        user: data.user,
+        repos: data.repos || [],
+        events: data.events || [],
+      });
     } catch (err: any) {
+      console.error("❌ GitHubTracker fetch error:", err);
       setError(err.message);
-      setGhData(null);
+      setGhData({ user: undefined, repos: [], events: [] });
     } finally {
       setLoading(false);
     }
@@ -122,22 +134,23 @@ export default function GitHubTracker({ theme }: { theme: TrackerTheme }) {
     size: r.size,
   }));
 
-  const commitEvents = ghData?.events
+  const commitEvents = (ghData?.events || [])
     .filter((e: any) => e.type === "PushEvent")
     .reduce((acc: any, ev: any) => {
       const day = new Date(ev.created_at).toLocaleDateString();
-      acc[day] = (acc[day] || 0) + ev.payload.size;
+      acc[day] = (acc[day] || 0) + (ev.payload?.size || 0);
       return acc;
     }, {});
+
   const commitData = commitEvents
     ? Object.entries(commitEvents).map(([day, commits]) => ({ day, commits }))
     : [];
 
   const mostActiveRepos = Object.entries(
-    ghData?.events
+    (ghData?.events || [])
       .filter((e: any) => e.type === "PushEvent")
       .reduce((acc: any, e: any) => {
-        const repo = e.repo.name;
+        const repo = e.repo?.name || "unknown";
         acc[repo] = (acc[repo] || 0) + 1;
         return acc;
       }, {}) || {}
