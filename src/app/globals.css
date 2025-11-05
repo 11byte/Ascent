@@ -67,3 +67,58 @@ body {
 #nprogress .spinner {
   display: none !important;
 }
+
+/* Marquee core variables (fallbacks) */
+:root {
+  --marquee-duration: 20s;
+  --marquee-gap: 1rem;
+}
+
+/* Horizontal marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Scroll the full width plus the configured gap */
+    transform: translateX(calc(-100% - var(--gap, var(--marquee-gap))));
+  }
+}
+
+/* Vertical marquee */
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap, var(--marquee-gap))));
+  }
+}
+
+/* Apply animation using CSS variables from the wrapper (with fallbacks) */
+.animate-marquee {
+  animation: marquee var(--duration, var(--marquee-duration)) linear infinite;
+}
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration, var(--marquee-duration)) linear infinite;
+}
+
+/* Optional: pause on hover without Tailwind's group-hover utility */
+.marquee-pause-on-hover:hover .animate-marquee,
+.marquee-pause-on-hover:hover .animate-marquee-vertical {
+  animation-play-state: paused;
+}
+
+/* Optional: reverse direction without using [animation-direction:reverse] */
+.is-reversed {
+  animation-direction: reverse;
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-vertical {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+  }
+}

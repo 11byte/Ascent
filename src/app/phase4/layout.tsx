@@ -1,5 +1,6 @@
 import NavbarWrapper from "../../components/navbar/Navbar-Wrapper";
 import { Phase2Provider } from "../../context/phase2Context";
+import Phase4NavbarClient from "../../components/navbar/Phase4Navbar.client";
 export default function Phase4Layout({
   children,
 }: Readonly<{
@@ -7,24 +8,7 @@ export default function Phase4Layout({
 }>) {
   return (
     <div>
-      <NavbarWrapper
-        phaseNo={4}
-        username="User"
-        points={7777}
-        triangle={true}
-        tBorder={{
-          light: "#F3F3E0",
-          dark: "#F3F3E0",
-        }}
-        tColor={{
-          dark: "#183B4E",
-          light: "#183B4E",
-        }}
-        tDepthColor={{
-          dark: "#DDA853",
-          light: "#DDA853",
-        }}
-      />
+      <Phase4NavbarClient />
       <Phase2Provider value={{ username: "Paresh" }}>{children}</Phase2Provider>
     </div>
   );
