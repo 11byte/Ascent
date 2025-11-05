@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { sendEvent } from "../utils/producer"; // Kafka producer
+import { sendEventToKafka } from "../utils/producer"; // Updated import
 import { prisma } from "../utils/prisma"; // Prisma client
 
 const router = Router();
@@ -38,36 +38,41 @@ router.get("/blogs", async (_req: Request, res: Response) => {
 
 /* =====================================================
    2️⃣ Track Blog Interaction (Interested / Not Interested)
-   - Save in Postgres + send Kafka event
+   - Save in Postgres + send Kafka event (under userId)
 ===================================================== */
 router.post("/blogs/interact", async (req: Request, res: Response) => {
   try {
     const { title, interested, domain, userId } = req.body;
 
-    if (!title || typeof interested !== "boolean") {
+    if (!title || typeof interested !== "boolean" || !userId) {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
-    // 1️⃣ Save to Postgres
+    // 1️⃣ Save to Postgres (optional, for analytics)
     await prisma.blogInteraction.create({
       data: {
+        userRefId: userId, // ✅ renamed to match schema
         blogTitle: title,
         interested,
         domain: domain || "general",
       },
     });
 
-    // 2️⃣ Send Kafka event
-    const payload = {
+    // 2️⃣ Construct event object
+    const eventPayload = {
       title,
       interested,
       domain: domain || "general",
-      userId: userId || null,
-      timestamp: new Date().toISOString(),
     };
 
-    await sendEvent("student.blog.interest", payload);
-    console.log("📤 Saved & sent to Kafka:", payload);
+    // 3️⃣ Send to Kafka (topic: blog-events)
+    await sendEventToKafka("blog-events", userId, "blog", eventPayload);
+
+    console.log("📤 Blog interaction sent to Kafka:", {
+      topic: "blog-events",
+      userId,
+      ...eventPayload,
+    });
 
     res.json({ ok: true, message: "Interaction saved and sent to Kafka" });
   } catch (err) {

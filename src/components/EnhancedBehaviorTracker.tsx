@@ -89,7 +89,13 @@ const ThemeCard = ({
 };
 
 // Small components
-const PhasePill = ({ phase, theme }: { phase: string; theme: TrackerTheme }) => {
+const PhasePill = ({
+  phase,
+  theme,
+}: {
+  phase: string;
+  theme: TrackerTheme;
+}) => {
   const t = useThemeTokens(theme);
   return (
     <span
@@ -165,7 +171,10 @@ const ProgressRing = ({
         cx={size / 2}
         cy={size / 2}
         style={{ rotate: "-90deg", originX: "50%", originY: "50%" }}
-        initial={{ strokeDasharray: circumference, strokeDashoffset: circumference }}
+        initial={{
+          strokeDasharray: circumference,
+          strokeDashoffset: circumference,
+        }}
         animate={{ strokeDashoffset: offset }}
         transition={{ duration: 0.6 }}
       />
@@ -235,7 +244,10 @@ const Badge = ({ label }: { label: string }) => (
   </span>
 );
 
-export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTrackerProps) {
+export default function EnhancedBehaviorTracker({
+  phase,
+  theme,
+}: BehaviorTrackerProps) {
   // Phase config
   const phaseConfigs = {
     phase1: {
@@ -268,7 +280,12 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
 
   // Flow state
   const [currentSection, setCurrentSection] = useState<
-    "intro" | "questions" | "activities" | "assessment" | "challenges" | "results"
+    | "intro"
+    | "questions"
+    | "activities"
+    | "assessment"
+    | "challenges"
+    | "results"
   >("intro");
 
   // Separate per-section indices (so you can perform ALL items)
@@ -300,7 +317,9 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
     const controller = new AbortController();
     const loadTrackerData = async () => {
       try {
-        const response = await fetch(config.endpoint, { signal: controller.signal });
+        const response = await fetch(config.endpoint, {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error("Primary API failed");
         const data = await response.json();
         if (isMounted) setTrackerData(data);
@@ -461,7 +480,9 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
     setCurrentSection((prevSection) => {
       switch (prevSection) {
         case "intro":
-          return trackerData && trackerData.questions.length ? "questions" : "activities";
+          return trackerData && trackerData.questions.length
+            ? "questions"
+            : "activities";
         case "questions":
           return "activities";
         case "activities":
@@ -500,7 +521,8 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
         const updated = { ...prev };
         if (response.category === "preference") {
           response.selectedDomains?.forEach((domain: string) => {
-            updated.techInterests[domain] = (updated.techInterests[domain] || 0) + 1;
+            updated.techInterests[domain] =
+              (updated.techInterests[domain] || 0) + 1;
           });
         }
         if (response.type === "scenario" && response.selectedScenario?.domain) {
@@ -538,7 +560,10 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
   // Layout
   const activeStep = Math.max(
     0,
-    steps.findIndex((s) => s.key === (currentSection === "intro" ? "questions" : currentSection))
+    steps.findIndex(
+      (s) =>
+        s.key === (currentSection === "intro" ? "questions" : currentSection)
+    )
   );
 
   // Current index alias for UI controls
@@ -550,7 +575,10 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
       <div className="mb-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: "#0F172A" }}>
+            <h1
+              className="text-2xl md:text-3xl font-extrabold"
+              style={{ color: "#0F172A" }}
+            >
               Behavior Tracker
             </h1>
             <PhasePill phase={config.name} theme={theme} />
@@ -657,7 +685,10 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
                 challenges={trackerData.domainChallenges}
                 currentIndex={currentIndex}
                 onResponse={(resp: any) =>
-                  handleResponse(resp, { xp: 25, achievement: "Creative Thinker" })
+                  handleResponse(resp, {
+                    xp: 25,
+                    achievement: "Creative Thinker",
+                  })
                 }
               />
             )}
@@ -681,7 +712,11 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
               <button
                 onClick={goPrev}
                 className="px-4 py-2 rounded-lg border text-sm font-medium"
-                style={{ borderColor: t.border, color: "#334155", background: "#fff" }}
+                style={{
+                  borderColor: t.border,
+                  color: "#334155",
+                  background: "#fff",
+                }}
                 disabled={currentIndex === 0}
               >
                 ← Back
@@ -713,10 +748,15 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
                 U
               </div>
               <div>
-                <div className="text-sm font-semibold" style={{ color: "#0F172A" }}>
+                <div
+                  className="text-sm font-semibold"
+                  style={{ color: "#0F172A" }}
+                >
                   Your Journey
                 </div>
-                <div className="text-xs text-slate-600">Keep up the momentum!</div>
+                <div className="text-xs text-slate-600">
+                  Keep up the momentum!
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 mt-4">
@@ -731,17 +771,25 @@ export default function EnhancedBehaviorTracker({ phase, theme }: BehaviorTracke
               <div className="font-semibold" style={{ color: "#0F172A" }}>
                 Achievements
               </div>
-              <span className="text-xs text-slate-500">{achievements.length}/8</span>
+              <span className="text-xs text-slate-500">
+                {achievements.length}/8
+              </span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {achievements.length === 0 ? (
-                <span className="text-xs text-slate-500">No badges yet — earn XP to unlock!</span>
+                <span className="text-xs text-slate-500">
+                  No badges yet — earn XP to unlock!
+                </span>
               ) : (
                 achievements.map((a) => (
                   <span
                     key={a}
                     className="px-2 py-1 rounded-md text-[10px] font-semibold border"
-                    style={{ background: t.depth, borderColor: t.border, color: "#0F172A" }}
+                    style={{
+                      background: t.depth,
+                      borderColor: t.border,
+                      color: "#0F172A",
+                    }}
                     title={a}
                   >
                     {a}
@@ -782,7 +830,8 @@ function IntroSection({ theme, config, onStart }: any) {
         Welcome to the {config.name} Journey 🚀
       </motion.h2>
       <p className="text-slate-600 max-w-2xl mx-auto">
-        Discover your strengths, interests, and learning preferences through short, fun, and adaptive activities.
+        Discover your strengths, interests, and learning preferences through
+        short, fun, and adaptive activities.
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
         {[
@@ -825,7 +874,8 @@ function QuestionsSection({
   currentIndex: number;
   onResponse: (r: any) => void;
 }) {
-  if (!questions || questions.length === 0 || currentIndex >= questions.length) return null;
+  if (!questions || questions.length === 0 || currentIndex >= questions.length)
+    return null;
   const question = questions[currentIndex];
   const t = useThemeTokens(theme);
 
@@ -852,7 +902,11 @@ function QuestionsSection({
               })
             }
             className="p-4 rounded-xl border text-left"
-            style={{ background: "#fff", color: "#0F172A", borderColor: t.border }}
+            style={{
+              background: "#fff",
+              color: "#0F172A",
+              borderColor: t.border,
+            }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -878,7 +932,12 @@ function ActivitiesSection({
   currentIndex: number;
   onResponse: (r: any) => void;
 }) {
-  if (!activities || activities.length === 0 || currentIndex >= activities.length) return null;
+  if (
+    !activities ||
+    activities.length === 0 ||
+    currentIndex >= activities.length
+  )
+    return null;
   const activity = activities[currentIndex];
   const t = useThemeTokens(theme);
 
@@ -896,19 +955,37 @@ function ActivitiesSection({
       <p className="text-slate-600 mb-6">{activity.description}</p>
 
       {activity.type === "ranking" && (
-        <RankingActivity activity={activity} theme={theme} onResponse={onResponse} />
+        <RankingActivity
+          activity={activity}
+          theme={theme}
+          onResponse={onResponse}
+        />
       )}
       {activity.type === "matching" && (
-        <MatchingActivity activity={activity} theme={theme} onResponse={onResponse} />
+        <MatchingActivity
+          activity={activity}
+          theme={theme}
+          onResponse={onResponse}
+        />
       )}
       {activity.type === "scenario" && (
-        <ScenarioActivity activity={activity} theme={theme} onResponse={onResponse} />
+        <ScenarioActivity
+          activity={activity}
+          theme={theme}
+          onResponse={onResponse}
+        />
       )}
       {activity.type === "preference" && (
-        <PreferenceActivity activity={activity} theme={theme} onResponse={onResponse} />
+        <PreferenceActivity
+          activity={activity}
+          theme={theme}
+          onResponse={onResponse}
+        />
       )}
 
-      <div className="mt-6 text-xs text-slate-500">Complete this activity to earn bonus XP.</div>
+      <div className="mt-6 text-xs text-slate-500">
+        Complete this activity to earn bonus XP.
+      </div>
     </ThemeCard>
   );
 }
@@ -933,8 +1010,15 @@ function RankingActivity({ activity, theme, onResponse }: any) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">Drag to reorder your preference (top = highest)</p>
-      <Reorder.Group axis="y" values={items} onReorder={setItems} className="space-y-3">
+      <p className="text-sm text-slate-600">
+        Drag to reorder your preference (top = highest)
+      </p>
+      <Reorder.Group
+        axis="y"
+        values={items}
+        onReorder={setItems}
+        className="space-y-3"
+      >
         {items.map((item: string) => (
           <Reorder.Item
             key={item}
@@ -970,7 +1054,10 @@ function MatchingActivity({ activity, theme, onResponse }: any) {
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const technologies = activity.data.technologies || [];
   const useCases =
-    activity.data.applications || activity.data.useCases || activity.data.convergences || [];
+    activity.data.applications ||
+    activity.data.useCases ||
+    activity.data.convergences ||
+    [];
 
   const handleTechSelect = (tech: string) => setSelectedTech(tech);
   const handleUseCaseSelect = (useCase: string) => {
@@ -1001,7 +1088,9 @@ function MatchingActivity({ activity, theme, onResponse }: any) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tech list */}
         <div>
-          <div className="text-sm font-semibold text-slate-700 mb-2">Technologies</div>
+          <div className="text-sm font-semibold text-slate-700 mb-2">
+            Technologies
+          </div>
           <div className="space-y-2">
             {technologies.map((tech: string) => {
               const isSelected = selectedTech === tech;
@@ -1040,14 +1129,18 @@ function MatchingActivity({ activity, theme, onResponse }: any) {
         </div>
         {/* Use cases */}
         <div>
-          <div className="text-sm font-semibold text-slate-700 mb-2">Applications / Use Cases</div>
+          <div className="text-sm font-semibold text-slate-700 mb-2">
+            Applications / Use Cases
+          </div>
           <div className="space-y-2">
             {useCases.map((uc: string) => {
               const taken = matchedUseCases.has(uc);
               return (
                 <button
                   key={uc}
-                  onClick={() => !taken && selectedTech && handleUseCaseSelect(uc)}
+                  onClick={() =>
+                    !taken && selectedTech && handleUseCaseSelect(uc)
+                  }
                   className="w-full text-left px-3 py-2 rounded-lg border transition"
                   style={{
                     borderColor: taken ? "#E5E7EB" : t.border,
@@ -1063,16 +1156,22 @@ function MatchingActivity({ activity, theme, onResponse }: any) {
           </div>
           {selectedTech && (
             <div className="mt-3 text-xs text-slate-600">
-              Selected tech: <span className="font-semibold">{selectedTech}</span> — choose a use
-              case
+              Selected tech:{" "}
+              <span className="font-semibold">{selectedTech}</span> — choose a
+              use case
             </div>
           )}
         </div>
       </div>
 
       {Object.keys(matches).length > 0 && (
-        <div className="rounded-xl border p-3" style={{ borderColor: t.border }}>
-          <div className="text-sm font-semibold text-slate-700 mb-2">Your Matches</div>
+        <div
+          className="rounded-xl border p-3"
+          style={{ borderColor: t.border }}
+        >
+          <div className="text-sm font-semibold text-slate-700 mb-2">
+            Your Matches
+          </div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(matches).map(([tech, uc]) => (
               <span
@@ -1179,7 +1278,10 @@ function PreferenceActivity({ activity, theme, onResponse }: any) {
   const t = useThemeTokens(theme);
   const [selectedPath, setSelectedPath] = useState<any>(null);
   const paths =
-    activity.data.paths || activity.data.directions || activity.data.strategies || [];
+    activity.data.paths ||
+    activity.data.directions ||
+    activity.data.strategies ||
+    [];
 
   return (
     <div className="space-y-6">
@@ -1236,7 +1338,12 @@ function AssessmentSection({
   currentIndex: number;
   onResponse: (r: any) => void;
 }) {
-  if (!assessments || assessments.length === 0 || currentIndex >= assessments.length) return null;
+  if (
+    !assessments ||
+    assessments.length === 0 ||
+    currentIndex >= assessments.length
+  )
+    return null;
   const assessment = assessments[currentIndex];
   const t = useThemeTokens(theme);
 
@@ -1260,7 +1367,8 @@ function AssessmentSection({
   const score = useMemo(() => {
     let correct = 0;
     assessment.questions.forEach((q, i) => {
-      if (q.correctAnswer !== undefined && answers[i] === q.correctAnswer) correct++;
+      if (q.correctAnswer !== undefined && answers[i] === q.correctAnswer)
+        correct++;
     });
     const total = assessment.questions.length;
     return {
@@ -1298,7 +1406,8 @@ function AssessmentSection({
         </div>
         <div className="space-y-3 mb-5">
           {assessment.questions.map((q, i) => {
-            const isCorrect = q.correctAnswer !== undefined && answers[i] === q.correctAnswer;
+            const isCorrect =
+              q.correctAnswer !== undefined && answers[i] === q.correctAnswer;
             return (
               <div
                 key={i}
@@ -1313,11 +1422,12 @@ function AssessmentSection({
                 </p>
                 <p className="text-sm text-slate-700">
                   Your answer: {q.options[answers[i]]}
-                  {q.correctAnswer !== undefined && answers[i] !== q.correctAnswer && (
-                    <span className="block text-emerald-600">
-                      Correct: {q.options[q.correctAnswer]}
-                    </span>
-                  )}
+                  {q.correctAnswer !== undefined &&
+                    answers[i] !== q.correctAnswer && (
+                      <span className="block text-emerald-600">
+                        Correct: {q.options[q.correctAnswer]}
+                      </span>
+                    )}
                 </p>
               </div>
             );
@@ -1342,7 +1452,8 @@ function AssessmentSection({
     <ThemeCard theme={theme}>
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs text-slate-600">
-          {assessment.domain} — Question {qIdx + 1} of {assessment.questions.length}
+          {assessment.domain} — Question {qIdx + 1} of{" "}
+          {assessment.questions.length}
         </span>
         <div className="flex gap-1">
           {assessment.questions.map((_, i) => (
@@ -1351,7 +1462,8 @@ function AssessmentSection({
               className="h-1.5 rounded-full"
               style={{
                 width: 28,
-                background: i < qIdx ? t.border : i === qIdx ? t.depth : "#E5E7EB",
+                background:
+                  i < qIdx ? t.border : i === qIdx ? t.depth : "#E5E7EB",
               }}
             />
           ))}
@@ -1366,7 +1478,11 @@ function AssessmentSection({
             key={idx}
             onClick={() => handleAnswer(idx)}
             className="p-4 rounded-xl border text-left"
-            style={{ background: "#fff", color: "#0F172A", borderColor: t.border }}
+            style={{
+              background: "#fff",
+              color: "#0F172A",
+              borderColor: t.border,
+            }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -1393,7 +1509,12 @@ function ChallengesSection({
   onResponse: (r: any) => void;
 }) {
   const t = useThemeTokens(theme);
-  if (!challenges || challenges.length === 0 || currentIndex >= challenges.length) return null;
+  if (
+    !challenges ||
+    challenges.length === 0 ||
+    currentIndex >= challenges.length
+  )
+    return null;
   const challenge = challenges[currentIndex];
   const [response, setResponse] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -1422,10 +1543,16 @@ function ChallengesSection({
   if (submitted) {
     return (
       <ThemeCard theme={theme}>
-        <h2 className="text-xl font-bold text-center mb-4" style={{ color: "#0F172A" }}>
+        <h2
+          className="text-xl font-bold text-center mb-4"
+          style={{ color: "#0F172A" }}
+        >
           Response Submitted 🎉
         </h2>
-        <div className="p-4 rounded-xl border mb-4" style={{ borderColor: t.border, background: "#fff" }}>
+        <div
+          className="p-4 rounded-xl border mb-4"
+          style={{ borderColor: t.border, background: "#fff" }}
+        >
           <div className="flex items-center gap-2 mb-2">
             <Badge label={challenge.domain} />
             <Badge label={challenge.type} />
@@ -1459,7 +1586,9 @@ function ChallengesSection({
       </h2>
       <p className="text-slate-700 mb-4">{challenge.prompt}</p>
 
-      <label className="text-sm font-medium text-slate-700 mb-2 block">Your Response</label>
+      <label className="text-sm font-medium text-slate-700 mb-2 block">
+        Your Response
+      </label>
       <textarea
         value={response}
         onChange={(e) => setResponse(e.target.value)}
@@ -1471,7 +1600,8 @@ function ChallengesSection({
       <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
         <span>Minimum {minChars} characters required</span>
         <span>
-          {response.length} characters | {response.split(" ").filter(Boolean).length} words
+          {response.length} characters |{" "}
+          {response.split(" ").filter(Boolean).length} words
         </span>
       </div>
 
@@ -1482,7 +1612,8 @@ function ChallengesSection({
         style={{
           background: response.trim().length >= minChars ? t.border : "#E5E7EB",
           color: response.trim().length >= minChars ? "#0F172A" : "#9CA3AF",
-          cursor: response.trim().length >= minChars ? "pointer" : "not-allowed",
+          cursor:
+            response.trim().length >= minChars ? "pointer" : "not-allowed",
         }}
         whileHover={response.trim().length >= minChars ? { scale: 1.02 } : {}}
         whileTap={response.trim().length >= minChars ? { scale: 0.98 } : {}}
@@ -1537,6 +1668,29 @@ function ResultsSection({
     }),
     [userProfile, sectionAnswers]
   );
+  const [status, setStatus] = useState("");
+  const handleSaveToKafka = async () => {
+    try {
+      setStatus("Saving...");
+      const userId = localStorage.getItem("userId") || "guest";
+
+      const res = await fetch("http://localhost:5000/tracker/quiz/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, data: backendPayload }),
+      });
+
+      const result = await res.json();
+      if (result.ok) {
+        setStatus("✅ Data sent to backend and Kafka successfully!");
+      } else {
+        setStatus("⚠️ Failed to save data.");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      setStatus("❌ Error sending data.");
+    }
+  };
 
   return (
     <>
@@ -1586,9 +1740,16 @@ function ResultsSection({
           style={{ borderColor: t.border }}
         >
           <pre>{JSON.stringify(backendPayload, null, 2)}</pre>
+          <button
+            onClick={handleSaveToKafka}
+            className="mt-4 px-5 py-3 bg-cyan-600 text-white hover:bg-cyan-700 rounded-4xl"
+          >
+            Save & Send to Kafka
+          </button>
         </div>
         <div className="mt-3 text-sm text-slate-600">
-          This payload can power personalized recommendations, adaptive challenges, and analytics.
+          This payload can power personalized recommendations, adaptive
+          challenges, and analytics.
         </div>
       </ThemeCard>
     </>

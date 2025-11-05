@@ -1,29 +1,47 @@
-import { kafka } from "./kafka";
+import { Kafka, Producer, Message } from "kafkajs";
 
-const producer = kafka.producer();
+const kafka = new Kafka({
+  clientId: "ascent-backend",
+  brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
+});
 
-// ✅ Connect producer only once
-let isConnected = false;
+let producer: Producer | null = null;
 
-export async function sendEvent(topic: string, payload: any) {
-  try {
-    if (!isConnected) {
-      await producer.connect();
-      isConnected = true;
-      console.log("✅ Kafka producer connected");
-    }
-
-    await producer.send({
-      topic,
-      messages: [
-        {
-          value: JSON.stringify(payload),
-        },
-      ],
-    });
-
-    console.log(`📤 Event sent to Kafka topic "${topic}":`, payload);
-  } catch (error) {
-    console.error("❌ Error sending Kafka message:", error);
+// Initialize and connect producer once
+export const connectProducer = async () => {
+  if (!producer) {
+    producer = kafka.producer();
+    await producer.connect();
+    console.log("✅ Kafka producer connected");
   }
-}
+  return producer;
+};
+
+// Helper: generic produce function for any topic
+export const sendEventToKafka = async (
+  topic: string,
+  userId: string,
+  feature: string,
+  data: Record<string, any>
+) => {
+  if (!producer) {
+    await connectProducer();
+  }
+
+  const message: Message = {
+    key: userId, // ensures same partition per user
+    value: JSON.stringify({
+      userId,
+      feature,
+      data,
+      timestamp: new Date().toISOString(),
+    }),
+  };
+
+  await producer!.send({
+    topic,
+    messages: [message],
+  });
+
+  console.log(`📤 Sent event → ${topic} | user: ${userId}`);
+};
