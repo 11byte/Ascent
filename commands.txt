@@ -6,3 +6,9 @@ docker-compose down (stop containers)
 docker stop $(docker ps -q)  (stop all containers)
 
 docker start $(docker ps -a -q)   (start all containers)
+
+
+Prisma:
+[make changes in schema.prisma]
+npx prisma migrate dev --name signup_updated
+npx prisma generate

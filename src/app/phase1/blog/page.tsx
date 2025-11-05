@@ -43,15 +43,18 @@ const PremiumBlogPage = () => {
   const handleInterest = async (blogTitle: string, interested: boolean) => {
     try {
       setClickedBlogs((prev) => ({ ...prev, [blogTitle]: true }));
+      const userId = localStorage.getItem("userId") || "guest";
 
       await fetch("http://localhost:5000/api/blogs/interact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: blogTitle, interested }),
+        body: JSON.stringify({ title: blogTitle, interested, userId }),
       });
 
       console.log(
-        `Sent ${interested ? "Interested" : "Not Interested"} for ${blogTitle}`
+        `Sent ${
+          interested ? "Interested" : "Not Interested"
+        } for ${blogTitle} by user ${userId}`
       );
     } catch (err) {
       console.error("Failed to send interaction:", err);

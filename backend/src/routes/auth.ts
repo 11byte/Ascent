@@ -23,25 +23,62 @@ function verifyToken(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-/* =====================================================
-   1️⃣ Signup Route
-===================================================== */
+// helper to generate a random 6-character alphanumeric ID
+function generateUserId() {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
+  for (let i = 0; i < 6; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
 router.post("/signup", async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = req.body;
-    if (!email || !password)
+    const { email, password, name, phase } = req.body;
+
+    if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
+    }
 
     const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) return res.status(409).json({ error: "Email already in use" });
+    if (exists) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
 
     const hash = await bcrypt.hash(password, 12);
+
+    // generate unique 6-char userId (retry if collision)
+    let userId: string;
+    while (true) {
+      userId = generateUserId();
+      const existingId = await prisma.user.findUnique({ where: { userId } });
+      if (!existingId) break; // ensure uniqueness
+    }
+
     const newUser = await prisma.user.create({
-      data: { email, name: name ?? "", password: hash },
-      select: { id: true, email: true, name: true },
+      data: {
+        email,
+        name: name ?? "",
+        password: hash,
+        phase: phase ?? "1",
+        userId, // added line
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phase: true,
+        userId: true, // optional: include in response
+      },
     });
 
-    res.status(201).json({ ok: true, message: "User created", user: newUser });
+    res.status(201).json({
+      ok: true,
+      message: "User created",
+      user: newUser,
+    });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: "Server error" });
@@ -57,22 +94,41 @@ router.post("/login", async (req: Request, res: Response) => {
     if (!email || !password)
       return res.status(400).json({ error: "Email and password required" });
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true,
+        phase: true,
+        userId: true,
+      },
+    });
+
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: "Invalid credentials" });
 
+    // ✅ Generate JWT as before
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
+    // ✅ Include phase in returned user object
     res.json({
       ok: true,
       token,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phase: user.phase,
+        userId: user.userId, // ✅ Added here
+      },
     });
   } catch (err) {
     console.error("Login error:", err);

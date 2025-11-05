@@ -2,13 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Signup = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phase: "",
+  });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -36,29 +43,29 @@ const Signup = () => {
     }
   };
 
+  const handleSelectYear = (value: string) => {
+    setForm({ ...form, phase: value });
+    setOpenDropdown(false);
+  };
+
+  const options = [
+    { label: "FE", value: "1" },
+    { label: "SE", value: "2" },
+    { label: "TE", value: "3" },
+    { label: "BE", value: "4" },
+  ];
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#eef5f8] via-[#dce8ec] to-[#cfdde2] relative overflow-hidden">
-      {/* Ice-blue metallic shimmer */}
+      {/* Metallic shimmer effect */}
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.65)_15%,transparent_50%,rgba(255,255,255,0.65)_85%)] opacity-40 animate-[metallicShimmer_6s_linear_infinite]" />
+
+      {/* Home button */}
       <motion.button
         onClick={() => (window.location.href = "http://localhost:3000")}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        className="
-        absolute
-        left-[15px]
-        top-[15px]
-        flex
-        items-center
-        justify-center
-        text-2xl
-        font-[Orbitron]
-        font-extrabold
-        text-white
-        cursor-pointer
-        disabled:opacity-60
-        overflow-hidden
-      "
+        className="absolute left-[15px] top-[15px] flex items-center justify-center text-2xl font-[Orbitron] font-extrabold text-white cursor-pointer disabled:opacity-60 overflow-hidden"
         animate={{
           width: isHovered ? 120 : 60,
           height: isHovered ? 45 : 60,
@@ -82,6 +89,8 @@ const Signup = () => {
           {isHovered ? "Home" : "⌂"}
         </p>
       </motion.button>
+
+      {/* Signup Form */}
       <div className="w-full max-w-md px-6 relative z-10">
         <form
           onSubmit={handleSignup}
@@ -130,7 +139,46 @@ const Signup = () => {
             required
           />
 
-          {/* Button */}
+          {/* College Year */}
+          <label className="block text-sm text-gray-700 mb-2">
+            College Year
+          </label>
+          <div className="relative mb-6">
+            <button
+              type="button"
+              onClick={() => setOpenDropdown(!openDropdown)}
+              className="w-full rounded-xl px-4 py-3 bg-white/80 border border-gray-300 text-left text-zinc-700 focus:ring-2 focus:ring-[#88bdd2] transition shadow-inner"
+            >
+              {form.phase
+                ? options.find((opt) => opt.value === form.phase)?.label
+                : "Select Year"}
+            </button>
+
+            <AnimatePresence>
+              {openDropdown && (
+                <motion.ul
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20"
+                >
+                  {options.map((opt) => (
+                    <motion.li
+                      key={opt.value}
+                      whileHover={{ backgroundColor: "#eaf3f6", scale: 1.02 }}
+                      className="px-4 py-2 text-gray-700 cursor-pointer transition-colors"
+                      onClick={() => handleSelectYear(opt.value)}
+                    >
+                      {opt.label}
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Submit Button */}
           <center>
             <button
               type="submit"
@@ -146,7 +194,7 @@ const Signup = () => {
             <p className="mt-4 text-center text-sm text-red-500">{msg}</p>
           )}
 
-          {/* Link to Login */}
+          {/* Login Link */}
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link
@@ -159,6 +207,7 @@ const Signup = () => {
         </form>
       </div>
 
+      {/* Shimmer Animation */}
       <style jsx global>{`
         @keyframes metallicShimmer {
           0% {
