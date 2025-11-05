@@ -54,7 +54,6 @@ router.post("/blogs/interact", async (req: Request, res: Response) => {
         blogTitle: title,
         interested,
         domain: domain || "general",
-        userId: userId || null, // Optional userId if logged in
       },
     });
 

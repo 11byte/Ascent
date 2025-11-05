@@ -104,8 +104,8 @@ export default function Home() {
           transition={{ delay: 0.5, duration: 0.8 }}
           className="absolute bottom-28 lg:bottom-10 right-10"
         >
-          <h1 className="text-2xl font-bold text-white mb-2">
-            <span className="text-accent-teal">Hola</span> {username}!
+          <h1 className="font-bold text-white mb-2 font-[Orbitron] text-6xl">
+            <span className="text-accent-teal ">Hola</span> {username}!
           </h1>
         </motion.div>
 

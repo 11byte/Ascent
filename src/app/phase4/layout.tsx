@@ -1,15 +1,27 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import NavbarWrapper from "../../components/navbar/Navbar-Wrapper";
 import { Phase2Provider } from "../../context/phase2Context";
+
 export default function Phase4Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [username, setUsername] = useState<string>("");
+
+  useEffect(() => {
+    // ✅ Fetch username from localStorage on client side
+    const storedName = localStorage.getItem("userName") || "User";
+    setUsername(storedName);
+  }, []);
+
   return (
     <div>
       <NavbarWrapper
         phaseNo={4}
-        username="User"
+        username={username}
         points={7777}
         triangle={true}
         tBorder={{
@@ -25,7 +37,9 @@ export default function Phase4Layout({
           light: "#DDA853",
         }}
       />
-      <Phase2Provider value={{ username: "Paresh" }}>{children}</Phase2Provider>
+
+      {/* ✅ Pass username dynamically into provider */}
+      <Phase2Provider value={{ username }}>{children}</Phase2Provider>
     </div>
   );
 }
