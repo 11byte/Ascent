@@ -29,6 +29,7 @@
       "@services/*": ["./src/services/*"],
       "@context/*": ["./src/context/*"],
       "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/components/lib/*"],
       // The most versatile alias: Maps @/ to the src/ folder.
       // E.g., @/app/page.tsx or @/components/ui/button.tsx
       "@/*": ["./*"], 
