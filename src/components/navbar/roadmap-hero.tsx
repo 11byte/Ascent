@@ -1,7 +1,7 @@
 // import { getTotalRoadmapsGenerated } from "@/actions/roadmaps";
 import RoadmapHeroClient from "./roadmap-hero.client";
 
-export default async function RoadmapHero() {
+export default async function RoadmapHero({ phase = "4" }: { phase?: string }) {
   // const totalRoadmaps = await getTotalRoadmapsGenerated().catch(() => 0);
   const totalRoadmaps = 100;
 
@@ -14,6 +14,7 @@ export default async function RoadmapHero() {
 
   return (
     <RoadmapHeroClient
+      phase={phase}
       totalRoadmaps={Number(totalRoadmaps) || 0}
       trendyRoadmaps={trendyRoadmaps}
       applyTopOffset

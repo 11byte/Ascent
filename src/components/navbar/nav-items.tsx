@@ -7,18 +7,20 @@ import { usePathname } from "next/navigation";
 type Variant = "desktop" | "mobile";
 
 export default function NavItems({
+  phase,
   variant = "desktop",
   className,
 }: {
+  phase: string;
   variant?: Variant;
   className?: string;
 }) {
   const pathname = usePathname();
 
   const items = [
-    { href: "/explore", label: "Explore" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/roadmap", label: "Roadmap" },
+    { href: `/phase${phase}/roadmap-generator/roadmap/explore`, label: "Explore" },
+    { href: `/phase${phase}/roadmap-generator/roadmap/archives`, label: "Archives" },
+    { href: `/phase${phase}/roadmap-generator/roadmap`, label: "Roadmap" },
   ];
 
   if (variant === "mobile") {

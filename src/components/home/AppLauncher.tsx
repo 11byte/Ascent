@@ -13,6 +13,7 @@ import {
   DollarSign,
   X,
   Search,
+  Network,
 } from "lucide-react";
 
 interface App {
@@ -102,6 +103,16 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Discover coding bounties",
         category: "development",
         link: `/${phase}/bountyhub`,
+        phases: ["phase2", "phase3", "phase4"],
+      },
+      {
+        id: "roadmap-generator",
+        name: "RoadMap",
+        icon: <Network className="w-8 h-8" />,
+        color: "from-emerald-500 to-emerald-600",
+        description: "Discover coding bounties",
+        category: "development",
+        link: `/${phase}/roadmap-generator`,
         phases: ["phase2", "phase3", "phase4"],
       },
     ],

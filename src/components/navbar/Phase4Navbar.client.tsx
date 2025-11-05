@@ -18,13 +18,22 @@ const OVERRIDES: Record<string, Partial<typeof DEFAULT_CONFIG>> = {
   },
 };
 
+function getConfigForPath(pathname: string) {
+  // Find the first key in OVERRIDES that matches as a prefix
+  const match = Object.keys(OVERRIDES).find((key) =>
+    pathname.startsWith(key)
+  );
+
+  return {
+    ...DEFAULT_CONFIG,
+    ...(match ? OVERRIDES[match] : {}),
+  };
+}
+
 export default function Phase4NavbarClient() {
   const pathname = (usePathname() || "").replace(/\/$/, ""); // normalize trailing slash
 
-  const config = {
-    ...DEFAULT_CONFIG,
-    ...(OVERRIDES[pathname] ?? {}),
-  };
+  const config = getConfigForPath(pathname);
 
   return (
     <NavbarWrapper

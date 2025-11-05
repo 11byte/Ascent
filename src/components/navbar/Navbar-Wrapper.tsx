@@ -81,7 +81,7 @@ const NavbarWrapper = ({
                 />
               </Link>
 
-              {showNavItems && <NavItems variant="desktop" />}
+              {showNavItems && <NavItems phase="4" variant="desktop" />}
             </div>
 
             {/* Center - Triangle (kept absolute so it doesn't affect layout) */}
@@ -243,7 +243,7 @@ const NavbarWrapper = ({
                 </div>
 
                 {/* Mobile Nav Items */}
-                {showNavItems && <div className="mt-6"><NavItems variant="mobile" /></div>}
+                {showNavItems && <div className="mt-6"><NavItems phase="4" variant="mobile" /></div>}
               </div>
             </motion.div>
           )}

@@ -5,6 +5,7 @@ import { motion, animate } from "framer-motion";
 import Link from "next/link";
 import { Wand, Telescope, ArrowUpRight } from "lucide-react";
 import MarqueeDemo from "../../components/ui/marque-wrapper";
+import { string } from "three/src/nodes/TSL.js";
 
 const phase2Theme = {
   tBorder: { light: "#E8E3D4", dark: "#E8E3D4" },
@@ -26,11 +27,13 @@ function CountUp({ to = 0, duration = 1.2 }) {
 }
 
 export default function RoadmapHeroClient({
+  phase = "4",
   totalRoadmaps = 0,
   trendyRoadmaps = {},
   applyTopOffset = true,
   topOffset = 70,
 }:{
+  phase: string;
   totalRoadmaps?: number;
   trendyRoadmaps?: Record<string, string>;
   applyTopOffset?: boolean;
@@ -64,7 +67,7 @@ export default function RoadmapHeroClient({
           className="text-center font-[Orbitron] text-4xl sm:text-5xl font-bold tracking-tight"
           style={{ color: phase2Theme.tBorder.dark }}
         >
-          AI Roadmap Generator
+          Roadmap Generator
         </motion.h1>
 
         {/* Subhead */}
@@ -74,7 +77,7 @@ export default function RoadmapHeroClient({
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mt-3 text-center text-gray-300 sm:text-lg"
         >
-          Curate personalized learning paths with a single prompt.
+          Enter a topic and let the AI generate a roadmap for you
         </motion.p>
 
         {/* CTAs */}
@@ -84,7 +87,7 @@ export default function RoadmapHeroClient({
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-7 flex items-center justify-center gap-3"
         >
-          <Link href="/roadmap">
+          <Link href={`/phase${phase}/roadmap-generator/roadmap`}>
             <button
               className="px-5 py-3 rounded-lg font-semibold text-white shadow-lg hover:scale-[1.02] active:scale-[0.99] transition-transform"
               style={{

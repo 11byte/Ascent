@@ -104,8 +104,8 @@ body {
 }
 
 /* Optional: pause on hover without Tailwind's group-hover utility */
-.marquee-pause-on-hover:hover .animate-marquee,
-.marquee-pause-on-hover:hover .animate-marquee-vertical {
+.group:hover .animate-marquee,
+.group:hover .animate-marquee-vertical {
   animation-play-state: paused;
 }
 

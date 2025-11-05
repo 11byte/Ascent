@@ -9,7 +9,7 @@ export default function Roadmap() {
   // remove the className below to avoid double spacing.
   return (
     <main>
-      <RoadmapHero />
+      <RoadmapHero phase="4" />
       {/* Add more sections below */}
     </main>
   );
