@@ -17,6 +17,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@google/genai": "^1.38.0",
     "kafkajs": "^2.2.4"
   }
 }

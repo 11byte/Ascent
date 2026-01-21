@@ -1,172 +1,113 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Wand2, Download, KeyRound, Sparkles, ChevronDown } from "lucide-react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Loader2,
+  Wand2,
+  Download,
+  KeyRound,
+  Sparkles,
+  ChevronDown,
+  Coins,
+  Info,
+  MousePointer2,
+} from "lucide-react";
 import ReactFlow, {
   Controls,
   Background,
   useReactFlow,
   ReactFlowProvider,
+  Handle,
+  Position,
+  Edge,
+  Node,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import * as htmlToImage from "html-to-image";
 
 // ---------- THEME ----------
-const theme = {
-  ink: "#000000",
-  parchment: "#E8E3D4",
-  gold: "#CBAF68",
+const theme = { ink: "#000000", gold: "#CBAF68" };
+const MODELS = [{ key: "gemini-3-flash-preview", label: "Gemini 3 Flash" }];
+
+// ---------- CUSTOM NODE COMPONENT ----------
+const RoadmapNode = ({ data }: any) => {
+  return (
+    <div
+      className={`px-4 py-3 rounded-xl border transition-all duration-300 shadow-xl ${
+        data.isExpanded
+          ? "bg-white/15 border-[#CBAF68] shadow-[#CBAF68]/20"
+          : "bg-white/5 border-white/15"
+      }`}
+    >
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!bg-[#CBAF68] !w-2 !h-2"
+      />
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-white whitespace-nowrap">
+          {data.label}
+        </span>
+        {data.hasChildren && (
+          <span className="text-[10px] text-[#CBAF68]">
+            {data.isExpanded ? "▼" : "▶"}
+          </span>
+        )}
+      </div>
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!bg-[#CBAF68] !w-2 !h-2"
+      />
+    </div>
+  );
 };
 
-// Sample models with "gemini-2.5-flash"
-const MODELS = [
-  { key: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { key: "openai", label: "OpenAI" },
-  { key: "groq", label: "Groq" },
-  { key: "cohere", label: "Cohere" },
-];
+const nodeTypes = { roadmap: RoadmapNode };
 
-// Rich sample roadmap tree (multi-level) to display immediately and via "Load Sample"
-const SAMPLE_TREE = {
-  name: "Full‑Stack Web Development",
-  children: [
-    {
-      name: "Fundamentals",
-      children: [
-        {
-          name: "HTML & CSS",
-          children: [{ name: "Semantics" }, { name: "Flex/Grid" }, { name: "Responsive" }],
-        },
-        {
-          name: "JavaScript Basics",
-          children: [{ name: "ES6+" }, { name: "Async/Await" }, { name: "Modules" }],
-        },
-        {
-          name: "Version Control",
-          children: [{ name: "Git Basics" }, { name: "Branching" }, { name: "PR Workflow" }],
-        },
-      ],
-    },
-    {
-      name: "Frontend",
-      children: [
-        {
-          name: "Framework",
-          children: [{ name: "React" }, { name: "Next.js" }, { name: "Routing" }],
-        },
-        {
-          name: "State Mgmt",
-          children: [{ name: "Context" }, { name: "Redux" }, { name: "Server State" }],
-        },
-        {
-          name: "Styling",
-          children: [{ name: "Tailwind" }, { name: "CSS-in-JS" }, { name: "Design Systems" }],
-        },
-      ],
-    },
-    {
-      name: "Backend",
-      children: [
-        {
-          name: "Runtime & Framework",
-          children: [{ name: "Node.js" }, { name: "Express" }, { name: "tRPC/GraphQL" }],
-        },
-        {
-          name: "Databases",
-          children: [{ name: "Postgres" }, { name: "MongoDB" }, { name: "ORM (Prisma)" }],
-        },
-        {
-          name: "Auth & Security",
-          children: [{ name: "JWT/OAuth" }, { name: "OWASP" }, { name: "Rate Limiting" }],
-        },
-      ],
-    },
-    {
-      name: "DevOps",
-      children: [
-        {
-          name: "CI/CD",
-          children: [{ name: "GitHub Actions" }, { name: "Testing" }, { name: "Preview Apps" }],
-        },
-        {
-          name: "Containers",
-          children: [{ name: "Docker" }, { name: "Compose" }, { name: "Images" }],
-        },
-        {
-          name: "Cloud",
-          children: [{ name: "Vercel" }, { name: "AWS" }, { name: "Monitoring" }],
-        },
-      ],
-    },
-    {
-      name: "Advanced",
-      children: [
-        {
-          name: "Performance",
-          children: [{ name: "Caching" }, { name: "Code Split" }, { name: "Profiling" }],
-        },
-        {
-          name: "Architecture",
-          children: [{ name: "Monorepos" }, { name: "Microservices" }, { name: "Event-Driven" }],
-        },
-        {
-          name: "Testing",
-          children: [{ name: "Unit" }, { name: "E2E" }, { name: "Contract" }],
-        },
-      ],
-    },
-  ],
-};
-
-// Lightweight mock tree generator so UI works without backend
-function mockTree(topic: string) {
-  const t = topic || "Your Topic";
-  return {
-    name: t,
-    children: [
-      {
-        name: "Fundamentals",
-        children: [{ name: "Basics" }, { name: "Tooling" }, { name: "Core APIs" }],
-      },
-      {
-        name: "Intermediate",
-        children: [{ name: "Patterns" }, { name: "Testing" }, { name: "State Mgmt" }],
-      },
-      {
-        name: "Advanced",
-        children: [{ name: "Performance" }, { name: "Security" }, { name: "Scaling" }],
-      },
-    ],
-  };
-}
-
-// Build visible nodes/edges from tree based on expanded Set.
-// Node IDs are stable path strings: "0", "0-1", "0-1-2"
+// ---------- SMART TREE LAYOUT LOGIC ----------
 function buildGraph(tree: any, expandedSet: Set<string>) {
-  const nodes: any[] = [];
-  const edges: any[] = [];
-  const rows = new Map(); // depth -> array of node ids
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
-  function traverse(node: any, path: string = "0", depth: number = 0, parentId: string | null = null) {
-    const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+  function getSubtreeHeight(node: any, path: string): number {
+    if (
+      !expandedSet.has(path) ||
+      !node.children ||
+      node.children.length === 0
+    ) {
+      return 1;
+    }
+    return node.children.reduce((acc: number, child: any, i: number) => {
+      return acc + getSubtreeHeight(child, `${path}-${i}`);
+    }, 0);
+  }
+
+  function traverse(
+    node: any,
+    path: string = "0",
+    x: number = 0,
+    yOffset: number = 0,
+    parentId: string | null = null,
+  ) {
+    const hasChildren =
+      Array.isArray(node.children) && node.children.length > 0;
     const isExpanded = expandedSet.has(path);
+    const subtreeHeight = getSubtreeHeight(node, path);
 
-    if (!rows.has(depth)) rows.set(depth, []);
-    rows.get(depth).push(path);
+    const nodeY = yOffset + (subtreeHeight * 100) / 2;
 
     nodes.push({
       id: path,
+      type: "roadmap",
       data: { label: node.name, hasChildren, isExpanded },
-      position: { x: 0, y: 0 }, // set after traversal
-      style: {
-        background: "rgba(255,255,255,0.08)",
-        border: "1px solid rgba(255,255,255,0.15)",
-        color: "#fff",
-        borderRadius: 12,
-        padding: 10,
-        boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-        cursor: hasChildren ? "pointer" : "default",
-        fontSize: 12,
-      },
+      position: { x, y: nodeY },
     });
 
     if (parentId !== null) {
@@ -175,114 +116,205 @@ function buildGraph(tree: any, expandedSet: Set<string>) {
         source: parentId,
         target: path,
         type: "smoothstep",
-        animated: false,
-        style: { stroke: theme.gold, strokeWidth: 1.5 },
+        animated: isExpanded,
+        style: {
+          stroke: isExpanded ? theme.gold : "rgba(255,255,255,0.2)",
+          strokeWidth: 2,
+        },
       });
     }
 
     if (hasChildren && isExpanded) {
+      let currentY = yOffset;
       node.children.forEach((child: any, idx: number) => {
-        traverse(child, `${path}-${idx}`, depth + 1, path);
+        const childPath = `${path}-${idx}`;
+        const childHeight = getSubtreeHeight(child, childPath);
+        traverse(child, childPath, x + 300, currentY, path);
+        currentY += childHeight * 100;
       });
     }
   }
 
-  traverse(tree);
-
-  // Simple grid layout by depth/row
-  const xGap = 260;
-  const yGap = 120;
-  const maxDepth = Math.max(...rows.keys());
-  const colCount = maxDepth + 1;
-
-  rows.forEach((ids: string[], depth: number) => {
-    const colX = depth * xGap;
-    const totalHeight = (ids.length - 1) * yGap;
-    const startY = -totalHeight / 2;
-    ids.forEach((id, i) => {
-      const n = nodes.find((nn) => nn.id === id);
-      if (n) n.position = { x: colX, y: startY + i * yGap };
-    });
-  });
-
-  // center the whole graph horizontally
-  const centerOffsetX = -((colCount - 1) * xGap) / 2;
-  nodes.forEach((n) => (n.position.x += centerOffsetX));
-
+  if (tree) traverse(tree);
   return { nodes, edges };
 }
 
-// function FlowCanvas({ tree }: { tree: any }) {
-//   const { fitView } = useReactFlow();
-//   // Expanded nodes tracked by stable path IDs. Root "0" expanded by default.
-//   const [expanded, setExpanded] = useState(() => new Set(["0"]));
+// ---------- MAIN PAGE COMPONENT ----------
+export default function RoadmapGeneratorPage() {
+  const [topic, setTopic] = useState("");
+  const [model, setModel] = useState("gemini-3-flash-preview");
+  const [apiKey, setApiKey] = useState("");
+  const [usePersonalKey, setUsePersonalKey] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [tree, setTree] = useState<any>(null);
+  const [credits, setCredits] = useState(1000);
+  const [error, setError] = useState("");
 
-//   const { nodes, edges } = useMemo(() => buildGraph(tree, expanded), [tree, expanded]);
+  // Fetch credits and user info on mount
+  // useEffect(() => {
+  //   const fetchCredits = async () => {
+  //     try {
+  //       const res = await fetch("http://localhost:5000/api/users/profile", {
+  //         headers: { "userId": "user_id_from_auth" } // Replace with your actual auth userId
+  //       });
+  //       const data = await res.json();
+  //       if (data.status) setCredits(data.credits);
+  //     } catch (e) { console.error("Could not fetch credits"); }
+  //   };
+  //   fetchCredits();
+  // }, []);
 
-//   useEffect(() => {
-//     const t = setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 50);
-//     return () => clearTimeout(t);
-//   }, [fitView, nodes.length, edges.length]);
+  const handleGenerate = async () => {
+    setError("");
+    if (!topic.trim()) return setError("Please enter a topic");
+    if (usePersonalKey && !apiKey.trim())
+      return setError("Please enter your API Key");
+    if (!usePersonalKey && credits < 100)
+      return setError("Insufficient credits (100 required)");
 
-//   const onNodeClick = useCallback((_: any, node: any) => {
-//     const hasChildren = node?.data?.hasChildren;
-//     if (!hasChildren) return;
-//     setExpanded((prev) => {
-//       const next = new Set(prev);
-//       if (next.has(node.id)) next.delete(node.id);
-//       else next.add(node.id);
-//       return next;
-//     });
-//   }, []);
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/roadmap/generate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: topic,
+            model: model,
+            apiKey: usePersonalKey ? apiKey : null,
+            mode: usePersonalKey ? "personal" : "credits",
+            userId: localStorage.getItem("userId"),
+          }),
+        },
+      );
 
-//   // Small visual hint by appending an expand/collapse marker to label
-//   const nodesWithHint = useMemo(
-//     () =>
-//       nodes.map((n) => ({
-//         ...n,
-//         data: {
-//           ...n.data,
-//           label: n.data.hasChildren
-//             ? `${n.data.label} ${n.data.isExpanded ? "▾" : "▸"}`
-//             : n.data.label,
-//         },
-//       })),
-//     [nodes],
-//   );
+      const data = await response.json();
 
-//   return (
-//     <ReactFlow
-//       nodes={nodesWithHint}
-//       edges={edges}
-//       fitView
-//       panOnScroll
-//       zoomOnScroll
-//       elementsSelectable={false}
-//       onNodeClick={onNodeClick}
-//     >
-//       <Background />
-//       <Controls />
-//     </ReactFlow>
-//   );
-// }
-import * as htmlToImage from "html-to-image";
-import "reactflow/dist/style.css";
+      if (!response.ok || !data.status) {
+        throw new Error(data.message || "Failed to generate roadmap");
+      }
 
-function FlowCanvas({ tree }: { tree: any }) {
+      setTree(data.tree);
+      if (!usePersonalKey) setCredits((prev) => prev - 100);
+    } catch (e: any) {
+      setError(e.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#0a0a0a] text-white selection:bg-[#CBAF68]/30">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_-20%,#1a1a1a,transparent)]" />
+      <div className="relative z-10 flex flex-col h-screen mt-16">
+        {/* Credits Badge Overlay */}
+        {/* <div className="absolute top-4 right-8 z-20 flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+          <Coins className="text-yellow-500" size={16} />
+          <span className="text-sm font-bold font-mono text-yellow-500">{credits}</span>
+        </div> */}
+
+        <div className="flex flex-1 overflow-hidden">
+          <aside className="w-80 border-r border-white/10 p-6 flex flex-col gap-6 bg-black/20 overflow-y-auto">
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-gray-500">
+                Subject
+              </label>
+              <input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g. Fullstack Web Dev"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#CBAF68]"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-gray-500">
+                Model
+              </label>
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none"
+              >
+                {MODELS.map((m) => (
+                  <option key={m.key} value={m.key} className="bg-zinc-900">
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => setUsePersonalKey(!usePersonalKey)}
+              className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              <KeyRound size={14} />
+              {usePersonalKey ? "Personal Key Active" : "Use Personal API Key"}
+            </button>
+
+            {usePersonalKey && (
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Paste Gemini Key..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs"
+              />
+            )}
+
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full py-4 rounded-xl bg-[#CBAF68] text-black font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Wand2 size={18} />
+              )}
+              Generate Path
+            </button>
+            {error && (
+              <p className="text-red-400 text-xs text-center">{error}</p>
+            )}
+          </aside>
+
+          <main className="flex-1 relative">
+            {!tree ? (
+              <div className="h-full flex flex-col items-center justify-center text-gray-600">
+                <MousePointer2 size={40} className="mb-4 opacity-20" />
+                <p>Enter a topic to build your journey</p>
+              </div>
+            ) : (
+              <ReactFlowProvider>
+                <FlowContent tree={tree} />
+              </ReactFlowProvider>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Separate component for internal ReactFlow hooks
+function FlowContent({ tree }: { tree: any }) {
   const { fitView } = useReactFlow();
-  const [expanded, setExpanded] = useState(() => new Set(["0"]));
+  const [expanded, setExpanded] = useState(new Set(["0"]));
   const flowRef = useRef<HTMLDivElement>(null);
 
-  const { nodes, edges } = useMemo(() => buildGraph(tree, expanded), [tree, expanded]);
+  const { nodes, edges } = useMemo(
+    () => buildGraph(tree, expanded),
+    [tree, expanded],
+  );
 
   useEffect(() => {
-    const t = setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 50);
-    return () => clearTimeout(t);
-  }, [fitView, nodes.length, edges.length]);
+    setTimeout(() => fitView({ padding: 0.3, duration: 800 }), 100);
+  }, [nodes.length, fitView]);
 
   const onNodeClick = useCallback((_: any, node: any) => {
-    const hasChildren = node?.data?.hasChildren;
-    if (!hasChildren) return;
+    if (!node.data.hasChildren) return;
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(node.id)) next.delete(node.id);
@@ -291,276 +323,60 @@ function FlowCanvas({ tree }: { tree: any }) {
     });
   }, []);
 
-  const nodesWithHint = useMemo(
-    () =>
-      nodes.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
-          label: n.data.hasChildren
-            ? `${n.data.label} ${n.data.isExpanded ? "▾" : "▸"}`
-            : n.data.label,
-        },
-      })),
-    [nodes],
-  );
-
-  // 🔽 Download as PNG handler
-  const handleDownloadPng = async () => {
+  const downloadPng = async () => {
     if (!flowRef.current) return;
+
     try {
       const dataUrl = await htmlToImage.toPng(flowRef.current, {
-        backgroundColor: "#111", // optional background for better contrast
-        pixelRatio: 2, // higher quality
-        skipFonts: true,
+        backgroundColor: "#0a0a0a",
+        quality: 1,
+        pixelRatio: 2, // 🚀 Makes the image high-resolution
+        skipFonts: true, // 🛠️ FIX: Prevents the "trim" undefined error
+        style: {
+          // Ensures the fonts don't look weird when skipped
+          fontFamily: "sans-serif",
+        },
+        // Filters out potential problematic elements
+        filter: (node) => {
+          const exclusionClasses = [
+            "react-flow__controls",
+            "react-flow__panel",
+          ];
+          return !exclusionClasses.some((cls) => node.classList?.contains(cls));
+        },
       });
 
       const link = document.createElement("a");
-      link.download = "roadmap.png";
+      link.download = `roadmap.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Failed to export PNG:", err);
+      // Fallback alert for the user
+      alert("Export failed. Try closing other browser tabs to free up memory.");
     }
   };
 
   return (
-    <div className="relative h-full w-full">
-      {/* ReactFlow canvas wrapped in ref */}
-      <div ref={flowRef} className="h-full w-full rounded-xl overflow-hidden">
-        <ReactFlow
-          nodes={nodesWithHint}
-          edges={edges}
-          fitView
-          panOnScroll
-          zoomOnScroll
-          elementsSelectable={false}
-          onNodeClick={onNodeClick}
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
-      </div>
-
-      {/* Download button overlay */}
-      <button
-        onClick={handleDownloadPng}
-        className="absolute top-4 right-4 inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm text-white/90 hover:bg-white/15 backdrop-blur-md shadow-lg"
-        title="Download PNG"
+    <div className="h-full w-full" ref={flowRef}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        onNodeClick={onNodeClick}
+        fitView
       >
-        <Download size={16} />
-        PNG
-      </button>
-    </div>
-  );
-}
-
-
-export default function RoadmapGeneratorPage() {
-  const [topic, setTopic] = useState("");
-  const [model, setModel] = useState("gemini-2.5-flash");
-  const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
-  const [loading, setLoading] = useState(false);
-  // Initialize with the rich sample tree so users see a roadmap immediately
-  const [tree, setTree] = useState(SAMPLE_TREE);
-  const [error, setError] = useState("");
-
-  // Restore API keys per model from localStorage
-  useEffect(() => {
-    const key = localStorage.getItem(`${model.toUpperCase()}_API_KEY`) || "";
-    setApiKey(key);
-  }, [model]);
-
-  const saveKey = () => {
-    localStorage.setItem(`${model.toUpperCase()}_API_KEY`, apiKey);
-  };
-
-  const handleGenerate = useCallback(async () => {
-    setError("");
-    if (!topic.trim()) {
-      setError("Please enter a topic");
-      return;
-    }
-    setLoading(true);
-    try {
-      // Frontend-only stub call. Replace with your real backend later.
-      await fetch("https://example.com/api/generate-roadmap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, model }),
-      });
-      // Use mock tree so UI renders
-      const t: any = mockTree(topic.trim());
-      setTree(t);
-    } catch (e) {
-      setError("Failed to reach generator service. Try again later.");
-    } finally {
-      setLoading(false);
-    }
-  }, [topic, model]);
-
-  const loadSample = () => {
-    setTopic(SAMPLE_TREE.name);
-    setTree(SAMPLE_TREE);
-  };
-
-  return (
-    <div className="relative min-h-screen w-full">
-      {/* Gradient backdrop to match your site theme */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-gray-950 via-gray-900 to-black" />
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 opacity-30"
-        style={{
-          background:
-            "radial-gradient(600px 200px at 50% -50px, rgba(203,175,104,0.25), transparent 70%)",
-        }}
-      />
-
-      <div className="mx-auto max-w-7xl px-6 pt-[70px] pb-10">
-        {/* Controls */}
-        <div className="mt-6">
-          <div className="w-full rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl p-4 md:p-5 shadow-[0_0_30px_rgba(0,0,0,0.35)]">
-            <div className="flex flex-col md:flex-row gap-3 md:items-center">
-              {/* Topic input */}
-              <input
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleGenerate();
-                }}
-                placeholder="e.g. React, Backend, Machine Learning"
-                className="flex-1 rounded-lg border border-white/15 bg-transparent px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#CBAF68]"
-              />
-
-              {/* Model select */}
-              <div className="relative">
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="appearance-none rounded-lg border border-white/15 bg-white/10 px-4 py-3 pr-10 text-white/90 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[#CBAF68]"
-                >
-                  {MODELS.map((m) => (
-                    <option key={m.key} value={m.key} className="bg-gray-900 text-white">
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={16}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/70"
-                />
-              </div>
-
-              {/* Add Key */}
-              <button
-                onClick={() => setShowKey((s) => !s)}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-white/90 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[#CBAF68]"
-                title="Add API Key"
-              >
-                <KeyRound size={16} />
-                <span className="hidden sm:inline">Add Key</span>
-              </button>
-
-              {/* Generate */}
-              <button
-                onClick={handleGenerate}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.99]"
-                style={{
-                  background: `linear-gradient(90deg, ${theme.ink}, ${theme.gold})`,
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 size={18} />}
-                {loading ? "Generating…" : "Generate"}
-              </button>
-
-              {/* Load Sample */}
-              {/* <button
-                onClick={loadSample}
-                className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold text-white/90 border border-white/15 bg-white/10 hover:bg-white/15"
-                title="Load a rich sample roadmap"
-              >
-                Load Sample
-              </button> */}
-            </div>
-
-            {/* Key input row */}
-            {showKey && (
-              <div className="mt-3 flex flex-col sm:flex-row gap-3">
-                <input
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={`${model.toUpperCase()}_API_KEY`}
-                  className="flex-1 rounded-lg border border-white/15 bg-transparent px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#CBAF68]"
-                />
-                <button
-                  onClick={saveKey}
-                  className="rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-white/90 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[#CBAF68]"
-                >
-                  Save Key
-                </button>
-              </div>
-            )}
-
-            {/* Quick examples */}
-            {/* <div className="mt-3 flex flex-wrap gap-2">
-              {["Frontend", "Backend", "Machine Learning", "DevOps"].map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setTopic(tag)}
-                  className="group relative rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm text-white/85 hover:bg-white/15"
-                >
-                  {tag}
-                  <span className="pointer-events-none absolute left-2 right-2 -bottom-1 h-[2px] w-0 rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-emerald-400 transition-all duration-300 group-hover:w-6" />
-                </button>
-              ))}
-            </div> */}
-
-            {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
-          </div>
+        <Background color="#333" gap={20} />
+        <Controls />
+        <div className="absolute top-5 right-4 z-50">
+          <button
+            onClick={downloadPng}
+            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 text-sm"
+          >
+            <Download size={16} /> PNG
+          </button>
         </div>
-
-        {/* Graph + Side panel */}
-        <div className="mt-8">
-          {/* Graph */}
-          <div className="lg:col-span-3 rounded-2xl p-2 h-[72vh] shadow-[0_0_30px_rgba(0,0,0,0.35)]">
-            <ReactFlowProvider>
-              <FlowCanvas tree={tree} />
-            </ReactFlowProvider>
-          </div>
-
-          {/* Details panel (static UI placeholder) */}
-          {/* <div className="lg:col-span-1 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl p-5 text-white shadow-[0_0_30px_rgba(0,0,0,0.35)]">
-            <div className="flex items-center gap-2 text-[#E8E3D4]">
-              <Sparkles size={18} />
-              <h3 className="font-semibold">AI Tips</h3>
-            </div>
-            <ul className="mt-3 space-y-2 text-sm text-white/85">
-              <li>Click nodes with ▸/▾ to expand/collapse child topics.</li>
-              <li>Switch models to compare different pathways.</li>
-              <li>Save your API key locally for higher rate limits.</li>
-            </ul>
-
-            <hr className="my-5 border-white/10" />
-
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-white/90">Export</h4>
-              <button
-                className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-white/90 hover:bg-white/15"
-                onClick={() => alert("Add PNG export later")}
-              >
-                <Download size={16} />
-                PNG
-              </button>
-            </div>
-            <p className="mt-2 text-xs text-white/60">
-              Export and share your roadmap once you’re happy with it.
-            </p>
-          </div> */}
-        </div>
-      </div>
+      </ReactFlow>
     </div>
   );
 }

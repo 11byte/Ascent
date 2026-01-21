@@ -10,6 +10,7 @@ import timelineRoutes from "./routes/timelineRoutes";
 import githubTrackerRoutes from "./routes/githubTracker";
 import trackerRoute from "./routes/trackerRoute";
 import domainRoute from "./routes/domainRoute";
+import roadmapRouter from "./routes/roadmap.route";
 import { startKafkaConsumer } from "./services/kafkaConsumerService";
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api", timelineRoutes);
 app.use("/tracker", githubTrackerRoutes);
 app.use("/tracker", trackerRoute);
 app.use("/api", domainRoute);
+app.use("/api/roadmap", roadmapRouter);
 /* =====================================================
    🩺 Health Check Route
 ===================================================== */

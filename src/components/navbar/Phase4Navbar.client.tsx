@@ -30,7 +30,8 @@ function getConfigForPath(pathname: string) {
   };
 }
 
-export default function Phase4NavbarClient() {
+// make this component take json prop with username and points as key pairs
+export default function Phase4NavbarClient({ username, points }: { username: string; points: number }) {
   const pathname = (usePathname() || "").replace(/\/$/, ""); // normalize trailing slash
 
   const config = getConfigForPath(pathname);
@@ -39,8 +40,8 @@ export default function Phase4NavbarClient() {
     <NavbarWrapper
       // Your theme for Phase 4
       phaseNo={4}
-      username="User"
-      points={7777}
+      username={username}
+      points={points}
       triangle
       tBorder={{ light: "#F3F3E0", dark: "#F3F3E0" }}
       tColor={{ dark: "#183B4E", light: "#183B4E" }}

@@ -14,14 +14,16 @@ export default function Phase4Layout({
 
   useEffect(() => {
     // ✅ Fetch username from localStorage on client side
+    console.log("Fetching username from localStorage", localStorage.getItem("userName"));
     const storedName = localStorage.getItem("userName") || "User";
     setUsername(storedName);
+    console.log("Username set to:", storedName);
   }, []);
 
   return (
     <div>
-      <Phase4NavbarClient />
-      <Phase2Provider value={{ username: "Paresh" }}>{children}</Phase2Provider>
+      <Phase4NavbarClient username={username} points={7777} />
+      <Phase2Provider value={{ username }}>{children}</Phase2Provider>
     </div>
   );
 }

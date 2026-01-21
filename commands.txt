@@ -8,6 +8,11 @@ docker stop $(docker ps -q)  (stop all containers)
 docker start $(docker ps -a -q)   (start all containers)
 
 
+
+# Check topics of kafka 
+docker exec -it ascent-kafka bash
+kafka-topics --bootstrap-server localhost:9092 --describe
+
 Prisma:
 [make changes in schema.prisma]
 npx prisma migrate dev --name signup_updated
