@@ -1,15 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
-import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { PerformanceMonitor } from "@react-three/drei";
-import { useLoader } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,14 +10,10 @@ export default function Landing() {
   const containerRef = useRef<HTMLDivElement>(null);
   const nebulaRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<SVGSVGElement>(null);
-  const [perfLow, setPerfLow] = useState(false);
-
   const infoRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
+  const phasesRef = useRef<HTMLDivElement>(null);
+  const horizontalRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // ⚡ Impact frame control
-  const [showImpact, setShowImpact] = useState(false);
 
   const panels = [
     {
@@ -61,127 +50,151 @@ export default function Landing() {
       desc: "Phase-4 unlocks advanced upskilling with interactive pods and a personalized skill tree for long-term success.",
     },
   ];
-  const parentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!infoRef.current) return;
-
-    gsap.to(infoRef.current, {
-      maxWidth: "98%",
-      ease: "power1.out",
-      paddingInline: "6%",
-      scrollTrigger: {
-        trigger: infoRef.current,
-        start: "top 95%", // when top of div is 80% from top of viewport
-        end: "top 65%", // end when top reaches middle
-        scrub: 1.5, // smooth progress with scroll
-      },
-    });
-    if (!parentRef.current) return;
-
-    gsap.to(parentRef.current, {
-      maxWidth: "98%",
-      ease: "power1.out",
-      paddingInline: "6%",
-      scrollTrigger: {
-        trigger: parentRef.current,
-        start: "top 95%", // when top of div is 80% from top of viewport
-        end: "top 65%", // end when top reaches middle
-        scrub: 1.5, // smooth progress with scroll
-      },
-    });
-
-    if (!containerRef.current || !nebulaRef.current || !titleRef.current)
+    if (!infoRef.current || !phasesRef.current || !horizontalRef.current)
       return;
 
-    // ⚡ Impact frame animation
-    const timer = setTimeout(() => {
-      setShowImpact(true);
-      gsap.to(".impact-frame", {
-        opacity: 0,
-        duration: 0.35,
-        ease: "power2.out",
-        delay: 0.05,
-        onComplete: () => setShowImpact(false),
-      });
-    }, 1800);
+    // small reveal animation for info panel
+    gsap.fromTo(
+      infoRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
+    );
 
-    // Nebula parallax
-    gsap.to(nebulaRef.current, {
-      scale: 1.15,
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: true,
-      },
-    });
+    // // Nebula slight parallax
+    // if (nebulaRef.current && containerRef.current) {
+    //   gsap.to(nebulaRef.current, {
+    //     scale: 1.12,
+    //     ease: "none",
+    //     scrollTrigger: {
+    //       trigger: containerRef.current,
+    //       start: "top top",
+    //       end: "bottom bottom",
+    //       scrub: true,
+    //     },
+    //   });
+    // }
 
-    // Title animation
+    // --- Title Line Draw Animation (Sequential) ---
     requestAnimationFrame(() => {
       const stars = titleRef.current?.querySelectorAll(".star");
-      const lines = titleRef.current?.querySelectorAll(".line");
-      if (!stars || !lines) return;
+      const lines = Array.from(
+        titleRef.current?.querySelectorAll(".line") || []
+      ) as SVGLineElement[];
 
-      const tl = gsap.timeline();
-      tl.fromTo(
-        stars,
-        { opacity: 0, scale: 0 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.25,
-          stagger: 0.15,
-          ease: "back.out(2)",
-        }
-      );
+      // ⭐ Stars first
+      if (stars) {
+        gsap.fromTo(
+          stars,
+          { opacity: 0, scale: 0 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.25,
+            stagger: 0.15,
+            ease: "back.out(2)",
+          }
+        );
+      }
+
+      // ⭐ Convert <line> x1/y1/x2/y2 into length manually
+      const lineLengths = lines.map((line) => {
+        const x1 = Number(line.getAttribute("x1"));
+        const y1 = Number(line.getAttribute("y1"));
+        const x2 = Number(line.getAttribute("x2"));
+        const y2 = Number(line.getAttribute("y2"));
+        return Math.hypot(x2 - x1, y2 - y1);
+      });
+
+      // ⭐ Prep dashoffset
+      lines.forEach((line, i) => {
+        gsap.set(line, {
+          strokeDasharray: lineLengths[i],
+          strokeDashoffset: lineLengths[i],
+        });
+      });
+
+      // ⭐ Sequential timeline
+      const lineTL = gsap.timeline({ delay: 0.3 });
 
       lines.forEach((line, i) => {
-        const path = line as SVGPathElement;
-        const length = path.getTotalLength();
-        gsap.set(line, { strokeDasharray: length, strokeDashoffset: length });
-        tl.to(
+        lineTL.to(
           line,
-          { strokeDashoffset: 0, duration: 0.3, ease: "power1.inOut" },
-          `>-0.1`
+          {
+            strokeDashoffset: 0,
+            duration: 0.45,
+            ease: "power2.out",
+          },
+          ">-0.1" // small overlap for smooth chain
         );
       });
     });
 
-    // ScrollTrigger for phase updates
+    // Horizontal pinned scroll
+    const panelCount = panels.length;
+    const horizontalEl = horizontalRef.current;
+    const phasesEl = phasesRef.current;
+
+    // Ensure width of horizontal container equals viewport * panels
+    const setWidths = () => {
+      const vw = window.innerWidth;
+      if (horizontalEl) {
+        horizontalEl.style.width = `${panelCount * vw}px`;
+      }
+      // set each phase slide width
+      const slides = horizontalEl?.querySelectorAll(".phase-slide");
+      slides?.forEach((s: Element) => {
+        (s as HTMLElement).style.width = `${vw}px`;
+      });
+    };
+
+    setWidths();
+    window.addEventListener("resize", setWidths);
+
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: cardsRef.current,
+        trigger: phasesEl,
         start: "top top",
-        end: "+=" + 800 * panels.length,
-        scrub: 1,
+        end: () =>
+          `+=${
+            window.innerWidth * 0.3 * (panelCount - 1) + window.innerHeight
+          }`,
+        scrub: 0.9,
         pin: true,
-        onUpdate: (self) => {
-          const index = Math.floor(self.progress * panels.length);
-          setActiveIndex((prev) =>
-            prev !== index
-              ? index < panels.length
-                ? index
-                : panels.length - 1
-              : prev
+        snap: 1 / (panelCount - 1),
+        anticipatePin: 1,
+        onUpdate(self) {
+          const progress = self.progress; // 0 -> 1 across full pinned area
+          const index = Math.min(
+            panelCount - 1,
+            Math.floor((progress * panelCount) / 1)
           );
+          setActiveIndex(index);
         },
       },
     });
 
+    tl.to(horizontalEl, {
+      x: () => `-${(panelCount - 1) * window.innerWidth}px`,
+      ease: "none",
+    });
+
+    // kill handlers on unmount
     return () => {
-      clearTimeout(timer);
+      window.removeEventListener("resize", setWidths);
       ScrollTrigger.getAll().forEach((s) => s.kill());
       tl.kill();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
-      {/* ---- Your Original Page ---- */}
       <div
         ref={containerRef}
         className="text-zinc-50 font-[Times] relative"
-        style={{ minHeight: "600vh", overflowX: "hidden" }}
+        style={{ minHeight: "400vh", overflowX: "hidden" }}
       >
         {/* Nebula BG */}
         <div className="fixed inset-0 -z-10 overflow-hidden">
@@ -189,7 +202,7 @@ export default function Landing() {
           <div className="cosmic-stars" />
         </div>
 
-        {/* Title */}
+        {/* Title / Hero: KEPT AS-IS (only minor container changes to remain responsive) */}
         <div className="mb-[500px]">
           <div className="w-full flex justify-center items-center pt-20 mb-12 relative z-10">
             <svg
@@ -330,13 +343,12 @@ export default function Landing() {
           </motion.h3>
         </div>
 
-        {/* Info Section */}
+        {/* Info Section (kept similar) */}
         <motion.div
-          initial={{ opacity: 20, y: 20 }}
-          whileInView={{ opacity: 1, y: 50 }} // Animate when in view
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
           ref={infoRef}
+          initial={{ opacity: 0.0, y: 10 }}
+          animate={{ opacity: 1.0, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.12, 0, 0.39, 0] }}
           style={{
             position: "relative",
             zIndex: 10,
@@ -353,197 +365,379 @@ export default function Landing() {
           }}
           className="justify-center border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl max-w-[75%] transition-all"
         >
-          <div className="relative w-[95%] h-[100vh] flex py-15 px-0 ">
-            <motion.h3
+          <div className="relative w-[95%] h-[50vh] flex items-center py-10 px-0 ">
+            <div>
+              <h3
+                style={{
+                  fontFamily: "Orbitron",
+                  fontWeight: "bold",
+                  fontStyle: "italic",
+                }}
+                className=" text-rose-500 text-5xl m-0"
+              >
+                Student Monitoring Dashboards
+              </h3>
+              <p className="text-gray-300 max-w-xl mt-4">
+                Delivering deeper insights into student behaviour, performance,
+                and engagement — powered by AI and a privacy-first approach.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Phases Section (Pinned horizontal carousel) */}
+        <section
+          ref={phasesRef}
+          className="relative z-30 mt-12 border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl"
+          style={{
+            position: "relative",
+            background: `linear-gradient(135deg,#050005 0%,#1a0a2a 30%,#4b1cbf 50%,#1a0a2a 70%,#050005 100%) `,
+            paddingTop: "3rem",
+            paddingBottom: "3rem",
+          }}
+        >
+          <div className="max-w-[90%] mx-auto">
+            <h3
               style={{
                 fontFamily: "Orbitron",
                 fontWeight: "bold",
                 fontStyle: "italic",
               }}
-              className=" text-rose-500 text-5xl m-0"
+              className=" text-rose-500 text-5xl m-0 mb-8"
             >
-              Student Monitoring Dashboards
-            </motion.h3>
-          </div>
-        </motion.div>
+              Phases Of Software
+            </h3>
 
-        {/* Phases */}
-        <div
-          ref={parentRef}
-          style={{
-            zIndex: 30,
-            position: "relative",
-            background: `
-    linear-gradient(
-      135deg,
-      #050005 0%,       /* almost black base */
-      #1a0a2a 30%,      /* deep purple shadow */
-      #4b1cbf 50%,      /* brighter purple shine in the middle */
-      #1a0a2a 70%,      /* deep purple again */
-      #050005 100%      /* almost black edge */
-    )
-  `,
-          }}
-          className="justify-center border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto py-15 rounded-4xl max-w-[75%] transition-all"
-        >
-          <motion.h3
-            style={{
-              fontFamily: "Orbitron",
-              fontWeight: "bold",
-              fontStyle: "italic",
-            }}
-            className=" text-rose-500 text-5xl m-0"
-          >
-            Phases Of Software
-          </motion.h3>
-          <div
-            ref={cardsRef}
-            className="relative w-[95%] h-[100vh] flex items-center justify-center "
-          >
-            {/* LEFT: 3D Cosmic Cards */}
-            <div className="relative w-[100%] h-[80vh] flex items-center justify-center">
-              <Canvas
-                dpr={[1, 1.5]}
-                camera={{ position: [0, 2, 8.5], fov: 55 }}
-              >
-                <Environment preset="sunset" />
-                <PerformanceMonitor onDecline={() => setPerfLow(true)} />
-                <ambientLight intensity={1.2} />
-                <pointLight position={[10, 10, 10]} intensity={1.5} />
-                <PlanetOrbitScene activeIndex={activeIndex} />
-              </Canvas>
-            </div>
+            {/* Top small nav/indicator */}
+            <div className="flex items-center gap-4 mb-6">
+              {panels.map((p, i) => (
+                <button
+                  key={p.id}
+                  aria-label={`Jump to ${p.phaseLabel}`}
+                  onClick={() => {
+                    const rect = phasesRef.current?.getBoundingClientRect();
+                    if (rect) {
+                      window.scrollTo({
+                        top: window.scrollY + rect.top,
+                        behavior: "smooth",
+                      });
 
-            <div className="w-[60%] h-[70vh] flex flex-col justify-center pl-16">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={panels[activeIndex]?.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.6 }}
-                  className="space-y-6"
+                      const vw = window.innerWidth;
+                      gsap.to(horizontalRef.current, {
+                        x: `-${i * vw}px`,
+                        duration: 0.7,
+                        ease: "power2.out",
+                        onStart: () => setActiveIndex(i),
+                      });
+                    }
+                  }}
+                  className={`px-3 py-1 rounded-full text-sm border transition-all duration-300`}
+                  style={{
+                    color: activeIndex === i ? "#f43f5e" : "white",
+                    borderColor: activeIndex === i ? "#f43f5e" : "white",
+                    boxShadow:
+                      activeIndex === i
+                        ? "0 0 12px rgba(244,63,94,0.8)"
+                        : "0 0 0 transparent",
+                  }}
                 >
-                  {/* Phase Title */}
-                  <h3
-                    className="text-5xl font-[Orbitron] drop-shadow-lg"
-                    style={{ color: panels[activeIndex].color }}
+                  {p.phaseLabel}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Horizontal track (slides) */}
+          <div
+            style={{
+              overflow: "hidden",
+              width: "100%",
+              height: "70vh",
+            }}
+          >
+            <div
+              ref={horizontalRef}
+              className="horizontal-track"
+              style={{ display: "flex", willChange: "transform" }}
+            >
+              {panels.map((panel, idx) => (
+                <section
+                  key={panel.id}
+                  className="phase-slide flex-shrink-0 flex items-center justify-center"
+                  style={{
+                    padding: "2rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    className="max-w-5xl w-full grid grid-cols-2 gap-10 items-center"
+                    style={{ alignItems: "center" }}
                   >
-                    {panels[activeIndex].phaseLabel}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-lg text-gray-200 leading-relaxed max-w-md">
-                    {panels[activeIndex].desc}
-                  </p>
-
-                  {/* Feature Tiles */}
-                  <div className="grid grid-cols-2 gap-4 max-w-md pt-4">
-                    {panels[activeIndex].items.map((it, idx) => (
+                    {/* LEFT VISUAL — Cosmic Neon Card */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{
+                        opacity: activeIndex === idx ? 1 : 0.45,
+                        scale: activeIndex === idx ? 1 : 0.97,
+                      }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                      className={`p-6 rounded-2xl backdrop-blur-md border transition-all
+        ${
+          activeIndex === idx
+            ? "border-rose-500 shadow-[0_0_35px_#f43f5e88]"
+            : "border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+        }
+      `}
+                      style={{
+                        background:
+                          "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.1))",
+                      }}
+                    >
                       <motion.div
-                        key={idx}
-                        whileHover={{
-                          scale: 1.05,
-                          rotateX: 8,
-                          rotateY: -8,
-                          boxShadow: `0px 0px 20px ${panels[activeIndex].color}55`,
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{
+                          y: activeIndex === idx ? 0 : 8,
+                          opacity: activeIndex === idx ? 1 : 0.4,
                         }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 15,
+                        transition={{ duration: 0.65, delay: 0.1 }}
+                        className="h-[320px] w-full flex flex-col items-center justify-center rounded-xl relative overflow-hidden"
+                        style={{
+                          background:
+                            "radial-gradient(circle at 10% 20%, rgba(255,255,255,0.05), transparent 20%)",
                         }}
-                        className="relative bg-[transparent]
-                       border border-zinc-700/50 rounded-2xl p-4 text-center 
-                       text-gray-100 cursor-pointer overflow-hidden group"
                       >
-                        {/* Glow Edge Border on Hover */}
-                        <div
-                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{
-                            boxShadow: `0 0 15px ${panels[activeIndex].color}`,
-                            border: `1px solid ${panels[activeIndex].color}`,
-                            borderRadius: "1rem",
-                          }}
-                        ></div>
+                        {/* Neon Flicker Aura */}
+                        {activeIndex === idx && (
+                          <motion.div
+                            className="absolute inset-0 rounded-xl pointer-events-none"
+                            initial={{ opacity: 0.2 }}
+                            animate={{
+                              opacity: [0.2, 0.5, 0.3, 0.45, 0.2],
+                            }}
+                            transition={{
+                              duration: 2.2,
+                              repeat: Infinity,
+                              repeatType: "mirror",
+                            }}
+                            style={{
+                              boxShadow:
+                                "0 0 55px #f43f5e77, inset 0 0 20px #f43f5e55",
+                            }}
+                          />
+                        )}
 
-                        <h4
-                          className="relative z-10 text-lg font-semibold tracking-wide"
+                        {/* Icon Bubble */}
+                        <motion.div
+                          whileHover={{ scale: 1.06, rotateZ: -3 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 18,
+                          }}
                           style={{
-                            color: panels[activeIndex].color,
-                            textShadow: `0 0 10px ${panels[activeIndex].color}55`,
+                            width: 120,
+                            height: 120,
+                            borderRadius: "30px",
+                            display: "grid",
+                            placeItems: "center",
+                            background:
+                              "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2))",
+                            boxShadow:
+                              activeIndex === idx
+                                ? "0 0 30px #f43f5e99, inset 0 -5px 20px rgba(0,0,0,0.6)"
+                                : "0 0 18px rgba(255,255,255,0.15)",
                           }}
                         >
-                          {it}
-                        </h4>
+                          <svg width="68" height="68" viewBox="0 0 24 24">
+                            <motion.path
+                              d="M12 2L15 8H9L12 2Z M6 9H18L12 22L6 9Z"
+                              fill={activeIndex === idx ? "#f43f5e" : "white"}
+                              animate={{
+                                scale: activeIndex === idx ? [1, 1.08, 1] : 1,
+                              }}
+                              transition={{
+                                duration: 1.6,
+                                repeat: activeIndex === idx ? Infinity : 0,
+                                repeatDelay: 1.2,
+                              }}
+                            />
+                          </svg>
+                        </motion.div>
 
-                        {/* Subtle shimmer animation */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 blur-md animate-shimmer"></div>
+                        {/* Title & Description */}
+                        <div className="text-center mt-4 px-2">
+                          <h4
+                            className="text-2xl font-[Orbitron] font-semibold transition-all"
+                            style={{
+                              color: activeIndex === idx ? "#f43f5e" : "white",
+                              textShadow:
+                                activeIndex === idx
+                                  ? "0 0 15px #f43f5eaa"
+                                  : "0 0 4px rgba(255,255,255,0.25)",
+                            }}
+                          >
+                            {panel.phaseLabel}
+                          </h4>
+                          <p className="text-sm text-gray-300 max-w-xs mt-2">
+                            {panel.desc}
+                          </p>
+                        </div>
                       </motion.div>
-                    ))}
+                    </motion.div>
+
+                    {/* RIGHT SIDE — Features */}
+                    <div>
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={panel.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{
+                            opacity: activeIndex === idx ? 1 : 0.4,
+                            x: activeIndex === idx ? 0 : -6,
+                          }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{
+                            duration: 0.55,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
+                          className="space-y-6"
+                        >
+                          <h3
+                            className="text-4xl font-[Orbitron] drop-shadow-lg transition-all"
+                            style={{
+                              color: activeIndex === idx ? "#f43f5e" : "white",
+                              textShadow:
+                                activeIndex === idx
+                                  ? "0 0 12px #f43f5eaa"
+                                  : "0 0 3px rgba(255,255,255,0.4)",
+                            }}
+                          >
+                            {panel.phaseLabel}
+                          </h3>
+
+                          <p className="text-lg text-gray-200 leading-relaxed max-w-md">
+                            {panel.desc}
+                          </p>
+
+                          <div className="grid grid-cols-2 gap-4 max-w-md pt-4">
+                            {panel.items.map((it, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{
+                                  opacity: activeIndex === idx ? 1 : 0.5,
+                                  scale: activeIndex === idx ? 1 : 0.95,
+                                }}
+                                whileHover={
+                                  activeIndex === idx
+                                    ? {
+                                        scale: 1.07,
+                                        rotateZ: -2,
+                                        y: -8,
+                                        boxShadow: "0px 10px 35px #f43f5e55",
+                                      }
+                                    : {}
+                                }
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 240,
+                                  damping: 18,
+                                }}
+                                className="relative bg-[transparent] border border-zinc-700/40 rounded-2xl p-4 text-center text-gray-100 cursor-default overflow-hidden group"
+                              >
+                                {/* Neon border on hover */}
+                                <motion.div
+                                  className="absolute inset-0 pointer-events-none rounded-2xl"
+                                  animate={{
+                                    opacity:
+                                      activeIndex === idx ? [0.1, 0.4, 0.2] : 0,
+                                  }}
+                                  transition={{
+                                    duration: 2,
+                                    repeat: activeIndex === idx ? Infinity : 0,
+                                  }}
+                                  style={{
+                                    boxShadow:
+                                      activeIndex === idx
+                                        ? "0 0 25px #f43f5e55"
+                                        : "none",
+                                    border:
+                                      activeIndex === idx
+                                        ? "1px solid #f43f5e55"
+                                        : "1px solid rgba(255,255,255,0.1)",
+                                  }}
+                                />
+
+                                <h4
+                                  className="relative z-10 text-lg font-semibold tracking-wide transition-all"
+                                  style={{
+                                    color:
+                                      activeIndex === idx ? "#f43f5e" : "white",
+                                    textShadow:
+                                      activeIndex === idx
+                                        ? "0 0 12px #f43f5e88"
+                                        : "0 0 4px rgba(255,255,255,0.25)",
+                                  }}
+                                >
+                                  {it}
+                                </h4>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
                   </div>
-                </motion.div>
-              </AnimatePresence>
+                </section>
+              ))}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* --- Styles --- */}
+        {/* --- Styles (nebula, stars, shimmer) --- */}
         <style jsx>{`
-          .star {
-            will-change: opacity, transform, filter;
-          }
-          .line {
-            will-change: stroke-dashoffset, opacity;
-          }
-
           .nebula {
             position: absolute;
             inset: 0;
-            background: 
-  /* Subtle violet shimmer */ radial-gradient(
+            background: radial-gradient(
                 circle at 25% 35%,
                 rgba(90, 0, 180, 0.18),
                 transparent 60%
               ),
-              /* Cyan metallic glint */
-                radial-gradient(
-                  circle at 70% 65%,
-                  rgba(0, 180, 255, 0.15),
-                  transparent 70%
-                ),
-              /* Deep crimson undertone */
-                radial-gradient(
-                  circle at 50% 80%,
-                  rgba(150, 20, 40, 0.12),
-                  transparent 75%
-                ),
-              /* Soft metallic sheen (angled gloss) */
-                linear-gradient(
-                  125deg,
-                  rgba(255, 255, 255, 0.06) 0%,
-                  rgba(255, 255, 255, 0.02) 25%,
-                  rgba(0, 0, 0, 0.6) 50%,
-                  rgba(255, 255, 255, 0.03) 75%,
-                  rgba(0, 0, 0, 0.8) 100%
-                ),
-              /* Brushed metal texture hint */
-                repeating-linear-gradient(
-                  90deg,
-                  rgba(255, 255, 255, 0.015) 0px,
-                  rgba(255, 255, 255, 0.02) 2px,
-                  rgba(0, 0, 0, 0.02) 4px,
-                  rgba(0, 0, 0, 0.015) 6px
-                ),
-              /* Base metallic black gradient */
-                linear-gradient(180deg, #0b0b0d 0%, #0a0a0a 40%, #000000 100%);
-
+              radial-gradient(
+                circle at 70% 65%,
+                rgba(0, 180, 255, 0.15),
+                transparent 70%
+              ),
+              radial-gradient(
+                circle at 50% 80%,
+                rgba(150, 20, 40, 0.12),
+                transparent 75%
+              ),
+              linear-gradient(
+                125deg,
+                rgba(255, 255, 255, 0.06) 0%,
+                rgba(255, 255, 255, 0.02) 25%,
+                rgba(0, 0, 0, 0.6) 50%,
+                rgba(255, 255, 255, 0.03) 75%,
+                rgba(0, 0, 0, 0.8) 100%
+              ),
+              repeating-linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.015) 0px,
+                rgba(255, 255, 255, 0.02) 2px,
+                rgba(0, 0, 0, 0.02) 4px,
+                rgba(0, 0, 0, 0.015) 6px
+              ),
+              linear-gradient(180deg, #0b0b0d 0%, #0a0a2a 40%, #000000 100%);
             background-blend-mode: screen, overlay, overlay, soft-light, normal,
               normal;
             background-color: #000;
-
-            filter: blur(40px) brightness(1.1);
-            opacity: 0.9;
+            filter: blur(40px) brightness(1.08);
+            opacity: 0.95;
+            will-change: transform;
           }
 
           .cosmic-stars {
@@ -551,8 +745,9 @@ export default function Landing() {
             inset: 0;
             background: transparent
               url("https://www.transparenttextures.com/patterns/stardust.png");
-            opacity: 0.15;
+            opacity: 0.13;
             mix-blend-mode: screen;
+            pointer-events: none;
           }
 
           @keyframes shimmer {
@@ -563,229 +758,18 @@ export default function Landing() {
               transform: translateX(100%);
             }
           }
-          .animate-shimmer {
-            animation: shimmer 2s infinite linear;
+
+          /* small responsiveness */
+          @media (max-width: 900px) {
+            .phase-slide {
+              padding: 1rem !important;
+            }
+            .max-w-4xl {
+              gap: 1rem;
+            }
           }
         `}</style>
       </div>
     </>
-  );
-}
-
-/* --- 3D PLANET SCENE COMPONENTS --- */
-function PlanetOrbitScene({ activeIndex }: { activeIndex: number }) {
-  const groupRef = useRef<THREE.Group>(null!);
-  const lightRef = useRef<THREE.DirectionalLight>(null!);
-  const orbitRadius = 4;
-
-  const planets = [
-    { size: 0.8, model: "/model.glb" },
-    { size: 0.9, model: "/phase2.glb" },
-    { size: 1.0, model: "/phase3.glb" },
-    { size: 1.1, model: "/phase4.glb" },
-  ];
-
-  const totalPlanets = planets.length;
-  const angleStep = (2 * Math.PI) / totalPlanets;
-  const targetRotation = useRef(0);
-  const currentRotation = useRef(0);
-
-  useEffect(() => {
-    targetRotation.current = -activeIndex * angleStep;
-  }, [activeIndex]);
-
-  useFrame(() => {
-    // Smooth orbit rotation
-    currentRotation.current +=
-      (targetRotation.current - currentRotation.current) * 0.05;
-    if (groupRef.current) groupRef.current.rotation.y = currentRotation.current;
-
-    // Move the light to face the active planet
-    if (lightRef.current) {
-      const angle = activeIndex * angleStep + currentRotation.current;
-      lightRef.current.position.set(
-        Math.sin(angle) * orbitRadius * 1.5,
-        2,
-        Math.cos(angle) * orbitRadius * 1.5
-      );
-      lightRef.current.target.position.set(0, 0, 0);
-      lightRef.current.target.updateMatrixWorld();
-    }
-  });
-
-  return (
-    <>
-      {/* ✨ Directional light that follows the active planet */}
-      <directionalLight
-        ref={lightRef}
-        intensity={3}
-        color={"#ffffff"}
-        position={[5, 2, 5]}
-      />
-      <ambientLight intensity={0.2} />
-
-      <group ref={groupRef}>
-        {/* Orbit Ring */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[orbitRadius - 0.02, orbitRadius + 0.02, 128]} />
-          <meshBasicMaterial
-            color="#00ffff"
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.4}
-          />
-        </mesh>
-
-        {/* Planets */}
-        {planets.map((planet, i) => {
-          const angle = i * angleStep;
-          const x = Math.sin(angle) * orbitRadius;
-          const z = Math.cos(angle) * orbitRadius;
-          const isActive = i === activeIndex;
-
-          return (
-            <PlanetModel
-              key={i}
-              position={[x, 0, z]}
-              active={isActive}
-              scale={planet.size}
-              modelPath={planet.model}
-              angle={angle} // pass angle
-              currentRotation={currentRotation} // pass currentRotation
-            />
-          );
-        })}
-      </group>
-    </>
-  );
-}
-
-function PlanetModel({
-  position,
-  active,
-  scale = 1,
-  modelPath,
-  angle,
-  currentRotation,
-}: {
-  position: [number, number, number];
-  active: boolean;
-  scale?: number;
-  modelPath: string;
-  angle: number;
-  currentRotation: React.MutableRefObject<number>;
-}) {
-  const gltf = useLoader(GLTFLoader, modelPath);
-  const meshRef = useRef<THREE.Group>(null!);
-
-  useFrame(() => {
-    if (meshRef.current) {
-      // Rotate slowly for some effect
-      meshRef.current.rotation.y += 0.005;
-
-      // Fade based on Z position relative to camera
-      const totalAngle = angle + currentRotation.current;
-      const z = Math.cos(totalAngle); // z = 1 → front, z = -1 → back
-      const opacity = THREE.MathUtils.mapLinear(z, -1, 1, 0.3, 1);
-
-      // Update opacity of all child meshes
-      meshRef.current.traverse((child) => {
-        if ((child as THREE.Mesh).material) {
-          const material = (child as THREE.Mesh)
-            .material as THREE.MeshStandardMaterial;
-          material.transparent = true;
-          material.opacity = active ? 1 : opacity; // active model fully visible
-        }
-      });
-    }
-  });
-
-  return (
-    <primitive
-      ref={meshRef}
-      object={gltf.scene}
-      position={position}
-      scale={[scale, scale, scale]}
-    />
-  );
-}
-
-function Planet({
-  index,
-  angle,
-  currentRotation,
-  angleStep,
-  position,
-  color,
-  size,
-  active,
-  texture,
-}: {
-  index: number;
-  angle: number;
-  currentRotation: React.MutableRefObject<number>;
-  angleStep: number;
-  position: [number, number, number];
-  color: string;
-  size: number;
-  active: boolean;
-  texture: string;
-}) {
-  const planetTexture = useLoader(THREE.TextureLoader, texture);
-  const meshRef = useRef<THREE.Mesh>(null!);
-
-  useFrame(() => {
-    if (meshRef.current) {
-      // Calculate the current angle of the planet
-      const totalAngle = angle + currentRotation.current;
-      // Fade when behind (z < 0)
-      const z = Math.cos(totalAngle);
-      const opacity = THREE.MathUtils.mapLinear(z, -1, 1, 0.3, 1);
-      const material = meshRef.current.material as THREE.MeshStandardMaterial;
-      material.opacity = opacity;
-      material.transparent = true;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 64, 64]} />
-      <meshStandardMaterial
-        map={planetTexture}
-        color={color}
-        emissive={active ? color : "#000000"}
-        emissiveIntensity={active ? 1.2 : 0.1}
-        metalness={0.3}
-        roughness={0.7}
-        transparent
-        opacity={1}
-      />
-    </mesh>
-  );
-}
-
-function Stars() {
-  const ref = useRef<THREE.Points>(null!);
-  const positions = Array.from({ length: 500 }, () => [
-    (Math.random() - 0.5) * 30,
-    (Math.random() - 0.5) * 30,
-    (Math.random() - 0.5) * 30,
-  ]).flat();
-
-  useFrame((state) => {
-    ref.current.rotation.y = state.clock.getElapsedTime() * 0.01;
-  });
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry attach="geometry">
-        <bufferAttribute
-          attach="attributes-position"
-          args={[new Float32Array(positions), 3]}
-        />
-      </bufferGeometry>
-
-      <pointsMaterial color="white" size={0.03} />
-    </points>
   );
 }

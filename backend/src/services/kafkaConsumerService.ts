@@ -5,10 +5,10 @@ const kafka = new Kafka({
   brokers: ["localhost:9092"],
 });
 
-const consumer = kafka.consumer({ groupId: "ascent-shared-consumer-v2" });
+const consumer = kafka.consumer({ groupId: "ascent-shared-consumer-v3" });
 
 // ✅ Central in-memory cache (user → topic → messages)
-const userCache: Record<string, any> = {};
+export const userCache: Record<string, any> = {};
 
 export async function startKafkaConsumer() {
   await consumer.connect();

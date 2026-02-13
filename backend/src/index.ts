@@ -5,12 +5,15 @@ import morgan from "morgan";
 
 import authRoutes from "./routes/auth";
 import blogRoutes from "./routes/blogRoutes";
-import { connectProducer, sendEventToKafka } from "./utils/producer"; // ✅ Updated import
 import timelineRoutes from "./routes/timelineRoutes";
 import githubTrackerRoutes from "./routes/githubTracker";
 import trackerRoute from "./routes/trackerRoute";
 import domainRoute from "./routes/domainRoute";
-import { startKafkaConsumer } from "./services/kafkaConsumerService";
+
+import { connectProducer, sendEventToKafka } from "./utils/producer";
+import { startKafkaConsumer, userCache } from "./services/kafkaConsumerService";
+import { warmupKafkaCache } from "./utils/warmupKafka";
+
 const app = express();
 
 /* =====================================================
@@ -18,7 +21,7 @@ const app = express();
 ===================================================== */
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend origin
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
@@ -34,6 +37,7 @@ app.use("/api", timelineRoutes);
 app.use("/tracker", githubTrackerRoutes);
 app.use("/tracker", trackerRoute);
 app.use("/api", domainRoute);
+
 /* =====================================================
    🩺 Health Check Route
 ===================================================== */
@@ -58,18 +62,23 @@ app.get("/kafka/test", async (_req, res) => {
 });
 
 /* =====================================================
-   🚀 Start Server
+   🚀 Start Server + Kafka Warmup
 ===================================================== */
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log(`✅ Backend running at http://localhost:${PORT}`);
+
+  // ✅ Step 1: Warmup cache before ANY real consumer starts
+  await warmupKafkaCache();
+
+  // ✅ Step 2: Start real-time shared consumer
   await startKafkaConsumer();
-  // --- Initialize Kafka Producer on startup ---
+
+  // ✅ Step 3: Connect Kafka producer
   try {
     await connectProducer();
-
-    // Optionally send a startup event to Kafka for monitoring
     await sendEventToKafka("system-logs", "server", "startup", {
       message: "Ascent backend started successfully",
     });

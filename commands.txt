@@ -1,14 +1,24 @@
 Docker:
 docker ps (to check running images)
 docker-compose up -d (compile yml file and start running images)
-docker-compose down (stop containers)
+❌ docker-compose down (stop and delete containers)
 
 docker stop $(docker ps -q)  (stop all containers)
-
 docker start $(docker ps -a -q)   (start all containers)
 
+docker exec -it ascent-kafka kafka-consumer-groups --bootstrap-server localhost:9092 --group ascent-shared-consumer --topic quiz-tracker-events --reset-offsets --to-earliest --execute 
+docker exec -it ascent-kafka kafka-consumer-groups --bootstrap-server localhost:9092 --group ascent-shared-consumer --topic github-tracker-events --reset-offsets --to-earliest --execute 
+docker exec -it ascent-kafka kafka-consumer-groups --bootstrap-server localhost:9092 --group ascent-shared-consumer --topic blog-events --reset-offsets --to-earliest --execute 
+
+--------------------------------------------------------------------
 
 Prisma:
 [make changes in schema.prisma]
 npx prisma migrate dev --name signup_updated
 npx prisma generate
+
+--------------------------------------------------------------------
+general commands for operating project:
+/ascent:    npm run dev
+cd backend,  npm run dev
+/ascent:   docker-compose up -d, docker ps
