@@ -250,4 +250,8 @@ router.get("/leetcode/:username", async (req: Request, res: Response) => {
   }
 });
 
+/* =====================================================
+    GET USER PROFILE
+===================================================== */
+
 export default router;

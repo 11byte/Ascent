@@ -12,6 +12,11 @@ docker exec -it ascent-kafka kafka-consumer-groups --bootstrap-server localhost:
 
 --------------------------------------------------------------------
 
+
+# Check topics of kafka 
+docker exec -it ascent-kafka bash
+kafka-topics --bootstrap-server localhost:9092 --describe
+
 Prisma:
 [make changes in schema.prisma]
 npx prisma migrate dev --name signup_updated

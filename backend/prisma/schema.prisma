@@ -39,6 +39,10 @@ model User {
   skills       Skill[]
   achievements Achievement[]
 
+  //roadmap
+  roadmaps        Roadmap[]         @relation("UserRoadmaps")
+  roadmap_credits Int       @default(0) // New field
+
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 }
@@ -83,6 +87,20 @@ model Achievement {
   description String?
   user        User?    @relation(fields: [userId], references: [id])
   userId      Int?
+
+  createdAt   DateTime @default(now())
+}
+
+// ---------------- Roadmap ----------------
+model Roadmap {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text // ✅ Use @db.Text for large JSON roadmap strings
+  searchCount Int      @default(0)
+
+  // ✅ ADD THE RELATION NAME "UserRoadmaps" TO MATCH THE USER MODEL
+  user        User     @relation("UserRoadmaps", fields: [userId], references: [id])
+  userId      Int
 
   createdAt   DateTime @default(now())
 }

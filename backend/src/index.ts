@@ -9,6 +9,7 @@ import timelineRoutes from "./routes/timelineRoutes";
 import githubTrackerRoutes from "./routes/githubTracker";
 import trackerRoute from "./routes/trackerRoute";
 import domainRoute from "./routes/domainRoute";
+import roadmapRouter from "./routes/roadmap.route";
 
 import { connectProducer, sendEventToKafka } from "./utils/producer";
 import { startKafkaConsumer, userCache } from "./services/kafkaConsumerService";
@@ -23,7 +24,7 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(morgan("dev"));
@@ -52,7 +53,7 @@ app.get("/kafka/test", async (_req, res) => {
       "student.blog.interest",
       "test-user",
       "debugFeature",
-      { message: "Kafka test event" }
+      { message: "Kafka test event" },
     );
     res.json({ ok: true, message: "Test event sent to Kafka" });
   } catch (err) {
