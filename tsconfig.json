@@ -2,7 +2,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,7 +16,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -22,18 +26,36 @@
     // --- Path Resolution Configuration ---
     "baseUrl": "./src", // This tells TypeScript to start looking inside the 'src' folder
     "paths": {
-      "@components/*": ["./src/components/*"],
-      "@styles/*": ["./src/styles/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@services/*": ["./src/services/*"],
-      "@context/*": ["./src/context/*"],
-      "@/components/*": ["./src/components/*"],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@context/*": [
+        "./src/context/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
       // The most versatile alias: Maps @/ to the src/ folder.
       // E.g., @/app/page.tsx or @/components/ui/button.tsx
-      "@/*": ["./*"],
+      "@/*": [
+        "./*"
+      ],
       // We must define app explicitly since Next.js uses it heavily
-      "@/app/*": ["./app/*"]
+      "@/app/*": [
+        "./app/*"
+      ]
     }
     // ------------------------------------
   },
@@ -44,5 +66,7 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
