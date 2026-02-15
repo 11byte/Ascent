@@ -6,10 +6,11 @@ export default async function RoadmapHero({ phase = "4" }: { phase?: string }) {
   const totalRoadmaps = 100;
 
   const trendyRoadmaps = {
-    Backend: "cluqobxvs003shc0agvoh0f50",
-    Frontend: "cluik00o6001lye79osk1301z",
-    "Web 3": "cluik0y12001oye79i3mq6s0q",
-    "Machine Learning": "clupklkxg0012ej06fsx0gxui",
+    "AIML Engineer": "9",
+    "Cyber Security Engineer": "8",
+    "Devops Engineer": "7",
+    "Full Stack Web Development": "6",
+
   };
 
   return (

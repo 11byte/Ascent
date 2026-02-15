@@ -18,8 +18,7 @@ export default function NavItems({
   const pathname = usePathname();
 
   const items = [
-    { href: `/phase${phase}/roadmap-generator/roadmap/explore`, label: "Explore" },
-    { href: `/phase${phase}/roadmap-generator/roadmap/archives`, label: "Archives" },
+    { href: `/phase${phase}/roadmap-generator/explore`, label: "Explore" },
     { href: `/phase${phase}/roadmap-generator/roadmap`, label: "Roadmap" },
   ];
 

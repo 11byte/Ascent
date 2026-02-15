@@ -101,7 +101,7 @@ export default function RoadmapHeroClient({
             </button>
           </Link>
 
-          <Link href="/explore">
+          <Link href={`/phase${phase}/roadmap-generator/explore`}>
             <button className="px-5 py-3 rounded-lg font-semibold text-white/90 hover:text-white border border-white/20 bg-white/10 hover:bg-white/15 backdrop-blur-md transition-colors">
               <span className="flex items-center gap-2">
                 <Telescope size={18} />
@@ -121,7 +121,7 @@ export default function RoadmapHeroClient({
           {Object.entries(trendyRoadmaps).map(([name, id]) => (
             <Link
               key={id}
-              href={`/roadmap/${id}`}
+              href={`/phase${phase}/roadmap-generator/roadmap/${id}`}
               className="group flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-white/85 hover:text-white hover:bg-white/15 backdrop-blur-md transition-colors"
             >
               {name}
