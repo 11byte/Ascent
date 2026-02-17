@@ -220,9 +220,8 @@ router.get("/leetcode/:username", async (req: Request, res: Response) => {
   if (!username) return res.status(400).json({ error: "Username is required" });
 
   try {
-    // GET https://alfa-leetcode-api.onrender.com/<username>/solved
     const response = await fetch(
-      `https://alfa-leetcode-api.onrender.com/${username}/solved`,
+      `https://leetcode-stats-api.herokuapp.com/${username}`,
     );
     if (!response.ok)
       return res.status(500).json({ error: "Failed to fetch LeetCode data" });

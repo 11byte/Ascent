@@ -102,7 +102,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         color: "from-emerald-500 to-emerald-600",
         description: "Discover coding bounties",
         category: "development",
-        link: `/${phase}/bountyhub`,
+        link: `/${phase}/Bountyboard`,
         phases: ["phase2", "phase3", "phase4"],
       },
       {
@@ -113,10 +113,10 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         description: "Discover coding bounties",
         category: "development",
         link: `/${phase}/roadmap-generator`,
-        phases: ["phase2", "phase3", "phase4"],
+        phases: ["phase4"],
       },
     ],
-    [phase]
+    [phase],
   );
 
   // ✅ Filter by both phase and search query
@@ -126,7 +126,7 @@ export const AppLauncher = ({ phase = "phase1" }) => {
     return phaseFiltered.filter(
       (app) =>
         app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.description.toLowerCase().includes(searchQuery.toLowerCase())
+        app.description.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [apps, searchQuery, phase]);
 
