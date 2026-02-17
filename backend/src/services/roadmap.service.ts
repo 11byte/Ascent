@@ -1,6 +1,8 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { transformToTree } from "../utils/roadmap.util";
+import axios from "axios";
 
+const GOOGLE_API_KEY = process.env.GEMINI_API_KEY; // Using the same key
 // Helper function for sleeping between retries
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -40,6 +42,63 @@ export const roadmapService = {
         }
         throw error; // If not 503 or no retries left, throw the error
       }
+    }
+  },
+};
+
+export const resourceService = {
+  async getYouTubeVideos(topic: string) {
+    try {
+      const response = await axios.get(
+        `https://www.googleapis.com/youtube/v3/search`,
+        {
+          params: {
+            part: "snippet",
+            maxResults: 5,
+            q: `${topic} tutorial`,
+            type: "video",
+            videoEmbeddable: "true",
+            key: GOOGLE_API_KEY,
+          },
+        }
+      );
+
+      return response.data.items.map((item: any) => ({
+        id: item.id.videoId,
+        title: item.snippet.title,
+        thumbnail: item.snippet.thumbnails.medium.url,
+        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+      }));
+    } catch (error) {
+      console.error("YouTube API Error:", error);
+      return [];
+    }
+  },
+
+  async getBooks(topic: string) {
+    try {
+      const response = await axios.get(
+        `https://www.googleapis.com/books/v1/volumes`,
+        {
+          params: {
+            q: `intitle:${topic}`,
+            maxResults: 5,
+            printType: "books",
+            key: GOOGLE_API_KEY,
+          },
+        }
+      );
+
+      return response.data.items?.map((item: any) => ({
+        id: item.id,
+        title: item.volumeInfo.title,
+        authors: item.volumeInfo.authors || ["Unknown Author"],
+        thumbnail: item.volumeInfo.imageLinks?.thumbnail,
+        previewLink: item.volumeInfo.previewLink,
+      })) || [];
+    } catch (error) {
+      console.error("Google Books API Error:", error);
+      return [];
     }
   },
 };

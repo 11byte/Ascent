@@ -17,6 +17,10 @@ import {
   Coins,
   Info,
   MousePointer2,
+  BookOpen,
+  X,
+  ExternalLink,
+  Compass,
 } from "lucide-react";
 import ReactFlow, {
   Controls,
@@ -106,7 +110,14 @@ function buildGraph(tree: any, expandedSet: Set<string>) {
     nodes.push({
       id: path,
       type: "roadmap",
-      data: { label: node.name, hasChildren, isExpanded },
+      // Passing description and link to the node data for the sidebar
+      data: {
+        label: node.name,
+        hasChildren,
+        isExpanded,
+        description: node.moduleDescription,
+        link: node.link,
+      },
       position: { x, y: nodeY },
     });
 
@@ -149,20 +160,6 @@ export default function RoadmapGeneratorPage() {
   const [tree, setTree] = useState<any>(null);
   const [credits, setCredits] = useState(1000);
   const [error, setError] = useState("");
-
-  // Fetch credits and user info on mount
-  // useEffect(() => {
-  //   const fetchCredits = async () => {
-  //     try {
-  //       const res = await fetch("http://localhost:5000/api/users/profile", {
-  //         headers: { "userId": "user_id_from_auth" } // Replace with your actual auth userId
-  //       });
-  //       const data = await res.json();
-  //       if (data.status) setCredits(data.credits);
-  //     } catch (e) { console.error("Could not fetch credits"); }
-  //   };
-  //   fetchCredits();
-  // }, []);
 
   const handleGenerate = async () => {
     setError("");
@@ -207,13 +204,7 @@ export default function RoadmapGeneratorPage() {
   return (
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white selection:bg-[#CBAF68]/30">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_-20%,#1a1a1a,transparent)]" />
-      <div className="relative z-10 flex flex-col h-screen mt-16">
-        {/* Credits Badge Overlay */}
-        {/* <div className="absolute top-4 right-8 z-20 flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
-          <Coins className="text-yellow-500" size={16} />
-          <span className="text-sm font-bold font-mono text-yellow-500">{credits}</span>
-        </div> */}
-
+      <div className="relative flex flex-col h-screen mt-16">
         <div className="flex flex-1 overflow-hidden">
           <aside className="w-80 border-r border-white/10 p-6 flex flex-col gap-6 bg-black/20 overflow-y-auto">
             <div className="space-y-4">
@@ -302,6 +293,9 @@ export default function RoadmapGeneratorPage() {
 function FlowContent({ tree }: { tree: any }) {
   const { fitView } = useReactFlow();
   const [expanded, setExpanded] = useState(new Set(["0"]));
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [resources, setResources] = useState<any>(null);
+  const [loadingResources, setLoadingResources] = useState(false);
   const flowRef = useRef<HTMLDivElement>(null);
 
   const { nodes, edges } = useMemo(
@@ -313,30 +307,42 @@ function FlowContent({ tree }: { tree: any }) {
     setTimeout(() => fitView({ padding: 0.3, duration: 800 }), 100);
   }, [nodes.length, fitView]);
 
-  const onNodeClick = useCallback((_: any, node: any) => {
-    if (!node.data.hasChildren) return;
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(node.id)) next.delete(node.id);
-      else next.add(node.id);
-      return next;
-    });
+  const onNodeClick = useCallback(async (_: any, node: any) => {
+    if (node.data.hasChildren) {
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        if (next.has(node.id)) next.delete(node.id);
+        else next.add(node.id);
+        return next;
+      });
+    } else {
+      // Leaf Node Selection Logic
+      setSelectedNode(node.data);
+      setResources(null);
+      setLoadingResources(true);
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/roadmap/module-resources?topic=${encodeURIComponent(node.data.label)}`,
+        );
+        const data = await res.json();
+        if (data.status) setResources(data.resources);
+      } catch (e) {
+        console.error("Resource fetch error");
+      } finally {
+        setLoadingResources(false);
+      }
+    }
   }, []);
 
   const downloadPng = async () => {
     if (!flowRef.current) return;
-
     try {
       const dataUrl = await htmlToImage.toPng(flowRef.current, {
         backgroundColor: "#0a0a0a",
         quality: 1,
-        pixelRatio: 2, // 🚀 Makes the image high-resolution
-        skipFonts: true, // 🛠️ FIX: Prevents the "trim" undefined error
-        style: {
-          // Ensures the fonts don't look weird when skipped
-          fontFamily: "sans-serif",
-        },
-        // Filters out potential problematic elements
+        pixelRatio: 2,
+        skipFonts: true,
+        style: { fontFamily: "sans-serif" },
         filter: (node) => {
           const exclusionClasses = [
             "react-flow__controls",
@@ -345,15 +351,12 @@ function FlowContent({ tree }: { tree: any }) {
           return !exclusionClasses.some((cls) => node.classList?.contains(cls));
         },
       });
-
       const link = document.createElement("a");
       link.download = `roadmap.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Failed to export PNG:", err);
-      // Fallback alert for the user
-      alert("Export failed. Try closing other browser tabs to free up memory.");
     }
   };
 
@@ -371,12 +374,154 @@ function FlowContent({ tree }: { tree: any }) {
         <div className="absolute top-5 right-4 z-50">
           <button
             onClick={downloadPng}
-            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 text-sm"
+            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 text-sm backdrop-blur-md"
           >
             <Download size={16} /> PNG
           </button>
         </div>
       </ReactFlow>
+
+      {/* --- PREMIUM SIDEBAR --- */}
+      <aside
+        className={`fixed top-0 right-0 h-full w-[400px] bg-[#09090b]/95 border-l border-white/10 backdrop-blur-2xl transition-transform duration-500 z-[100] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] ${
+          selectedNode ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="h-full overflow-y-auto custom-scrollbar flex flex-col">
+          {/* Header */}
+          <div className="sticky top-0 z-20 bg-[#09090b]/80 backdrop-blur-md px-8 py-6 border-b border-white/5 flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#CBAF68]">
+                <BookOpen size={16} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Module Details
+                </span>
+              </div>
+              <h2 className="text-xl font-bold text-white leading-tight">
+                {selectedNode?.label}
+              </h2>
+            </div>
+            <button
+              onClick={() => setSelectedNode(null)}
+              className="p-2 hover:bg-white/10 rounded-full text-gray-500 hover:text-white transition-all"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-8 space-y-10">
+            {selectedNode && (
+              <>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black flex items-center gap-2">
+                    <Info size={14} className="text-[#CBAF68]" /> Overview
+                  </h4>
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 leading-relaxed">
+                    <p className="text-gray-300 text-sm italic">
+                      {selectedNode.description ||
+                        "In-depth intelligence for this module is currently being synthesized."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* YouTube Section */}
+                <section className="space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                    Top Video Tutorials
+                  </h4>
+                  {loadingResources ? (
+                    <div className="py-10 flex flex-col items-center justify-center gap-3">
+                      <Loader2
+                        className="animate-spin text-[#CBAF68]"
+                        size={24}
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {resources?.videos.map((vid: any) => (
+                        <a
+                          key={vid.id}
+                          href={vid.url}
+                          target="_blank"
+                          className="group flex items-center gap-4 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.07] hover:border-[#CBAF68]/30 transition-all"
+                        >
+                          <img
+                            src={vid.thumbnail}
+                            className="w-24 h-14 object-cover rounded-lg"
+                            alt=""
+                          />
+                          <span className="text-xs font-medium text-gray-300 group-hover:text-white line-clamp-2">
+                            {vid.title}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                {/* Books Section */}
+                <section className="space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                    Recommended Reading
+                  </h4>
+                  <div className="grid gap-3">
+                    {resources?.books.map((book: any) => (
+                      <a
+                        key={book.id}
+                        href={book.previewLink}
+                        target="_blank"
+                        className="group flex items-center gap-4 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.07] hover:border-[#CBAF68]/30 transition-all"
+                      >
+                        {book.thumbnail ? (
+                          <img
+                            src={book.thumbnail}
+                            className="w-12 h-16 object-cover rounded"
+                            alt=""
+                          />
+                        ) : (
+                          <div className="w-12 h-16 bg-white/5 rounded flex items-center justify-center text-gray-700">
+                            <BookOpen size={16} />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs font-bold text-gray-200 group-hover:text-[#CBAF68] line-clamp-1">
+                            {book.title}
+                          </p>
+                          <p className="text-[10px] text-gray-500">
+                            {book.authors?.[0]}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Wikipedia Link */}
+                {selectedNode.link && (
+                  <div className="pt-6 border-t border-white/5">
+                    <a
+                      href={selectedNode.link}
+                      target="_blank"
+                      className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#CBAF68]/10 to-transparent border border-[#CBAF68]/20 rounded-2xl hover:from-[#CBAF68]/20 transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-[#CBAF68] text-black rounded-lg">
+                          <Compass size={16} />
+                        </div>
+                        <span className="text-sm font-bold text-white group-hover:text-[#CBAF68]">
+                          Wikipedia Research
+                        </span>
+                      </div>
+                      <ExternalLink size={16} className="text-[#CBAF68]" />
+                    </a>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

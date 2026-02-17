@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/prisma";
-import { roadmapService } from "../services/roadmap.service";
+import { roadmapService, resourceService } from "../services/roadmap.service";
 
 export const generateRoadmap = async (req: Request, res: Response) => {
   try {
@@ -13,21 +13,35 @@ export const generateRoadmap = async (req: Request, res: Response) => {
     });
 
     if (existing) {
-      await prisma.roadmap.update({ where: { id: existing.id }, data: { searchCount: { increment: 1 } } });
-      return res.json({ status: true, tree: JSON.parse(existing.content), roadmapId: existing.id });
+      await prisma.roadmap.update({
+        where: { id: existing.id },
+        data: { searchCount: { increment: 1 } },
+      });
+      return res.json({
+        status: true,
+        tree: JSON.parse(existing.content),
+        roadmapId: existing.id,
+      });
     }
 
     // 2. Credit check if using system mode
     const user = await prisma.user.findUnique({ where: { userId } });
-    if (!user) return res.status(404).json({ status: false, message: "User not found" });
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
 
     if (mode === "credits" && user.roadmap_credits < 100) {
-      return res.status(403).json({ status: false, message: "Insufficient credits" });
+      return res
+        .status(403)
+        .json({ status: false, message: "Insufficient credits" });
     }
 
     // 3. Generate content
     const activeKey = mode === "personal" ? apiKey : process.env.GEMINI_API_KEY;
-    const tree = await roadmapService.generateAIContent(query, activeKey, model || "gemini-3-flash-preview");
+    const tree = await roadmapService.generateAIContent(
+      query,
+      activeKey,
+      model || "gemini-3-flash-preview",
+    );
 
     // 4. Atomic Update: Save roadmap and decrement credits
     const finalResult = await prisma.$transaction(async (tx) => {
@@ -48,9 +62,82 @@ export const generateRoadmap = async (req: Request, res: Response) => {
       return saved;
     });
 
-    return res.status(200).json({ status: true, tree, roadmapId: finalResult.id });
+    return res
+      .status(200)
+      .json({ status: true, tree, roadmapId: finalResult.id });
   } catch (error) {
     console.error("Express Roadmap Error:", error);
-    return res.status(500).json({ status: false, message: "Roadmap generation failed." });
+    return res
+      .status(500)
+      .json({ status: false, message: "Roadmap generation failed." });
+  }
+};
+
+// send list of id,name of all roadmaps in database, sorted by createdAt desc
+export const getAllRoadmaps = async (req: Request, res: Response) => {
+  try {
+    const roadmaps = await prisma.roadmap.findMany({
+      select: { id: true, title: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return res.status(200).json({ status: true, roadmaps });
+  } catch (error) {
+    console.error("Express Get All Roadmaps Error:", error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Failed to fetch roadmaps." });
+  }
+};
+
+// get roadmap by id
+export const getRoadmapById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const roadmap = await prisma.roadmap.findUnique({ where: { id: Number(id) } });
+    if (!roadmap)
+      return res
+        .status(404)
+        .json({ status: false, message: "Roadmap not found." });
+    return res
+      .status(200)
+      .json({
+        status: true,
+        roadmap: {
+          id: roadmap.id,
+          title: roadmap.title,
+          content: JSON.parse(roadmap.content),
+        },
+      });
+  } catch (error) {
+    console.error("Express Get Roadmap By ID Error:", error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Failed to fetch roadmap." });
+  }
+};
+
+export const getModuleResources = async (req: Request, res: Response) => {
+  try {
+    const { topic } = req.query;
+
+    if (!topic) {
+      return res.status(400).json({ status: false, message: "Topic is required" });
+    }
+
+    // Fetch both in parallel for speed
+    const [videos, books] = await Promise.all([
+      resourceService.getYouTubeVideos(topic as string),
+      resourceService.getBooks(topic as string),
+    ]);
+
+    return res.status(200).json({
+      status: true,
+      resources: {
+        videos,
+        books,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: "Failed to fetch resources" });
   }
 };

@@ -15,7 +15,7 @@ const REDIRECT_URI = "http://localhost:3000/phase2/githubtracker";
 ===================================================== */
 function verifyToken(req: Request, res: Response, next: NextFunction) {
   try {
-    console.log("🧪 Skipping JWT verification for testing");
+    console.log("Skipping JWT verification for testing");
     (req as any).user = { id: 1 }; // Simulate user
     next();
   } catch (err) {
@@ -86,7 +86,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 });
 
 /* =====================================================
-   2️⃣ Login Route
+   Login Route
 ===================================================== */
 router.post("/login", async (req: Request, res: Response) => {
   try {
@@ -111,14 +111,14 @@ router.post("/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: "Invalid credentials" });
 
-    // ✅ Generate JWT as before
+    // Generate JWT as before
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
-    // ✅ Include phase in returned user object
+    // Include phase in returned user object
     res.json({
       ok: true,
       token,
@@ -127,7 +127,7 @@ router.post("/login", async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
         phase: user.phase,
-        userId: user.userId, // ✅ Added here
+        userId: user.userId, // Added here
       },
     });
   } catch (err) {
@@ -137,7 +137,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 /* =====================================================
-   3️⃣ GitHub Data Fetch
+   GitHub Data Fetch
 ===================================================== */
 router.get("/github/data/:username", async (req: Request, res: Response) => {
   try {
@@ -147,7 +147,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
     if (!username)
       return res.status(400).json({ error: "GitHub username required" });
 
-    // ✅ Fetch GitHub user profile
+    // Fetch GitHub user profile
     const userResponse = await fetch(
       `https://api.github.com/users/${username}`
     );
@@ -157,14 +157,14 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
         .json({ error: await userResponse.text() });
     const userData = await userResponse.json();
 
-    // ✅ Fetch repositories
+    // Fetch repositories
     const repoResponse = await fetch(
       `https://api.github.com/users/${username}/repos`
     );
     const repos = await repoResponse.json();
     console.log("github fetched");
 
-    // ✅ Build the payload to send to Kafka
+    // Build the payload to send to Kafka
     const payload = {
       userId,
       github: {
@@ -192,7 +192,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     };
 
-    // ✅ Send data to Kafka
+    // Send data to Kafka
     try {
       await sendEventToKafka(
         "github-tracker-events",
@@ -200,20 +200,20 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
         "githubTracker",
         payload
       );
-      console.log(`📤 Sent GitHub data for ${username} to Kafka pipeline`);
+      console.log(`Sent GitHub data for ${username} to Kafka pipeline`);
     } catch (kafkaErr) {
-      console.error("⚠️ Kafka pipeline send failed:", kafkaErr);
+      console.error("Kafka pipeline send failed:", kafkaErr);
     }
 
-    // ✅ Finally, respond to frontend
+    // Finally, respond to frontend
     res.json({ ok: true, user: userData, repos });
   } catch (err) {
-    console.error("❌ GitHub fetch error:", err);
+    console.error("GitHub fetch error:", err);
     res.status(500).json({ error: "Failed to fetch GitHub data" });
   }
 });
 /* =====================================================
-   4️⃣ LeetCode Data Fetch
+   LeetCode Data Fetch
 ===================================================== */
 router.get("/leetcode/:username", async (req: Request, res: Response) => {
   const { username } = req.params;

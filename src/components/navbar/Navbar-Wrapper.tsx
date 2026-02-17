@@ -148,7 +148,7 @@ const NavbarWrapper = ({
                   </div>
 
                   {/* Credits */}
-                  {showCredits && (
+                  {/* {showCredits && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Badge
@@ -161,7 +161,7 @@ const NavbarWrapper = ({
                       </TooltipTrigger>
                       <TooltipContent>Credits Remaining</TooltipContent>
                     </Tooltip>
-                  )}
+                  )} */}
 
                   <div className="flex flex-col font-[Orbitron]">
                     <span className="text-sm font-semibold text-white drop-shadow-sm">{username}</span>
@@ -223,7 +223,7 @@ const NavbarWrapper = ({
                       <User className="w-5 h-5 text-white" />
                     </div>
 
-                    {showCredits && (
+                    {/* {showCredits && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge className="cursor-default flex items-center gap-1 text-white" variant={userCredits > 0 ? "outline" : "destructive"}>
@@ -233,7 +233,7 @@ const NavbarWrapper = ({
                         </TooltipTrigger>
                         <TooltipContent>Credits Remaining</TooltipContent>
                       </Tooltip>
-                    )}
+                    )} */}
 
                     <div>
                       <div className="font-semibold text-white drop-shadow-sm">{username}</div>
