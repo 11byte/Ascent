@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { generateRoadmap, getAllRoadmaps, getRoadmapById, getModuleResources } from "../controllers/roadmap.controller";
+import {
+  generateRoadmap,
+  getAllRoadmaps,
+  getRoadmapById,
+  getModuleResources,
+} from "../controllers/roadmap.controller.js";
 import { get } from "http";
 
 const router = Router();

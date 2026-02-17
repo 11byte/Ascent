@@ -1,6 +1,6 @@
 // src/utils/warmupKafka.ts
 import { Kafka } from "kafkajs";
-import { userCache } from "../services/kafkaConsumerService";
+import { userCache } from "../services/kafkaConsumerService.js";
 
 export async function warmupKafkaCache() {
   console.log("🔥 Warming up Kafka cache...");

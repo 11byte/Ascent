@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { sendEventToKafka } from "../utils/producer"; // Updated import
-import { prisma } from "../utils/prisma"; // Prisma client
+import { sendEventToKafka } from "../utils/producer.js";
+import { prisma } from "../utils/prisma.js";
 
 const router = Router();
 
@@ -10,7 +10,7 @@ const router = Router();
 router.get("/blogs", async (_req: Request, res: Response) => {
   try {
     const devtoResponse = await fetch(
-      "https://dev.to/api/articles?per_page=15&tags=engineering"
+      "https://dev.to/api/articles?per_page=15&tags=engineering",
     );
     if (!devtoResponse.ok)
       throw new Error(`Dev.to API failed with status ${devtoResponse.status}`);

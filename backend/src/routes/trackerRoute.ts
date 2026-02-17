@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { sendEventToKafka } from "../utils/producer";
+import { sendEventToKafka } from "../utils/producer.js";
 
 const router = Router();
 
@@ -26,7 +26,7 @@ router.post("/quiz/save", async (req: Request, res: Response) => {
       "quiz-tracker-events",
       userId,
       "quizTracker",
-      payload
+      payload,
     );
     console.log(`📤 Sent questionnaire data for user ${userId} to Kafka`);
 

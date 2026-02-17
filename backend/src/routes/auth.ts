@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { prisma } from "../utils/prisma";
+import { prisma } from "../utils/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendEventToKafka } from "../utils/producer";
+import { sendEventToKafka } from "../utils/producer.js";
 
 const router = Router();
 
@@ -115,7 +115,7 @@ router.post("/login", async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // Include phase in returned user object
@@ -149,7 +149,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
 
     // Fetch GitHub user profile
     const userResponse = await fetch(
-      `https://api.github.com/users/${username}`
+      `https://api.github.com/users/${username}`,
     );
     if (!userResponse.ok)
       return res
@@ -159,7 +159,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
 
     // Fetch repositories
     const repoResponse = await fetch(
-      `https://api.github.com/users/${username}/repos`
+      `https://api.github.com/users/${username}/repos`,
     );
     const repos = await repoResponse.json();
     console.log("github fetched");
@@ -198,7 +198,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
         "github-tracker-events",
         userId as string,
         "githubTracker",
-        payload
+        payload,
       );
       console.log(`Sent GitHub data for ${username} to Kafka pipeline`);
     } catch (kafkaErr) {
@@ -220,8 +220,9 @@ router.get("/leetcode/:username", async (req: Request, res: Response) => {
   if (!username) return res.status(400).json({ error: "Username is required" });
 
   try {
+    // GET https://alfa-leetcode-api.onrender.com/<username>/solved
     const response = await fetch(
-      `https://leetcode-stats-api.herokuapp.com/${username}`
+      `https://alfa-leetcode-api.onrender.com/${username}/solved`,
     );
     if (!response.ok)
       return res.status(500).json({ error: "Failed to fetch LeetCode data" });

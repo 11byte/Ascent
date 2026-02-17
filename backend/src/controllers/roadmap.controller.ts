@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
-import { prisma } from "../utils/prisma";
-import { roadmapService, resourceService } from "../services/roadmap.service";
+import { prisma } from "../utils/prisma.js";
+import {
+  roadmapService,
+  resourceService,
+} from "../services/roadmap.service.js";
 
 export const generateRoadmap = async (req: Request, res: Response) => {
   try {
@@ -93,21 +96,21 @@ export const getAllRoadmaps = async (req: Request, res: Response) => {
 export const getRoadmapById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const roadmap = await prisma.roadmap.findUnique({ where: { id: Number(id) } });
+    const roadmap = await prisma.roadmap.findUnique({
+      where: { id: Number(id) },
+    });
     if (!roadmap)
       return res
         .status(404)
         .json({ status: false, message: "Roadmap not found." });
-    return res
-      .status(200)
-      .json({
-        status: true,
-        roadmap: {
-          id: roadmap.id,
-          title: roadmap.title,
-          content: JSON.parse(roadmap.content),
-        },
-      });
+    return res.status(200).json({
+      status: true,
+      roadmap: {
+        id: roadmap.id,
+        title: roadmap.title,
+        content: JSON.parse(roadmap.content),
+      },
+    });
   } catch (error) {
     console.error("Express Get Roadmap By ID Error:", error);
     return res
@@ -121,7 +124,9 @@ export const getModuleResources = async (req: Request, res: Response) => {
     const { topic } = req.query;
 
     if (!topic) {
-      return res.status(400).json({ status: false, message: "Topic is required" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Topic is required" });
     }
 
     // Fetch both in parallel for speed
@@ -138,6 +143,8 @@ export const getModuleResources = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ status: false, message: "Failed to fetch resources" });
+    return res
+      .status(500)
+      .json({ status: false, message: "Failed to fetch resources" });
   }
 };

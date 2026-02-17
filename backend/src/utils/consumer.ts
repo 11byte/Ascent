@@ -1,4 +1,4 @@
-import { kafka } from "./kafka";
+import { kafka } from "./kafka.js";
 
 const consumer = kafka.consumer({ groupId: "ascent-blog-interests" });
 
@@ -25,11 +25,11 @@ export async function startConsumer() {
           // ✅ Example structure: { title: "...", interested: true, timestamp: "..." }
           if (data.interested) {
             console.log(
-              `💡 User marked blog as INTERESTED: "${data.title}" at ${data.timestamp}`
+              `💡 User marked blog as INTERESTED: "${data.title}" at ${data.timestamp}`,
             );
           } else {
             console.log(
-              `❌ User marked blog as NOT INTERESTED: "${data.title}"`
+              `❌ User marked blog as NOT INTERESTED: "${data.title}"`,
             );
           }
 

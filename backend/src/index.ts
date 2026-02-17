@@ -1,19 +1,21 @@
-import "dotenv/config";
-import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
-import authRoutes from "./routes/auth";
-import blogRoutes from "./routes/blogRoutes";
-import timelineRoutes from "./routes/timelineRoutes";
-import githubTrackerRoutes from "./routes/githubTracker";
-import trackerRoute from "./routes/trackerRoute";
-import domainRoute from "./routes/domainRoute";
-import roadmapRouter from "./routes/roadmap.route";
+import authRoutes from "./routes/auth.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import timelineRoutes from "./routes/timelineRoutes.js";
+import githubTrackerRoutes from "./routes/githubTracker.js";
+import trackerRoute from "./routes/trackerRoute.js";
+import domainRoute from "./routes/domainRoute.js";
+import roadmapRouter from "./routes/roadmap.route.js";
 
-import { connectProducer, sendEventToKafka } from "./utils/producer";
-import { startKafkaConsumer, userCache } from "./services/kafkaConsumerService";
-import { warmupKafkaCache } from "./utils/warmupKafka";
+import { connectProducer, sendEventToKafka } from "./utils/producer.js";
+import {
+  startKafkaConsumer,
+  userCache,
+} from "./services/kafkaConsumerService.js";
+import { warmupKafkaCache } from "./utils/warmupKafka.js";
+import express from "express";
 
 const app = express();
 

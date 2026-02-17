@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { sendEventToKafka } from "../utils/producer";
+import { sendEventToKafka } from "../utils/producer.js";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
 
     // ✅ Fetch GitHub user profile
     const userResponse = await fetch(
-      `https://api.github.com/users/${username}`
+      `https://api.github.com/users/${username}`,
     );
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
@@ -30,13 +30,13 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
 
     // ✅ Fetch repositories
     const repoResponse = await fetch(
-      `https://api.github.com/users/${username}/repos?per_page=100`
+      `https://api.github.com/users/${username}/repos?per_page=100`,
     );
     const repos = await repoResponse.json();
 
     // ✅ Fetch recent events (commits, pushes, stars, etc.)
     const eventsResponse = await fetch(
-      `https://api.github.com/users/${username}/events?per_page=100`
+      `https://api.github.com/users/${username}/events?per_page=100`,
     );
     const events = await eventsResponse.json();
 
@@ -85,10 +85,10 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
         "github-tracker-events",
         userId,
         "githubTracker",
-        payload
+        payload,
       );
       console.log(
-        `📤 GitHub data successfully sent to Kafka (topic: github-tracker-events)`
+        `📤 GitHub data successfully sent to Kafka (topic: github-tracker-events)`,
       );
     } catch (kafkaErr) {
       console.error("⚠️ Kafka send failed:", kafkaErr);

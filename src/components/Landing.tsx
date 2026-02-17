@@ -345,86 +345,99 @@ export default function Landing() {
         </div>
 
         {/* Info Section (kept similar) */}
-        <motion.div
-          ref={infoRef}
-          initial={{ opacity: 0, rotateY: -20, rotateX: 8, scale: 0.9 }}
-          whileInView={{
-            opacity: 1,
-            rotateY: -30,
-            rotateX: 4,
-            rotateZ: 5,
-            scale: 1,
-          }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.9, ease: [0.12, 0, 0.39, 0] }}
-          style={{
-            position: "relative",
-            zIndex: 10,
-            background: "transparent",
-          }}
-          className="justify-center border-rose-500 border-y-2 
-             shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] 
-             mx-auto rounded-3xl max-w-[85%] transition-all"
-        >
-          <div
-            className="relative w-full min-h-[75vh] mx-auto 
-                  flex flex-col justify-center items-center py-20"
+        <div className="relative w-full flex justify-end pl-12 mb-9">
+          <motion.div
+            ref={infoRef}
+            initial={{ opacity: 0, rotateY: -20, rotateX: 0, scale: 0.9 }}
+            whileInView={{
+              opacity: 1,
+              rotateY: -25,
+              rotateX: 6,
+              rotateZ: 4,
+              scale: 1,
+            }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              position: "relative",
+              zIndex: 10,
+              background: "transparent",
+              perspective: "1600px",
+              transformStyle: "preserve-3d",
+            }}
+            className="border-rose-500 border-y-2 
+               shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] 
+               rounded-3xl 
+               w-[65%]   /* smaller width */
+               transition-all"
           >
-            {/* Video Section */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="relative w-[95%] max-w-6xl rounded-3xl 
-                 overflow-hidden shadow-[0_40px_120px_rgba(244,63,94,0.4)]"
+            <div
+              className="relative w-full min-h-[55vh] mx-auto 
+                  flex flex-col justify-center items-center py-20"
             >
-              <video
-                src="/Student_Lifecycle.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-[70vh] object-cover [filter:contrast(1.1)_brightness(1.05)_saturate(1.1)_sharpness(1.2)]"
-              />
+              {/* Video Section */}
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1 }}
+                className="relative w-[95%] max-w-6xl rounded-3xl 
+                 overflow-hidden shadow-[0_40px_120px_rgba(244,63,94,0.4)]"
+              >
+                <video
+                  src="/Student_Lifecycle.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-[70vh] object-cover [filter:contrast(1.1)_brightness(1.05)_saturate(1.1)_sharpness(1.2)]"
+                />
 
-              {/* Red Cinematic Overlay */}
-              <div
-                className="absolute inset-0 bg-gradient-to-tr 
+                {/* Red Cinematic Overlay */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-tr 
                       from-red-900/80 
                       via-red-600/50 
                       to-red-400/30 
                       mix-blend-multiply"
-              />
-            </motion.div>
+                />
+              </motion.div>
 
-            {/* Diagonal Text */}
-            <motion.h3
-              initial={{ opacity: 0, x: -60, rotate: 0 }}
-              whileInView={{ opacity: 1, x: 0, rotate: -1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.9 }}
-              style={{
-                fontFamily: "Orbitron",
-                fontWeight: "bold",
-                fontStyle: "italic",
-              }}
-              className="relative z-30 mt-12 text-7xl text-rose-600 mx-auto  rounded-xl"
-            >
-              Explore the Student Lifecycle
-              <br />
-              like never before...
-            </motion.h3>
-          </div>
-        </motion.div>
+              {/* Diagonal Text */}
+              <motion.h3
+                initial={{ opacity: 0, x: -60, rotate: 0 }}
+                whileInView={{ opacity: 1, x: 0, rotate: -1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: 0.9 }}
+                style={{
+                  fontFamily: "Orbitron",
+                  fontWeight: "bold",
+                  fontStyle: "italic",
+                }}
+                className="absolute z-30 mt-12 text-6xl text-rose-600 mx-auto  rounded-xl left-[-650px] top-0"
+              >
+                Explore
+                <br />
+                <span className="text-[#e5daff] text-9xl">
+                  The
+                  <br /> Student <br />
+                  Lifecycle
+                </span>
+                <br />
+                <br />
+                like never before...
+              </motion.h3>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Phases Section (Pinned horizontal carousel) */}
         <section
           ref={phasesRef}
-          className="relative z-30 mt-12 border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl"
+          className="relative z-30 mt-40 border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl"
           style={{
             position: "relative",
-            background: `linear-gradient(135deg,#050005 0%,#1a0a2a 30%,#4b1cbf 50%,#1a0a2a 70%,#050005 100%) `,
+            background: "transparent",
             paddingTop: "3rem",
             paddingBottom: "3rem",
           }}

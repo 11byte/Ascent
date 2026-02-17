@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { sendEventToKafka } from "../utils/producer";
+import { sendEventToKafka } from "../utils/producer.js";
 
 const router = Router();
 
