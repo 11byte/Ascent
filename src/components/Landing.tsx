@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -59,7 +60,7 @@ export default function Landing() {
     gsap.fromTo(
       infoRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
     );
 
     // // Nebula slight parallax
@@ -80,7 +81,7 @@ export default function Landing() {
     requestAnimationFrame(() => {
       const stars = titleRef.current?.querySelectorAll(".star");
       const lines = Array.from(
-        titleRef.current?.querySelectorAll(".line") || []
+        titleRef.current?.querySelectorAll(".line") || [],
       ) as SVGLineElement[];
 
       // ⭐ Stars first
@@ -94,7 +95,7 @@ export default function Landing() {
             duration: 0.25,
             stagger: 0.15,
             ease: "back.out(2)",
-          }
+          },
         );
       }
 
@@ -126,7 +127,7 @@ export default function Landing() {
             duration: 0.45,
             ease: "power2.out",
           },
-          ">-0.1" // small overlap for smooth chain
+          ">-0.1", // small overlap for smooth chain
         );
       });
     });
@@ -168,7 +169,7 @@ export default function Landing() {
           const progress = self.progress; // 0 -> 1 across full pinned area
           const index = Math.min(
             panelCount - 1,
-            Math.floor((progress * panelCount) / 1)
+            Math.floor((progress * panelCount) / 1),
           );
           setActiveIndex(index);
         },
@@ -346,42 +347,74 @@ export default function Landing() {
         {/* Info Section (kept similar) */}
         <motion.div
           ref={infoRef}
-          initial={{ opacity: 0.0, y: 10 }}
-          animate={{ opacity: 1.0, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.12, 0, 0.39, 0] }}
+          initial={{ opacity: 0, rotateY: -20, rotateX: 8, scale: 0.9 }}
+          whileInView={{
+            opacity: 1,
+            rotateY: -30,
+            rotateX: 4,
+            rotateZ: 5,
+            scale: 1,
+          }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.9, ease: [0.12, 0, 0.39, 0] }}
           style={{
             position: "relative",
             zIndex: 10,
-            background: `
-    linear-gradient(
-      135deg,
-      #050005 0%,       
-      #1a0a2a 30%,      
-      #4b1cbf 50%,      
-      #1a0a2a 70%,
-      #050005 100%    
-    )
-  `,
+            background: "transparent",
           }}
-          className="justify-center border-rose-500 border-y-2 shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] mx-auto  rounded-4xl max-w-[75%] transition-all"
+          className="justify-center border-rose-500 border-y-2 
+             shadow-[0_-20px_280px_0_rgba(244,63,94,0.5)] 
+             mx-auto rounded-3xl max-w-[85%] transition-all"
         >
-          <div className="relative w-[95%] h-[50vh] flex items-center py-10 px-0 ">
-            <div>
-              <h3
-                style={{
-                  fontFamily: "Orbitron",
-                  fontWeight: "bold",
-                  fontStyle: "italic",
-                }}
-                className=" text-rose-500 text-5xl m-0"
-              >
-                Student Monitoring Dashboards
-              </h3>
-              <p className="text-gray-300 max-w-xl mt-4">
-                Delivering deeper insights into student behaviour, performance,
-                and engagement — powered by AI and a privacy-first approach.
-              </p>
-            </div>
+          <div
+            className="relative w-full min-h-[75vh] mx-auto 
+                  flex flex-col justify-center items-center py-20"
+          >
+            {/* Video Section */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="relative w-[95%] max-w-6xl rounded-3xl 
+                 overflow-hidden shadow-[0_40px_120px_rgba(244,63,94,0.4)]"
+            >
+              <video
+                src="/Student_Lifecycle.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-[70vh] object-cover [filter:contrast(1.1)_brightness(1.05)_saturate(1.1)_sharpness(1.2)]"
+              />
+
+              {/* Red Cinematic Overlay */}
+              <div
+                className="absolute inset-0 bg-gradient-to-tr 
+                      from-red-900/80 
+                      via-red-600/50 
+                      to-red-400/30 
+                      mix-blend-multiply"
+              />
+            </motion.div>
+
+            {/* Diagonal Text */}
+            <motion.h3
+              initial={{ opacity: 0, x: -60, rotate: 0 }}
+              whileInView={{ opacity: 1, x: 0, rotate: -1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.9 }}
+              style={{
+                fontFamily: "Orbitron",
+                fontWeight: "bold",
+                fontStyle: "italic",
+              }}
+              className="relative z-30 mt-12 text-7xl text-rose-600 mx-auto  rounded-xl"
+            >
+              Explore the Student Lifecycle
+              <br />
+              like never before...
+            </motion.h3>
           </div>
         </motion.div>
 
@@ -697,11 +730,12 @@ export default function Landing() {
         </section>
 
         {/* --- Styles (nebula, stars, shimmer) --- */}
-        <style jsx>{`
+        <style>{`
           .nebula {
             position: absolute;
             inset: 0;
-            background: radial-gradient(
+            background:
+              radial-gradient(
                 circle at 25% 35%,
                 rgba(90, 0, 180, 0.18),
                 transparent 60%
@@ -732,8 +766,8 @@ export default function Landing() {
                 rgba(0, 0, 0, 0.015) 6px
               ),
               linear-gradient(180deg, #0b0b0d 0%, #0a0a2a 40%, #000000 100%);
-            background-blend-mode: screen, overlay, overlay, soft-light, normal,
-              normal;
+            background-blend-mode:
+              screen, overlay, overlay, soft-light, normal, normal;
             background-color: #000;
             filter: blur(40px) brightness(1.08);
             opacity: 0.95;

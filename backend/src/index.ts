@@ -38,7 +38,7 @@ app.use("/api", timelineRoutes);
 app.use("/tracker", githubTrackerRoutes);
 app.use("/tracker", trackerRoute);
 app.use("/api", domainRoute);
-
+app.use("/api", domainRoute);
 /* =====================================================
    🩺 Health Check Route
 ===================================================== */
