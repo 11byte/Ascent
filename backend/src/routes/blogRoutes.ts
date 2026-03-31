@@ -1,84 +1,154 @@
-import { Router, Request, Response } from "express";
-import { sendEventToKafka } from "../utils/producer.js";
-import { prisma } from "../utils/prisma.js";
+import express from "express";
+import axios from "axios";
 
-const router = Router();
+const router = express.Router();
 
-/* =====================================================
-   1️⃣ Fetch Blogs from Dev.to (Only)
-===================================================== */
-router.get("/blogs", async (_req: Request, res: Response) => {
+/* Difficulty classification */
+
+function classifyDifficulty(title: string, description: string) {
+  const text = (title + " " + description).toLowerCase();
+
+  if (
+    text.includes("architecture") ||
+    text.includes("system design") ||
+    text.includes("deep dive")
+  )
+    return "advanced";
+
+  if (
+    text.includes("build") ||
+    text.includes("tutorial") ||
+    text.includes("guide")
+  )
+    return "intermediate";
+
+  return "beginner";
+}
+
+/* Academic weighting */
+
+function academicScore(year: string, difficulty: string) {
+  const map: any = {
+    FE: { beginner: 1, intermediate: 0.7, advanced: 0.4 },
+    SE: { beginner: 0.8, intermediate: 1, advanced: 0.6 },
+    TE: { beginner: 0.6, intermediate: 1, advanced: 0.9 },
+    BE: { beginner: 0.4, intermediate: 0.8, advanced: 1 },
+  };
+
+  return map[year]?.[difficulty] ?? 0.6;
+}
+
+/* Summary generator */
+
+function generateSummary(text: string) {
+  if (!text) return "Summary unavailable for this article.";
+
+  const words = text.replace(/\s+/g, " ").trim().split(" ");
+
+  const minWords = 80;
+  const maxWords = 90;
+
+  if (words.length <= minWords) {
+    return words.join(" ") + "...";
+  }
+
+  const trimmed = words.slice(0, maxWords).join(" ");
+
+  // try cutting at sentence boundary
+  const lastPeriod = trimmed.lastIndexOf(".");
+
+  if (lastPeriod > minWords * 3) {
+    return trimmed.slice(0, lastPeriod + 1);
+  }
+
+  return trimmed + "...";
+}
+
+/* Image generator */
+
+function generateImage(title: string) {
+  const keyword = title.split(" ")[0];
+
+  return `https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60`;
+}
+
+/* Remove duplicates */
+
+function removeDuplicates(blogs: any[]) {
+  const seen = new Set();
+
+  return blogs.filter((blog) => {
+    if (seen.has(blog.url)) return false;
+
+    seen.add(blog.url);
+    return true;
+  });
+}
+
+/* Ranking */
+
+function computeScore(blog: any, year: string) {
+  const academicWeight = academicScore(year, blog.difficulty);
+
+  const popularity =
+    (blog.public_reactions_count || 0) * 0.6 + (blog.comments_count || 0) * 0.4;
+
+  return academicWeight * 0.4 + popularity * 0.6;
+}
+
+router.get("/", async (req, res) => {
   try {
-    const devtoResponse = await fetch(
-      "https://dev.to/api/articles?per_page=15&tags=engineering",
+    const year = typeof req.query.year === "string" ? req.query.year : "FE";
+
+    const response = await axios.get(
+      "https://dev.to/api/articles?tag=technology&per_page=40",
     );
-    if (!devtoResponse.ok)
-      throw new Error(`Dev.to API failed with status ${devtoResponse.status}`);
 
-    const devtoBlogs = (await devtoResponse.json()) as any[];
+    let blogs = response.data.map((blog: any) => {
+      const difficulty = classifyDifficulty(blog.title, blog.description || "");
 
-    const formattedBlogs = devtoBlogs.map((b) => ({
-      id: b.id,
-      title: b.title,
-      content: b.description || "",
-      author: b.user?.name || "Unknown",
-      createdAt: new Date(b.published_at),
-      domain: (b.tag_list && b.tag_list[0]) || "technology",
-      source: "Dev.to",
-      url: b.url,
-      cover_image: b.cover_image || null,
-    }));
+      return {
+        id: blog.id,
+        title: blog.title,
+        description: blog.description,
+        summary: generateSummary(blog.description || ""),
+        author: blog.user.name,
+        published_at: blog.published_at,
+        url: blog.url,
+        cover_image: blog.cover_image || generateImage(blog.title),
+        reactions: blog.public_reactions_count,
+        comments: blog.comments_count,
+        difficulty,
+      };
+    });
 
-    res.status(200).json({ ok: true, blogs: formattedBlogs });
+    blogs = removeDuplicates(blogs);
+
+    blogs = blogs
+      .map((b: any) => ({
+        ...b,
+        score: computeScore(b, year),
+      }))
+      .sort((a: any, b: any) => b.score - a.score);
+
+    res.json({ blogs });
   } catch (err) {
-    console.error("❌ Error fetching Dev.to blogs:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch blogs" });
   }
 });
 
-/* =====================================================
-   2️⃣ Track Blog Interaction (Interested / Not Interested)
-   - Save in Postgres + send Kafka event (under userId)
-===================================================== */
-router.post("/blogs/interact", async (req: Request, res: Response) => {
-  try {
-    const { title, interested, domain, userId } = req.body;
+router.post("/interact", async (req, res) => {
+  const { title, interested, userId } = req.body;
 
-    if (!title || typeof interested !== "boolean" || !userId) {
-      return res.status(400).json({ error: "Invalid payload" });
-    }
+  console.log({
+    userId,
+    title,
+    interested,
+    timestamp: Date.now(),
+  });
 
-    // 1️⃣ Save to Postgres (optional, for analytics)
-    await prisma.blogInteraction.create({
-      data: {
-        userRefId: userId, // ✅ renamed to match schema
-        blogTitle: title,
-        interested,
-        domain: domain || "general",
-      },
-    });
-
-    // 2️⃣ Construct event object
-    const eventPayload = {
-      title,
-      interested,
-      domain: domain || "general",
-    };
-
-    // 3️⃣ Send to Kafka (topic: blog-events)
-    await sendEventToKafka("blog-events", userId, "blog", eventPayload);
-
-    console.log("📤 Blog interaction sent to Kafka:", {
-      topic: "blog-events",
-      userId,
-      ...eventPayload,
-    });
-
-    res.json({ ok: true, message: "Interaction saved and sent to Kafka" });
-  } catch (err) {
-    console.error("❌ Blog interaction error:", err);
-    res.status(500).json({ error: "Failed to save interaction" });
-  }
+  res.json({ success: true });
 });
 
 export default router;

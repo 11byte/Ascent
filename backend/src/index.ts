@@ -8,6 +8,8 @@ import githubTrackerRoutes from "./routes/githubTracker.js";
 import trackerRoute from "./routes/trackerRoute.js";
 import domainRoute from "./routes/domainRoute.js";
 import roadmapRouter from "./routes/roadmap.route.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import skillRouter from "./routes/skillRoute.js";
 
 import { connectProducer, sendEventToKafka } from "./utils/producer.js";
 import {
@@ -18,29 +20,31 @@ import { warmupKafkaCache } from "./utils/warmupKafka.js";
 import express from "express";
 
 const app = express();
-
-/* =====================================================
-   Middleware Setup
-===================================================== */
 app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
   }),
 );
+app.use("/api/analytics", analyticsRoutes);
+
+/* =====================================================
+   Middleware Setup
+===================================================== */
 app.use(express.json());
 app.use(morgan("dev"));
 
 /* =====================================================
    Routes
 ===================================================== */
-app.use("/api", blogRoutes);
+app.use("/api/blogs", blogRoutes);
 app.use("/auth", authRoutes);
 app.use("/api", timelineRoutes);
 app.use("/tracker", githubTrackerRoutes);
 app.use("/tracker", trackerRoute);
 app.use("/api", domainRoute);
 app.use("/api/roadmap", roadmapRouter);
+app.use("/api/skills", skillRouter);
 /* =====================================================
    Health Check Route
 ===================================================== */

@@ -60,7 +60,9 @@ body {
   height: 100%;
   opacity: 1;
   transform: rotate(3deg) translate(0, -4px);
-  box-shadow: 0 0 10px #e11d48, 0 0 5px #fb7185;
+  box-shadow:
+    0 0 10px #e11d48,
+    0 0 5px #fb7185;
 }
 
 /* Optional: Hide spinner */
@@ -100,7 +102,8 @@ body {
   animation: marquee var(--duration, var(--marquee-duration)) linear infinite;
 }
 .animate-marquee-vertical {
-  animation: marquee-vertical var(--duration, var(--marquee-duration)) linear infinite;
+  animation: marquee-vertical var(--duration, var(--marquee-duration)) linear
+    infinite;
 }
 
 /* Optional: pause on hover without Tailwind's group-hover utility */
@@ -121,4 +124,16 @@ body {
     animation-duration: 1ms;
     animation-iteration-count: 1;
   }
+}
+
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove selection box */
+.react-flow__node:focus,
+.react-flow__node:focus-visible {
+  outline: none !important;
 }

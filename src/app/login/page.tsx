@@ -28,18 +28,19 @@ const Login = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Login failed");
 
-      // ✅ Assuming backend returns user info including phase
-      const userPhase = data?.user?.phase || "1";
-      console.log(userPhase);
+      // ✅ STORE JWT TOKEN (THIS FIXES YOUR ISSUE)
+      localStorage.setItem("token", data.token);
 
-      // ✅ Store in localStorage
+      // existing logic
+      const userPhase = data?.user?.phase || "1";
+
       localStorage.setItem("userPhase", userPhase);
       localStorage.setItem("userEmail", data?.user?.email || "");
       localStorage.setItem("userName", data?.user?.name || "");
       localStorage.setItem("userId", data?.user?.userId || "");
+
       setMsg("Logged in successfully! Redirecting...");
 
-      // ✅ Redirect dynamically to phase page
       setTimeout(() => {
         router.push(`/phase${userPhase}`);
       }, 1500);
@@ -52,10 +53,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#f4f4f4] via-[#e6e6e6] to-[#dcdcdc] relative overflow-hidden">
-      {/* Subtle metallic shine effect */}
+      {/* metallic shine */}
+
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.6)_20%,transparent_50%,rgba(255,255,255,0.6)_80%)] opacity-40 animate-[metallicShimmer_6s_linear_infinite]" />
 
-      {/* Home btn */}
+      {/* Home button */}
+
       <motion.button
         onClick={() => router.push("/")}
         onHoverStart={() => setIsHovered(true)}
@@ -86,6 +89,7 @@ const Login = () => {
       </motion.button>
 
       {/* Login Form */}
+
       <div className="w-full max-w-md px-6 relative z-10">
         <form
           onSubmit={handleLogin}
@@ -119,7 +123,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-[100px] from-[#f8f8f8] to-[#e6e6e6] font-[Orbitron] text-md rounded-xl cursor-pointer py-3 font-semibold transition hover:bg-[linear-gradient(135deg,#e4e4e4,#fafafa,#dcdcdc)] hover:shadow-md hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 border border-none text-[#4a4949]"
+              className="w-[100px] font-[Orbitron] text-md rounded-xl cursor-pointer py-3 font-semibold transition hover:bg-[linear-gradient(135deg,#e4e4e4,#fafafa,#dcdcdc)] hover:shadow-md hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 border border-none text-[#4a4949]"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -143,7 +147,6 @@ const Login = () => {
         </form>
       </div>
 
-      {/* Animation */}
       <style jsx global>{`
         @keyframes metallicShimmer {
           0% {

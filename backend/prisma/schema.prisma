@@ -72,9 +72,18 @@ model BlogInteraction {
 
 model Skill {
   id        Int      @id @default(autoincrement())
-  name      String
-  level     String?  // beginner, intermediate, advanced
 
+  // timeline fields
+  phase     String                      // 1,2,3,4 (engineering year)
+  category  String                      // Technical Skills, Academics etc
+  skillName String                      // MERN App, Hackathon Winner etc
+
+  // optional metadata
+  level     String?                     // beginner, intermediate, advanced
+  proofUrl  String?                     // github repo, certificate link
+  source    String?                     // manual, github, leetcode, hackathon
+
+  // relation
   user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
 

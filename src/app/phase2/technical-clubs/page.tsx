@@ -14,7 +14,7 @@ import ClubCard from "./components/clubs/ClubCard";
 // --- Data Structure for the 5 clubs (UNCHANGED) ---
 const clubs = [
   {
-    name: "Cognito AI Labs",
+    name: "AIML CLub",
     icon: <Brain className="w-10 h-10 text-fuchsia-400" />,
     desc: "Deep learning, generative AI, LLMs, and MLOps deployment projects.",
     domain: "aiml",
@@ -22,21 +22,21 @@ const clubs = [
     color: "fuchsia",
   },
   {
-    name: "Aether Cloud Ops",
+    name: "DevOps Club",
     icon: <Cloud className="w-10 h-10 text-cyan-400" />,
     desc: "Kubernetes, Docker, Terraform, CI/CD pipelines, and multi-cloud infrastructure.",
     domain: "devops",
     color: "cyan",
   },
   {
-    name: "Aegis Security",
+    name: "Cyber Security Club",
     icon: <Shield className="w-10 h-10 text-red-500" />,
     desc: "Pen-testing, threat analysis, incident response, and collegiate CTF contests.",
     domain: "cyber-sec",
     color: "red",
   },
   {
-    name: "Nexus Data Core",
+    name: "Data Science Club",
     icon: <BarChart className="w-10 h-10 text-lime-400" />,
     desc: "Statistical modeling, Python/R, big data visualization, and predictive analytics.",
     domain: "data-science",
@@ -53,7 +53,7 @@ const clubs = [
 
 // --- Domain List for Filter Buttons (UNCHANGED) ---
 const domains = [
-  { label: "AI/ML", key: "ai-ml" },
+  { label: "AI/ML", key: "aiml" },
   { label: "DevOps/Cloud", key: "devops" },
   { label: "Cyber Security", key: "cyber-sec" },
   { label: "Data Science", key: "data-science" },
@@ -71,17 +71,14 @@ export default function TechnicalClubsPage() {
 
   const filteredClubs = useMemo(() => {
     return clubs.filter(
-      (club) => !selectedDomain || club.domain === selectedDomain
+      (club) => !selectedDomain || club.domain === selectedDomain,
     );
   }, [selectedDomain]);
 
   return (
     <main className="relative min-h-screen overflow-hidden p-23">
       {/* Background Layout */}
-      <div
-        className="absolute inset-0 bg-[linear-gradient(-45deg,#ff9a9e,#fad0c4,#fbc2eb,#a18cd1)]
-                bg-[length:400%_400%] animate-[gradient_15s_ease_infinite]"
-      />
+      <div className="absolute inset-0 bg-black" />
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
@@ -93,7 +90,7 @@ export default function TechnicalClubsPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.6, 0.05, 0.0, 0.9] }}
         >
-          <span className="bg-gradient-to-r from-fuchsia-400 to-cyan-400 text-transparent bg-clip-text font-[Orbitron]">
+          <span className="bg-gradient-to-r from-yellow-200 to-yellow-300 text-transparent bg-clip-text font-[Orbitron]">
             Tech Clubs
           </span>{" "}
         </motion.h1>

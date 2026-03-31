@@ -16,102 +16,82 @@ import {
   Network,
 } from "lucide-react";
 
-interface App {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  description: string;
-  category: "development" | "learning" | "productivity" | string;
-  link: string;
-  phases: string[]; // ✅ Added — list of phases where the app should appear
-}
-
 export const AppLauncher = ({ phase = "phase1" }) => {
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Define apps and assign them to specific phases
-  const apps: App[] = useMemo(
+  const apps = useMemo(
     () => [
       {
         id: "timeline",
         name: "Timeline",
-        icon: <Timeline className="w-8 h-8" />,
-        color: "from-blue-500 to-blue-600",
+        icon: <Timeline className="w-7 h-7" />,
+        color: "from-blue-500 to-cyan-400",
         description: "Track your development journey",
-        category: "productivity",
         link: `/${phase}/timeline`,
-        phases: ["phase1", "phase2", "phase3", "phase4"], // ✅ visible in these phases
+        phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
         id: "blogs",
         name: "Blogs",
-        icon: <BookOpen className="w-8 h-8" />,
-        color: "from-green-500 to-green-600",
+        icon: <BookOpen className="w-7 h-7" />,
+        color: "from-green-400 to-emerald-500",
         description: "Read and write technical blogs",
-        category: "learning",
         link: `/${phase}/blog`,
         phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
         id: "tracker",
         name: "Tracker",
-        icon: <Brain className="w-8 h-8" />,
-        color: "from-purple-500 to-purple-600",
+        icon: <Brain className="w-7 h-7" />,
+        color: "from-purple-500 to-violet-500",
         description: "Daily Data Feed",
-        category: "learning",
         link: `/${phase}/tracker`,
         phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
         id: "marathons",
         name: "Macro-thons",
-        icon: <Trophy className="w-8 h-8" />,
-        color: "from-yellow-500 to-orange-500",
+        icon: <Trophy className="w-7 h-7" />,
+        color: "from-yellow-400 to-orange-500",
         description: "Participate in coding marathons",
-        category: "development",
         link: `/${phase}/macrothon`,
         phases: ["phase3", "phase4"],
       },
       {
         id: "leetspace",
         name: "LeetSpace",
-        icon: <Code className="w-8 h-8" />,
-        color: "from-red-500 to-red-600",
+        icon: <Code className="w-7 h-7" />,
+        color: "from-red-500 to-pink-500",
         description: "Practice coding problems",
-        category: "development",
         link: `/${phase}/leetTracker`,
         phases: ["phase2", "phase3", "phase4"],
       },
       {
         id: "gittrack",
         name: "GitTrack",
-        icon: <GitBranch className="w-8 h-8" />,
-        color: "from-gray-600 to-gray-700",
+        icon: <GitBranch className="w-7 h-7" />,
+        color: "from-gray-500 to-gray-700",
         description: "Monitor your Git activity",
-        category: "productivity",
         link: `/${phase}/githubtracker`,
         phases: ["phase3", "phase4"],
       },
       {
         id: "bountyhub",
         name: "BountyHub",
-        icon: <DollarSign className="w-8 h-8" />,
-        color: "from-emerald-500 to-emerald-600",
+        icon: <DollarSign className="w-7 h-7" />,
+        color: "from-emerald-400 to-green-600",
         description: "Discover coding bounties",
-        category: "development",
         link: `/${phase}/Bountyboard`,
         phases: ["phase2", "phase3", "phase4"],
       },
       {
         id: "roadmap-generator",
         name: "RoadMap",
-        icon: <Network className="w-8 h-8" />,
-        color: "from-emerald-500 to-emerald-600",
-        description: "Discover coding bounties",
-        category: "development",
+        icon: <Network className="w-7 h-7" />,
+        color: "from-indigo-400 to-purple-600",
+        description: "Generate learning roadmap",
         link: `/${phase}/roadmap-generator`,
         phases: ["phase4"],
       },
@@ -119,7 +99,6 @@ export const AppLauncher = ({ phase = "phase1" }) => {
     [phase],
   );
 
-  // ✅ Filter by both phase and search query
   const filteredApps = useMemo(() => {
     const phaseFiltered = apps.filter((app) => app.phases.includes(phase));
     if (!searchQuery) return phaseFiltered;
@@ -135,144 +114,128 @@ export const AppLauncher = ({ phase = "phase1" }) => {
     setSearchQuery("");
   };
 
-  const handleAppClick = (app: App) => {
-    console.log(`Opening ${app.name}...`);
-  };
-
   return (
     <>
-      {/* Launcher Button */}
+      {/* 🔥 Floating Button */}
       <motion.div
-        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50"
-        whileHover={{ scale: 1.1 }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+        whileHover={{ scale: 1.12 }}
         whileTap={{ scale: 0.9 }}
       >
         <motion.button
           onClick={toggleLauncher}
-          className="relative w-16 h-16 bg-gradient-to-br from-primary-red to-accent-teal rounded-2xl shadow-2xl flex items-center justify-center hover:shadow-3xl transition-all duration-100 backdrop-blur-sm border cursor-pointer border-white/20"
-          animate={isLauncherOpen ? { rotate: 45 } : { rotate: 0 }}
-          transition={{ duration: 0.2 }}
+          className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
           style={{
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.15)",
             boxShadow:
-              "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+              "0 10px 40px rgba(0,0,0,0.4), inset 0 0 10px rgba(255,255,255,0.05)",
           }}
+          animate={isLauncherOpen ? { rotate: 45 } : { rotate: 0 }}
         >
-          <Grid3X3 className="w-8 h-8 text-white drop-shadow-lg" />
+          <Grid3X3 className="w-7 h-7 text-white" />
         </motion.button>
       </motion.div>
 
-      {/* Launcher Overlay */}
+      {/* 🔥 Overlay */}
       <AnimatePresence>
         {isLauncherOpen && (
           <motion.div
+            className="fixed inset-0 z-40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 overflow-hidden"
             onClick={toggleLauncher}
           >
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: "rgba(0, 0, 0, 0.4)",
-                backdropFilter: "blur(20px) saturate(180%)",
-              }}
-            />
+            {/* Background Blur */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-2xl" />
+
+            {/* Content */}
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 40 }}
-              transition={{ duration: 0.15, ease: "easeInOut" }}
               className="absolute inset-0 flex items-center justify-center p-4 pt-24"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              ref={scrollContainerRef}
             >
-              <div className="w-full max-w-5xl max-h-[calc(100vh-8rem)] overflow-hidden rounded-3xl border border-white/30 shadow-2xl bg-white/10 backdrop-blur-2xl">
-                <div className="flex justify-between items-center p-6 border-b border-white/20">
+              <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)]">
+                {/* Header */}
+                <div className="flex justify-between items-center p-6 border-b border-white/10">
                   <div>
-                    <h2 className="text-3xl font-bold text-white">
+                    <h2 className="text-3xl font-semibold text-white">
                       Applications
                     </h2>
-                    <p className="text-white/60 text-sm mt-1 capitalize">
-                      {phase.replace("phase", "Phase ")} Development Suite
+                    <p className="text-white/50 text-sm mt-1">
+                      {phase.toUpperCase()} Suite
                     </p>
                   </div>
+
                   <motion.button
-                    onClick={toggleLauncher}
                     whileHover={{ scale: 1.1, rotate: 90 }}
-                    className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
+                    onClick={toggleLauncher}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
                   >
-                    <X className="w-5 h-5 text-white" />
+                    <X className="text-white w-5 h-5" />
                   </motion.button>
                 </div>
 
-                <div
-                  className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6"
-                  onWheel={(e) => e.stopPropagation()}
-                  onTouchMove={(e) => e.stopPropagation()}
-                >
-                  {/* Search */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
-                  >
-                    <div className="relative">
-                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-                      <input
-                        type="text"
-                        placeholder="Search applications..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white/10 border border-white/20 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-accent-teal"
-                      />
-                    </div>
-                  </motion.div>
-
-                  {/* App Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredApps.map((app, index) => (
-                      <motion.div
-                        key={app.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03 }}
-                        whileHover={{ scale: 1.05, y: -4 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="group cursor-pointer"
-                      >
-                        <Link href={app.link}>
-                          <div className="bg-white/10 rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all hover:bg-white/20 hover:shadow-xl">
-                            <div
-                              className={`w-16 h-16 bg-gradient-to-br ${app.color} rounded-xl flex items-center justify-center mb-4 shadow-lg`}
-                            >
-                              <div className="text-white">{app.icon}</div>
-                            </div>
-                            <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-accent-teal">
-                              {app.name}
-                            </h3>
-                            <p className="text-white/60 text-sm line-clamp-2">
-                              {app.description}
-                            </p>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
+                {/* Search */}
+                <div className="p-6">
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search apps..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                    />
                   </div>
+                </div>
 
-                  {/* No Results */}
-                  {filteredApps.length === 0 && (
+                {/* Grid */}
+                <div className="px-6 pb-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {filteredApps.map((app, index) => (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-center py-12"
+                      key={app.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03 }}
                     >
-                      <p className="text-white/60 text-lg">
-                        No applications found for this phase.
-                      </p>
+                      <Link href={app.link}>
+                        <motion.div
+                          whileHover={{
+                            scale: 1.06,
+                            y: -6,
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          className="relative p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden group"
+                        >
+                          {/* Glow */}
+                          <div
+                            className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition bg-gradient-to-br ${app.color}`}
+                          />
+
+                          {/* Icon */}
+                          <motion.div
+                            whileHover={{ y: -2 }}
+                            className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${app.color}`}
+                          >
+                            {app.icon}
+                          </motion.div>
+
+                          {/* Text */}
+                          <h3 className="text-white font-semibold text-lg">
+                            {app.name}
+                          </h3>
+                          <p className="text-white/50 text-sm mt-1">
+                            {app.description}
+                          </p>
+                        </motion.div>
+                      </Link>
                     </motion.div>
-                  )}
+                  ))}
                 </div>
               </div>
             </motion.div>

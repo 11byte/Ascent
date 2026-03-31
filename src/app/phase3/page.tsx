@@ -3,16 +3,17 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FogLiftSection } from "../../components/animations/FogLiftSection";
 import { AppLauncher } from "../../components/home/AppLauncher";
-import { HomeBackground } from "../../components/home/HomeBackground";
 import { WidgetSystem } from "../../components/widgets/WidgetSystem";
 import { usePhase2 } from "../../context/phase2Context";
 import Lenis from "@studio-freight/lenis";
+
+// ✅ NEW IMPORT
+import BackgroundTimeline from "../../components/BackgroundTimeline";
 
 export default function Home() {
   const { username } = usePhase2();
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // 🔹 Generate binary elements only on client
   const [binaryElements, setBinaryElements] = useState<
     {
       left: string;
@@ -24,10 +25,9 @@ export default function Home() {
   >([]);
 
   useEffect(() => {
-    // Lenis Smooth Scroll
     const lenis = new Lenis({
       smoothWheel: true,
-      lerp: 0.08, // Adjust scroll smoothness
+      lerp: 0.08,
     });
 
     function raf(time: number) {
@@ -37,12 +37,10 @@ export default function Home() {
 
     requestAnimationFrame(raf);
 
-    // Clock updater
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
-    // Random binary elements
     const elements = Array.from({ length: 8 }, () => ({
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
@@ -54,7 +52,7 @@ export default function Home() {
 
     return () => {
       clearInterval(timer);
-      lenis.destroy(); // Clean up
+      lenis.destroy();
     };
   }, []);
 
@@ -72,17 +70,19 @@ export default function Home() {
         day: "numeric",
       }),
     }),
-    [currentTime]
+    [currentTime],
   );
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Background */}
-      <HomeBackground username="Paresh" background="#000000" />
+      {/* ✅ NEW BACKGROUND TIMELINE */}
+      <div className="z-40">
+        <BackgroundTimeline />
+      </div>
 
       {/* Main Content */}
-      <FogLiftSection className="min-h-screen relative z-10 pt-20">
-        {/* Top Right - Clock */}
+      <FogLiftSection className="min-h-screen relative z-10 pt-20 pointer-events-none">
+        {/* Clock */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -97,7 +97,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Compact Greeting - Bottom Right */}
+        {/* Greeting */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -109,7 +109,7 @@ export default function Home() {
           </h1>
         </motion.div>
 
-        {/* Subtle Binary Background Elements */}
+        {/* Binary Particles */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.05 }}
@@ -138,7 +138,7 @@ export default function Home() {
         </motion.div>
       </FogLiftSection>
 
-      {/* Widget System */}
+      {/* Widgets */}
       <WidgetSystem />
 
       {/* App Launcher */}

@@ -103,7 +103,7 @@ function generateStudent(i: number): Student {
       [
         { name: "Communication", level: randInt(30, 85) },
         { name: "Problem Solving", level: randInt(30, 95) },
-      ].slice(0, 2)
+      ].slice(0, 2),
     );
   const timelineScore = [
     randInt(10, 70),
@@ -120,7 +120,7 @@ function generateStudent(i: number): Student {
         "Open source experience",
         "Leadership",
       ],
-      randInt(1, 2)
+      randInt(1, 2),
     ),
     weaknesses: pick(
       [
@@ -129,15 +129,15 @@ function generateStudent(i: number): Student {
         "Interview anxiety",
         "Lack of research exposure",
       ],
-      randInt(0, 2)
+      randInt(0, 2),
     ),
     opportunities: pick(
       ["Hackathons", "Internships", "Research projects", "Clubs"],
-      randInt(1, 2)
+      randInt(1, 2),
     ),
     threats: pick(
       ["Crowded placement pool", "Industry shifts", "Skill mismatch"],
-      randInt(0, 2)
+      randInt(0, 2),
     ),
   };
 
@@ -160,7 +160,7 @@ function generateStudent(i: number): Student {
         "Published Article",
         "Club Lead",
       ],
-      randInt(0, 2)
+      randInt(0, 2),
     ),
     gitContribs: randInt(0, 600),
     leetSolved: randInt(0, 1000),
@@ -171,7 +171,7 @@ function generateStudent(i: number): Student {
 }
 
 const STUDENTS = Array.from({ length: 2000 }).map((_, i) =>
-  generateStudent(i + 1)
+  generateStudent(i + 1),
 );
 
 /* -------------------------
@@ -200,7 +200,7 @@ function formatCSV(arr: Student[]) {
         if (h === "domains") return `"${s.domains.join(";")}"`;
         return (s as any)[h];
       })
-      .join(",")
+      .join(","),
   );
   return [header.join(","), ...rows].join("\n");
 }
@@ -289,8 +289,8 @@ export default function HODDashboardPage() {
     // sort by (git+leet) desc for visibility
     (Object.keys(groups) as unknown as Phase[]).forEach((p) =>
       groups[p].sort(
-        (a, b) => b.gitContribs + b.leetSolved - (a.gitContribs + a.leetSolved)
-      )
+        (a, b) => b.gitContribs + b.leetSolved - (a.gitContribs + a.leetSolved),
+      ),
     );
     return groups;
   }, [students, query, phaseFilter]);
@@ -306,13 +306,13 @@ export default function HODDashboardPage() {
         grouped[4].length,
       ],
       avgLeet: Math.round(
-        students.reduce((a, b) => a + b.leetSolved, 0) / students.length
+        students.reduce((a, b) => a + b.leetSolved, 0) / students.length,
       ),
       avgGit: Math.round(
-        students.reduce((a, b) => a + b.gitContribs, 0) / students.length
+        students.reduce((a, b) => a + b.gitContribs, 0) / students.length,
       ),
     }),
-    [students, grouped]
+    [students, grouped],
   );
 
   const exportVisibleCSV = useCallback(() => {
@@ -338,7 +338,7 @@ export default function HODDashboardPage() {
       a.click();
       URL.revokeObjectURL(url);
     },
-    [grouped]
+    [grouped],
   );
 
   const handleJumpTo = () => {
@@ -348,7 +348,7 @@ export default function HODDashboardPage() {
     const found = students.find(
       (s) =>
         s.roll.toLowerCase() === val.toLowerCase() ||
-        s.name.toLowerCase() === val.toLowerCase()
+        s.name.toLowerCase() === val.toLowerCase(),
     );
     if (found) {
       setSelected(found);
@@ -390,7 +390,7 @@ export default function HODDashboardPage() {
             <button
               onClick={() => {
                 /* placeholder: create new student */ alert(
-                  "Create student flow (demo)"
+                  "Create student flow (demo)",
                 );
               }}
               className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-black rounded-md"
@@ -417,7 +417,7 @@ export default function HODDashboardPage() {
                 setPhaseFilter(
                   e.target.value === "all"
                     ? "all"
-                    : (Number(e.target.value) as Phase)
+                    : (Number(e.target.value) as Phase),
                 )
               }
               className="bg-[#05251c] px-3 py-2 rounded-md border border-[#0e3e2e] text-emerald-100"
@@ -610,28 +610,28 @@ export default function HODDashboardPage() {
                             dimension: "Strengths",
                             score: Math.min(
                               100,
-                              selected.swot.strengths.length * 30
+                              selected.swot.strengths.length * 30,
                             ),
                           },
                           {
                             dimension: "Weaknesses",
                             score: Math.min(
                               100,
-                              selected.swot.weaknesses.length * 30
+                              selected.swot.weaknesses.length * 30,
                             ),
                           },
                           {
                             dimension: "Opportunities",
                             score: Math.min(
                               100,
-                              selected.swot.opportunities.length * 30
+                              selected.swot.opportunities.length * 30,
                             ),
                           },
                           {
                             dimension: "Threats",
                             score: Math.min(
                               100,
-                              selected.swot.threats.length * 30
+                              selected.swot.threats.length * 30,
                             ),
                           },
                         ]}

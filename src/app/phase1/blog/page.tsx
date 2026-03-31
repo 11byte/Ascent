@@ -4,33 +4,46 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type BlogPost = {
-  id: number | string;
+  id: number;
   title: string;
   description?: string;
+  summary?: string;
   author: string;
   published_at: string;
   url: string;
-  cover_image?: string | null;
+  cover_image?: string;
+  difficulty: string;
 };
 
-const PremiumBlogPage = () => {
+export default function BlogPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<BlogPost | null>(null);
   const [clickedBlogs, setClickedBlogs] = useState<Record<string, boolean>>({});
-  const [expandedId, setExpandedId] = useState<number | string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ---------------- Fetch Blogs ----------------
+  const year = "FE";
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/blogs", {
-          cache: "no-store",
-        });
+        const res = await fetch(
+          `http://localhost:5000/api/blogs?year=${year}`,
+          { cache: "no-store" },
+        );
+
         if (!res.ok) throw new Error("Failed to fetch blogs");
+
         const data = await res.json();
-        setBlogs(data.blogs || []);
+
+        /* Remove duplicates on frontend as extra safety */
+
+        const unique = Array.from(
+          new Map(data.blogs.map((b: BlogPost) => [b.url, b])).values(),
+        ) as BlogPost[];
+
+        setBlogs(unique);
       } catch (err) {
-        console.error("Error fetching blogs:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -39,188 +52,180 @@ const PremiumBlogPage = () => {
     fetchBlogs();
   }, []);
 
-  // ---------------- Handle Interest ----------------
-  const handleInterest = async (blogTitle: string, interested: boolean) => {
-    try {
-      setClickedBlogs((prev) => ({ ...prev, [blogTitle]: true }));
-      const userId = localStorage.getItem("userId") || "guest";
+  const handleInterest = async (title: string, interested: boolean) => {
+    const userId = localStorage.getItem("userId") || "guest";
 
-      await fetch("http://localhost:5000/api/blogs/interact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: blogTitle, interested, userId }),
-      });
+    setClickedBlogs((prev) => ({ ...prev, [title]: true }));
 
-      console.log(
-        `Sent ${
-          interested ? "Interested" : "Not Interested"
-        } for ${blogTitle} by user ${userId}`
-      );
-    } catch (err) {
-      console.error("Failed to send interaction:", err);
-    }
+    await fetch("http://localhost:5000/api/blogs/interact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, interested, userId }),
+    });
   };
 
-  // ---------------- UI ----------------
-  if (loading)
-    return <p className="text-center mt-10 text-gray-400">Loading blogs...</p>;
+  /* Fallback image */
 
-  if (!blogs.length)
-    return <p className="text-center mt-10 text-gray-400">No blogs found.</p>;
+  const fallback =
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60";
+
+  if (loading)
+    return (
+      <div className="flex justify-center mt-32 text-gray-400 text-lg">
+        Loading curated tech blogs...
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#0c0c0c] to-[#1a1a1a] text-white py-20 px-6">
-      <h1 className="text-6xl font-bold mb-16 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 font-[Orbitron] drop-shadow-[0_0_10px_rgba(180,100,255,0.5)]">
-        Tech Blogs
-      </h1>
+    <div className="min-h-screen bg-[#0b0b0b] text-white px-5 md:px-10 py-16">
+      {/* HEADER */}
 
-      {/* Grid Layout */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        <AnimatePresence>
-          {blogs.map((post) => {
-            const isExpanded = expandedId === post.id;
-            return (
-              <motion.div
-                key={post.id}
-                layout
-                whileHover={{
-                  scale: 1.1,
-                  transition: { duration: 0.1, ease: "easeOut" },
-                }}
-                onClick={() => setExpandedId(isExpanded ? null : post.id)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  layout: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }, // smoother
-                }}
-                style={{
-                  boxShadow: isExpanded
-                    ? "0px 0px 30px rgba(147, 51, 234, 0.3)"
-                    : "0px 4px 20px rgba(255, 255, 255, 0.05)",
-                }}
-                className={`relative bg-gradient-to-br from-[#1a1a1a] to-[#222] hover:bg-gradient-to-br hover:from-[#1a1a1a] hover:to-[#222222] border border-gray-800 rounded-2xl cursor-pointer backdrop-blur-lg transition-all duration-500 
-                  ${
-                    isExpanded
-                      ? "col-span-2 lg:col-span-3"
-                      : "hover:shadow-[0_0_15px_rgba(180,100,255,0.25)]"
-                  }
-                  ${isExpanded ? "overflow-visible" : "overflow-hidden"}`}
-              >
-                {/* Cover Image */}
-                {post.cover_image && (
-                  <motion.img
-                    layout="position"
-                    src={post.cover_image}
-                    alt={post.title}
-                    className={`w-full object-cover rounded-t-2xl ${
-                      isExpanded ? "h-80" : "h-48"
-                    } transition-all duration-700 ease-in-out`}
-                  />
-                )}
+      <div className="max-w-6xl mx-auto text-center mb-16">
+        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          Engineering Blog Feed
+        </h1>
 
-                {/* Card Content */}
-                <motion.div
-                  layout
-                  className="p-6 flex flex-col justify-between"
-                >
-                  <motion.h2
-                    layout="position"
-                    className="text-2xl font-semibold mb-3 text-gray-100"
-                  >
-                    {post.title}
-                  </motion.h2>
-
-                  {/* Buttons */}
-                  <div className="flex flex-wrap gap-3 mb-4 z-10">
-                    {/* Interested Button */}
-                    <motion.button
-                      whileHover={{
-                        scale: 1.05,
-                        transition: { duration: 0.25, ease: "easeOut" },
-                      }}
-                      whileTap={{ scale: 0.97 }}
-                      className={`px-5 py-2.5 rounded-full font-medium border transition-all duration-300 ease-in-out
-                        ${
-                          clickedBlogs[post.title]
-                            ? "bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed"
-                            : "border-pink-600 text-pink-400 bg-transparent hover:bg-pink-600/20 hover:text-pink-300"
-                        }`}
-                      disabled={!!clickedBlogs[post.title]}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInterest(post.title, true);
-                      }}
-                    >
-                      Interested
-                    </motion.button>
-
-                    {/* Not Interested Button */}
-                    <motion.button
-                      whileHover={{
-                        scale: 1.05,
-                        transition: { duration: 0.25, ease: "easeOut" },
-                      }}
-                      whileTap={{ scale: 0.97 }}
-                      className={`px-5 py-2.5 rounded-full font-medium border transition-all duration-300 ease-in-out
-                        ${
-                          clickedBlogs[post.title]
-                            ? "bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed"
-                            : "border-purple-600 text-purple-400 bg-transparent hover:bg-purple-600/20 hover:text-purple-300"
-                        }`}
-                      disabled={!!clickedBlogs[post.title]}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInterest(post.title, false);
-                      }}
-                    >
-                      Not Interested
-                    </motion.button>
-                  </div>
-
-                  {/* Description */}
-                  {!isExpanded ? (
-                    <p className="text-gray-400 text-sm line-clamp-3 mb-2">
-                      {post.description || "No description available."}
-                    </p>
-                  ) : (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.35 }}
-                      className="text-gray-300"
-                    >
-                      <p className="mb-4 leading-relaxed text-[15px]">
-                        {post.description || "No description available."}
-                      </p>
-
-                      <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                        <span>By {post.author || "Unknown"}</span>
-                        <span>
-                          {new Date(post.published_at).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <a
-                        href={post.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-block text-pink-400 hover:text-pink-200 font-medium underline underline-offset-2"
-                      >
-                        Read Full Article →
-                      </a>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+        <p className="text-gray-400 mt-4 max-w-xl mx-auto text-sm md:text-base">
+          Curated technical articles ranked according to academic stage and
+          engineering relevance.
+        </p>
       </div>
+
+      {/* BLOG GRID */}
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {blogs.map((blog) => (
+          <motion.div
+            key={blog.id}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            className="cursor-pointer bg-[#141414] border border-gray-800 rounded-xl overflow-hidden transition hover:border-purple-500"
+            onClick={() => setSelected(blog)}
+          >
+            {/* IMAGE */}
+
+            <img
+              src={blog.cover_image || fallback}
+              onError={(e) => (e.currentTarget.src = fallback)}
+              alt={blog.title}
+              className="w-full h-48 object-cover"
+            />
+
+            {/* CONTENT */}
+
+            <div className="p-5">
+              <h2 className="text-lg font-semibold line-clamp-2">
+                {blog.title}
+              </h2>
+
+              <p className="text-gray-400 text-sm line-clamp-2 mt-2">
+                {blog.description || blog.summary}
+              </p>
+
+              {/* META */}
+
+              <div className="flex justify-between items-center mt-4 text-xs">
+                <span className="text-gray-500">{blog.author}</span>
+
+                <span
+                  className={`px-2 py-1 rounded ${
+                    blog.difficulty === "beginner"
+                      ? "bg-green-700"
+                      : blog.difficulty === "intermediate"
+                        ? "bg-yellow-700"
+                        : "bg-red-700"
+                  }`}
+                >
+                  {blog.difficulty}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* MODAL */}
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+          >
+            <motion.div
+              className="bg-[#141414] max-w-3xl w-full rounded-xl overflow-hidden border border-gray-700"
+              initial={{ scale: 0.85, y: 40 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 120 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* IMAGE */}
+
+              <img
+                src={selected.cover_image || fallback}
+                onError={(e) => (e.currentTarget.src = fallback)}
+                className="w-full h-72 object-cover"
+              />
+
+              {/* DETAILS */}
+
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
+
+                {/* SUMMARY */}
+
+                <p className="text-gray-300 mb-5 leading-relaxed">
+                  {selected.summary || selected.description}
+                </p>
+
+                {/* META */}
+
+                <div className="flex justify-between text-sm text-gray-400 mb-6">
+                  <span>{selected.author}</span>
+
+                  <span>
+                    {new Date(selected.published_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* ACTION BUTTONS */}
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    disabled={clickedBlogs[selected.title]}
+                    onClick={() => handleInterest(selected.title, true)}
+                    className="flex-1 py-2 border border-pink-500 rounded hover:bg-pink-600/20"
+                  >
+                    Interested
+                  </button>
+
+                  <button
+                    disabled={clickedBlogs[selected.title]}
+                    onClick={() => handleInterest(selected.title, false)}
+                    className="flex-1 py-2 border border-purple-500 rounded hover:bg-purple-600/20"
+                  >
+                    Not Interested
+                  </button>
+
+                  <a
+                    href={selected.url}
+                    target="_blank"
+                    className="flex-1 py-2 text-center border border-gray-600 rounded hover:bg-gray-700"
+                  >
+                    Read Article
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
-export default PremiumBlogPage;
+}
