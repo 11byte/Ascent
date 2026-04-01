@@ -17,7 +17,7 @@ export async function warmupKafkaCache() {
   ];
 
   const warmupConsumer = kafka.consumer({
-    groupId: `warmup-consumer-${Date.now()}`, // ✅ unique, isolated
+    groupId: `warmup-consumer-${Date.now()}`, // unique, isolated
   });
 
   try {
@@ -27,7 +27,7 @@ export async function warmupKafkaCache() {
       await warmupConsumer.subscribe({ topic, fromBeginning: true });
     }
 
-    console.log("⏳ Warmup consumer started — replaying all messages...");
+    console.log("Warmup consumer started — replaying all messages...");
 
     await warmupConsumer.run({
       eachMessage: async ({ topic, message }) => {
@@ -52,18 +52,18 @@ export async function warmupKafkaCache() {
               break;
           }
         } catch (err) {
-          console.error("❌ Warmup message error:", err);
+          console.error("Warmup message error:", err);
         }
       },
     });
 
-    // ✅ Important: Wait a moment for late messages
+    // Important: Wait a moment for late messages
     await new Promise((r) => setTimeout(r, 1000));
   } finally {
-    console.log("✅ Warmup complete — disconnecting warmup consumer.");
+    console.log("Warmup complete — disconnecting warmup consumer.");
     await warmupConsumer.stop();
     await warmupConsumer.disconnect();
   }
 
-  console.log("✅ Kafka Warmup Done! Cache rebuilt.");
+  console.log("Kafka Warmup Done! Cache rebuilt.");
 }

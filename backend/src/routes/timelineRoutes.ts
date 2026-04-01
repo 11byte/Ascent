@@ -18,7 +18,7 @@ router.post("/timeline/sync", async (req: Request, res: Response) => {
 
     res.json({ ok: true, message: "Timeline data sent to Kafka" });
   } catch (err) {
-    console.error("❌ Timeline sync error:", err);
+    console.error("Timeline sync error:", err);
     res.status(500).json({ error: "Failed to sync timeline" });
   }
 });

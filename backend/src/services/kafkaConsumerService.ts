@@ -1,4 +1,5 @@
 import { Kafka } from "kafkajs";
+import { prisma } from "../utils/prisma.js";
 
 const kafka = new Kafka({
   clientId: "ascent-domain-service",
@@ -7,7 +8,7 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: "ascent-shared-consumer-v3" });
 
-// ✅ Central in-memory cache (user → topic → messages)
+// Central in-memory cache (user → topic → messages)
 export const userCache: Record<string, any> = {};
 
 export async function startKafkaConsumer() {
@@ -27,7 +28,7 @@ export async function startKafkaConsumer() {
     eachMessage: async ({ topic, message }) => {
       try {
         const msg = JSON.parse(message.value?.toString() || "{}");
-        const { userId } = msg;
+        const { userId, feature, data } = msg;
 
         if (!userId) return;
 
@@ -38,6 +39,19 @@ export async function startKafkaConsumer() {
         switch (topic) {
           case "quiz-tracker-events":
             userCache[userId].quiz.push(msg);
+            // 2. NEW: Save the ML payload permanently to PostgreSQL
+            if (feature === "trackerV2" && data) {
+              await prisma.trackerSession.create({
+                data: {
+                  userId: userId,
+                  assignedDomain: data.assignedDomain,
+                  metrics: data.metrics,
+                },
+              });
+              console.log(
+                `💾 Saved TrackerV2 ML Session to Database for user: ${userId}`,
+              );
+            }
             break;
           case "github-tracker-events":
             userCache[userId].github.push(msg);
@@ -47,19 +61,19 @@ export async function startKafkaConsumer() {
             break;
         }
 
-        console.log(`📥 Cached message for user ${userId} under ${topic}`);
+        console.log(`Cached message for user ${userId} under ${topic}`);
       } catch (err) {
-        console.error("❌ Error processing Kafka message:", err);
+        console.error("Error processing Kafka message:", err);
       }
     },
   });
 
   console.log(
-    "✅ Shared Kafka Consumer started — listening to all tracker topics"
+    "Shared Kafka Consumer started — listening to all tracker topics",
   );
 }
 
 export function getUserKafkaData(userId: string) {
-  console.log("🔎 Available users in cache:", Object.keys(userCache));
+  console.log("Available users in cache:", Object.keys(userCache));
   return userCache[userId];
 }

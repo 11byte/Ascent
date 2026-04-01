@@ -2,7 +2,6 @@ import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { transformToTree } from "../utils/roadmap.util.js";
 import axios from "axios";
 
-const GOOGLE_API_KEY = process.env.GEMINI_API_KEY; // Using the same key
 // Helper function for sleeping between retries
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -63,7 +62,7 @@ export const resourceService = {
             q: `${topic} tutorial`,
             type: "video",
             videoEmbeddable: "true",
-            key: GOOGLE_API_KEY,
+            key: process.env.GOOGLE_API_KEY,
           },
         },
       );
@@ -89,7 +88,7 @@ export const resourceService = {
             q: `intitle:${topic}`,
             maxResults: 5,
             printType: "books",
-            key: GOOGLE_API_KEY,
+            key: process.env.GOOGLE_API_KEY,
           },
         },
       );

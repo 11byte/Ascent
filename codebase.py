@@ -7,7 +7,7 @@ codebase_dirs = {
 
 # Directories to include for each codebase
 include_dirs = {
-    "codebase": [ "backend/src", "backend/prisma"],
+    "codebase": [ "backend/src", "backend/prisma", "src"],
 }
 
 # Allowed file extensions
@@ -24,7 +24,7 @@ allowed_extensions = [
 output_file = "backend_codebase.txt"
 
 # Clear the output file by opening it in write mode
-with open(output_file, "w") as output:
+with open(output_file, "w", encoding="utf-8") as output:
     output.write("")  # Clear the content
 
     for codebase_name, codebase_dir in codebase_dirs.items():
@@ -57,7 +57,7 @@ with open(output_file, "w") as output:
                     )  # prepend codebase name
 
                     try:
-                        with open(file_path, "r") as f:
+                        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
                             # Write the file path and content structured as desired
                             output.write(
                                 f"File Path: {relative_path_with_codebase}\n\n"
@@ -73,7 +73,7 @@ with open(output_file, "w") as output:
                         output.write(
                             f"Error reading file: {relative_path_with_codebase} - {str(e)}\n"
                         )
-                        print(f"Failed to read {relative_path_with_codebase}: {e}")
+                        print(f"Failed to read {relative_path_with_codebase}: {str(e).encode('utf-8', 'ignore').decode()}")
         
         # Add five lines of spacing between codebases
         output.write("\n\n\n\n\n")  # Five new lines for spacing between codebases

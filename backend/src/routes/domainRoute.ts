@@ -15,7 +15,7 @@ router.post("/domain/predict", async (req, res) => {
       return res.status(400).json({ error: "userId is required" });
     }
 
-    // ✅ 1️⃣ Fetch cached Kafka data for this user
+    // Fetch cached Kafka data for this user
     const userData = getUserKafkaData(userId);
     if (!userData) {
       return res
@@ -23,10 +23,10 @@ router.post("/domain/predict", async (req, res) => {
         .json({ error: "No Kafka data found for this user" });
     }
 
-    // ✅ 2️⃣ Extract flat numerical features
+    // Extract flat numerical features
     const featurePayload = extractFeatures(userData);
 
-    // ✅ 3️⃣ Call Python script with features
+    // Call Python script with features
     const python = spawn("python", ["domain_predict.py"]);
     let output = "";
 
@@ -35,16 +35,16 @@ router.post("/domain/predict", async (req, res) => {
     });
 
     python.stderr.on("data", (data) => {
-      console.error("🐍 Python error:", data.toString());
+      console.error(" Python error:", data.toString());
     });
 
     python.on("close", () => {
       try {
         const result = JSON.parse(output);
-        console.log("🎯 Domain Prediction Result:", result);
+        console.log(" Domain Prediction Result:", result);
         res.json(result);
       } catch (err) {
-        console.error("❌ Failed to parse Python output:", err);
+        console.error("Failed to parse Python output:", err);
         res.status(500).json({ error: "Invalid response from model" });
       }
     });
@@ -52,12 +52,12 @@ router.post("/domain/predict", async (req, res) => {
     python.stdin.write(JSON.stringify(featurePayload));
     python.stdin.end();
   } catch (err) {
-    console.error("🚨 Domain prediction route error:", err);
+    console.error("Domain prediction route error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// ✅ Add this route in domainRoute.ts
+// Add this route in domainRoute.ts
 router.get("/kafka/data/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -69,16 +69,16 @@ router.get("/kafka/data/:userId", async (req, res) => {
         .json({ error: "No Kafka data found for this user" });
     }
 
-    console.log(`✅ Fetched cached Kafka data for ${userId}`);
+    console.log(`Fetched cached Kafka data for ${userId}`);
     res.json(data);
   } catch (err) {
-    console.error("❌ Kafka data fetch error:", err);
+    console.error("Kafka data fetch error:", err);
     res.status(500).json({ error: "Failed to fetch Kafka data" });
   }
 });
 
 /**
- * 🧮 Feature extraction logic
+ * Feature extraction logic
  * Converts raw Kafka data → numerical inputs for the model
  */
 function extractFeatures(userData: any) {
@@ -103,7 +103,7 @@ function extractFeatures(userData: any) {
     blog_likes: blogData.filter((b: any) => b.data?.interested === true).length,
   };
 
-  console.log("📊 Extracted Features:", features);
+  console.log("Extracted Features:", features);
   return features;
 }
 

@@ -4,7 +4,7 @@ import { sendEventToKafka } from "../utils/producer.js";
 const router = Router();
 
 /* =====================================================
-   3️⃣ GitHub Tracker Route — Fetch and Send to Kafka
+   GitHub Tracker Route — Fetch and Send to Kafka
 ===================================================== */
 router.get("/github/data/:username", async (req: Request, res: Response) => {
   try {
@@ -15,34 +15,34 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "GitHub username required" });
     }
 
-    console.log(`🧠 Fetching GitHub data for: ${username} (userId: ${userId})`);
+    console.log(`Fetching GitHub data for: ${username} (userId: ${userId})`);
 
-    // ✅ Fetch GitHub user profile
+    // Fetch GitHub user profile
     const userResponse = await fetch(
       `https://api.github.com/users/${username}`,
     );
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
-      console.error(`❌ GitHub profile fetch failed: ${errorText}`);
+      console.error(`GitHub profile fetch failed: ${errorText}`);
       return res.status(userResponse.status).json({ error: errorText });
     }
     const userData = await userResponse.json();
 
-    // ✅ Fetch repositories
+    // Fetch repositories
     const repoResponse = await fetch(
       `https://api.github.com/users/${username}/repos?per_page=100`,
     );
     const repos = await repoResponse.json();
 
-    // ✅ Fetch recent events (commits, pushes, stars, etc.)
+    // Fetch recent events (commits, pushes, stars, etc.)
     const eventsResponse = await fetch(
       `https://api.github.com/users/${username}/events?per_page=100`,
     );
     const events = await eventsResponse.json();
 
-    console.log(`✅ GitHub data fetched successfully for ${username}`);
+    console.log(`GitHub data fetched successfully for ${username}`);
 
-    // ✅ Construct payload for Kafka
+    // Construct payload for Kafka
     const payload = {
       userId,
       github: {
@@ -78,9 +78,9 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     };
 
-    // ✅ Send to Kafka
+    // Send to Kafka
     try {
-      console.log(`🚀 Sending GitHub data to Kafka for user: ${userId}`);
+      console.log(`Sending GitHub data to Kafka for user: ${userId}`);
       await sendEventToKafka(
         "github-tracker-events",
         userId,
@@ -88,13 +88,13 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
         payload,
       );
       console.log(
-        `📤 GitHub data successfully sent to Kafka (topic: github-tracker-events)`,
+        `GitHub data successfully sent to Kafka (topic: github-tracker-events)`,
       );
     } catch (kafkaErr) {
-      console.error("⚠️ Kafka send failed:", kafkaErr);
+      console.error("Kafka send failed:", kafkaErr);
     }
 
-    // ✅ Respond to frontend (including events)
+    // Respond to frontend (including events)
     res.status(200).json({
       ok: true,
       user: userData,
@@ -102,7 +102,7 @@ router.get("/github/data/:username", async (req: Request, res: Response) => {
       events,
     });
   } catch (err) {
-    console.error("❌ GitHub fetch error:", err);
+    console.error("GitHub fetch error:", err);
     res.status(500).json({ error: "Failed to fetch GitHub data" });
   }
 });

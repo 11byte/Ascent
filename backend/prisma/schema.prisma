@@ -113,3 +113,12 @@ model Roadmap {
 
   createdAt   DateTime @default(now())
 }
+
+// ---------------- Tracker -----------------
+model TrackerSession {
+  id             String   @id @default(uuid())
+  userId         String
+  assignedDomain String
+  metrics        Json
+  createdAt      DateTime @default(now())
+}
