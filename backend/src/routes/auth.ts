@@ -136,6 +136,32 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/profile/:userId", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        phase: true,
+        roadmap_credits: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ status: true, user });
+  } catch (err) {
+    console.error("Profile fetch error:", err);
+    return res.status(500).json({ status: false, message: "Failed to fetch profile" });
+  }
+});
+
 /* =====================================================
    GitHub Data Fetch
 ===================================================== */

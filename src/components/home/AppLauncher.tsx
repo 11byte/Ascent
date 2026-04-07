@@ -51,6 +51,15 @@ export const AppLauncher = ({ phase = "phase1" }) => {
         phases: ["phase1", "phase2", "phase3", "phase4"],
       },
       {
+        id: "trackerv2",
+        name: "TrackerV2",
+        icon: <Brain className="w-7 h-7" />,
+        color: "from-purple-500 to-violet-500",
+        description: "Enhanced Daily Data Feed",
+        link: `/${phase}/trackerv2`,
+        phases: ["phase1", "phase2", "phase3", "phase4"],
+      },
+      {
         id: "marathons",
         name: "Macro-thons",
         icon: <Trophy className="w-7 h-7" />,

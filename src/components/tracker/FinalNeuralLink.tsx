@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { Zap, CheckCircle2, ChevronRight, Gamepad2, Volume2 } from "lucide-react";
+import { CheckCircle2, ChevronRight, Gamepad2, Volume2 } from "lucide-react";
 
 // --- 1. Predefined Word Banks ---
 const WORD_BANKS: Record<string, string[]> = {
@@ -14,9 +14,8 @@ const WORD_BANKS: Record<string, string[]> = {
   "DataScience": ["PANDAS", "DATA", "PLOT", "GRAPH", "MEAN", "MATH", "CHART", "STATS"]
 };
 
-// --- 2. Custom Game Audio Engine (No external files needed!) ---
+// --- 2. Custom Game Audio Engine ---
 const AudioEngine = {
-  // Synthesize a retro "blip" sound. Pitch gets higher based on 'step'
   playConnect: (step: number) => {
     if (typeof window === "undefined") return;
     try {
@@ -26,9 +25,7 @@ const AudioEngine = {
       const gain = ctx.createGain();
       
       osc.type = "sine";
-      // Base frequency 400Hz, goes up by 150Hz for each connected node
       osc.frequency.setValueAtTime(400 + (step * 150), ctx.currentTime); 
-      
       gain.gain.setValueAtTime(0.1, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       
@@ -36,10 +33,8 @@ const AudioEngine = {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.1);
-    } catch (e) { console.warn("Audio blocked"); }
+    } catch (e) {}
   },
-
-  // Synthesize a low error "buzz"
   playError: () => {
     if (typeof window === "undefined") return;
     try {
@@ -50,7 +45,6 @@ const AudioEngine = {
       
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(150, ctx.currentTime);
-      
       gain.gain.setValueAtTime(0.1, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       
@@ -60,8 +54,6 @@ const AudioEngine = {
       osc.stop(ctx.currentTime + 0.3);
     } catch (e) {}
   },
-
-  // Synthesize a happy success "chime"
   playSuccess: () => {
     if (typeof window === "undefined") return;
     try {
@@ -73,7 +65,6 @@ const AudioEngine = {
       osc.type = "triangle";
       osc.frequency.setValueAtTime(800, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
-      
       gain.gain.setValueAtTime(0.1, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
       
@@ -83,18 +74,14 @@ const AudioEngine = {
       osc.stop(ctx.currentTime + 0.4);
     } catch (e) {}
   },
-
-  // Use Browser's built in AI Voice to speak the word
   speakWord: (word: string) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(word);
-      utterance.rate = 1.1; // Slightly faster, more energetic
-      utterance.pitch = 1.2; // Slightly higher pitch for a "tech" feel
-      // Optional: Try to find a specific voice
+      utterance.rate = 1.1; 
+      utterance.pitch = 1.2; 
       const voices = window.speechSynthesis.getVoices();
       const techVoice = voices.find(v => v.name.includes("Google") || v.name.includes("Samantha"));
       if (techVoice) utterance.voice = techVoice;
-      
       window.speechSynthesis.speak(utterance);
     }
   }
@@ -122,9 +109,16 @@ function useScrambleText(text: string, trigger: boolean) {
   return displayText;
 }
 
-// --- 4. Main Game Component ---
-// UPDATED: onComplete now expects a metrics object to send to the ML payload
-export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domain?: string, onComplete?: (metrics: any) => void }) {
+// --- 4. Main Component ---
+export default function FinalNeuralLink({ 
+  domain = "AIML", 
+  theme, 
+  onComplete 
+}: { 
+  domain?: string, 
+  theme: any, 
+  onComplete?: (metrics: any) => void 
+}) {
   const [validWords, setValidWords] = useState<string[]>([]);
   const [letters, setLetters] = useState<{id: number, letter: string, x: number, y: number}[]>([]);
   const [activePath, setActivePath] = useState<number[]>([]);
@@ -133,23 +127,19 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [gameWon, setGameWon] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(true); // Let user toggle sound if they want
+  const [audioEnabled, setAudioEnabled] = useState(true);
   
-  // --- ADDED: ML TELEMETRY TRACKERS ---
+  // --- ML TELEMETRY TRACKERS ---
   const startTime = useRef<number>(0);
   const attempts = useRef<number>(0);
   const [finalMetrics, setFinalMetrics] = useState<any>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const nodesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cloudsRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
   
   const scrambledTitle = useScrambleText("NEURAL LINK ESTABLISHED", !loading && !gameWon);
 
   useEffect(() => {
-    // Ensure speech synthesis voices are loaded in advance
     if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.getVoices();
     }
@@ -159,16 +149,40 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
       const selectedWords = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
       setValidWords(selectedWords);
 
-      const combinedString = selectedWords.join("");
-      const uniqueLettersArray = Array.from(combinedString.split(""));
+      // --- INTELLIGENT CHARACTER FREQUENCY LOGIC ---
+      const maxLetterCounts: Record<string, number> = {};
       
-      const radius = 110;
-      const center = { x: 160, y: 160 }; 
+      selectedWords.forEach(word => {
+        const currentWordCounts: Record<string, number> = {};
+        for (const char of word) {
+          currentWordCounts[char] = (currentWordCounts[char] || 0) + 1;
+        }
+        for (const char in currentWordCounts) {
+          if (!maxLetterCounts[char] || currentWordCounts[char] > maxLetterCounts[char]) {
+            maxLetterCounts[char] = currentWordCounts[char];
+          }
+        }
+      });
+
+      let finalLettersArray: string[] = [];
+      for (const char in maxLetterCounts) {
+        for (let i = 0; i < maxLetterCounts[char]; i++) {
+          finalLettersArray.push(char);
+        }
+      }
+
+      // Jumble the final letter array
+      finalLettersArray = finalLettersArray.sort(() => 0.5 - Math.random());
       
-      const nodes = uniqueLettersArray.map((letter, i) => {
-        const angle = (i * 2 * Math.PI) / uniqueLettersArray.length - Math.PI / 2;
+      // Scale circle radius dynamically based on how many letters we generated
+      const radius = Math.max(120, finalLettersArray.length * 8.5); 
+      const center = { x: radius + 30, y: radius + 30 }; 
+      
+      const nodes = finalLettersArray.map((letter, i) => {
+        const angle = (i * 2 * Math.PI) / finalLettersArray.length - Math.PI / 2;
         return {
-          id: i, letter: letter as string,
+          id: i, 
+          letter: letter,
           x: center.x + radius * Math.cos(angle),
           y: center.y + radius * Math.sin(angle),
         };
@@ -176,38 +190,33 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
 
       setLetters(nodes);
       setLoading(false);
-
-      // --- ADDED: Start the timer exactly when nodes load ---
       startTime.current = Date.now();
     }, 800);
+
     return () => clearTimeout(timer);
   }, [domain]);
 
   useGSAP(() => {
-    gsap.to(groundRef.current, { backgroundPositionX: "1301px", duration: 20, ease: "none", repeat: -1, force3D: true });
-    gsap.to(cloudsRef.current, { backgroundPositionX: "-2247px", duration: 52, ease: "none", repeat: -1, force3D: true });
-
     if (!loading && !gameWon && nodesRef.current.length > 0) {
       gsap.fromTo(nodesRef.current, 
         { scale: 0, opacity: 0, rotation: -180, y: 50 }, 
-        { scale: 1, opacity: 1, rotation: 0, y: 0, duration: 0.8, stagger: 0.08, ease: "elastic.out(1, 0.5)" }
+        { scale: 1, opacity: 1, rotation: 0, y: 0, duration: 0.8, stagger: 0.05, ease: "elastic.out(1, 0.5)" }
       );
     }
   }, [loading, gameWon]);
 
-  // --- Interaction Logic with Audio Integration ---
+  // --- Interaction Logic ---
   const handlePointerDown = (id: number, e: React.PointerEvent) => {
     e.preventDefault(); 
     setIsDragging(true); 
     setActivePath([id]);
-    if (audioEnabled) AudioEngine.playConnect(0); // Play first note
+    if (audioEnabled) AudioEngine.playConnect(0); 
   };
 
   const handlePointerEnter = (id: number) => {
     if (isDragging && !activePath.includes(id)) {
       const newPath = [...activePath, id];
       setActivePath(newPath);
-      // The pitch goes higher the longer the chain is!
       if (audioEnabled) AudioEngine.playConnect(newPath.length); 
     }
   };
@@ -222,23 +231,19 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
     setIsDragging(false);
     if (activePath.length === 0) return;
     
-    // --- ADDED: Increment total attempts every time they drag and release ---
     attempts.current += 1;
-    
     const formedWord = activePath.map((id) => letters[id].letter).join("");
     
     if (validWords.includes(formedWord) && !foundWords.includes(formedWord)) {
       const newFound = [...foundWords, formedWord];
       setFoundWords(newFound);
       
-      // Correct Word Feedback
       if (audioEnabled) {
         AudioEngine.playSuccess();
-        setTimeout(() => AudioEngine.speakWord(formedWord), 300); // Speak after chime
+        setTimeout(() => AudioEngine.speakWord(formedWord), 300); 
       }
       
       if (newFound.length >= validWords.length) {
-        // --- ADDED: Calculate final ML metrics when they win ---
         const timeTaken = (Date.now() - startTime.current) / 1000;
         const accuracy = (validWords.length / attempts.current) * 100;
         
@@ -249,13 +254,10 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
           correct_words: validWords.length
         });
 
-        setTimeout(() => setGameWon(true), 1200); // Wait a bit longer so voice finishes
+        setTimeout(() => setGameWon(true), 1200); 
       }
     } else if (activePath.length > 1) {
-      // Wrong Word Feedback
       if (audioEnabled) AudioEngine.playError();
-      
-      // Shake animation for error
       if (containerRef.current) {
         gsap.fromTo(containerRef.current, 
           { x: -10 }, { x: 0, duration: 0.4, ease: "elastic.out(2, 0.1)" }
@@ -266,72 +268,99 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
   };
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-screen min-h-[700px] bg-[#63D0FF] overflow-hidden flex items-center justify-center font-sans">
+    <div className="relative w-full h-full min-h-[700px] flex items-center justify-center font-sans overflow-hidden">
       
-      <div ref={cloudsRef} className="absolute top-0 left-0 w-full h-[230px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 bottom' }} />
-      <div ref={groundRef} className="absolute bottom-0 left-0 w-full h-[192px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 0' }} />
-
       <div className="relative z-10 w-full max-w-md mx-4">
         <AnimatePresence mode="wait">
           
           {loading && (
-            <motion.div key="loading" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} className="bg-gray-900/70 backdrop-blur-2xl border border-white/20 rounded-3xl p-10 shadow-2xl flex flex-col items-center justify-center h-[500px]">
-              <Gamepad2 className="w-12 h-12 text-cyan-400 mb-4 animate-pulse" />
-              <h2 className="text-white font-bold text-xl tracking-widest animate-pulse font-mono">INITIALIZING...</h2>
+            <motion.div key="loading" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} 
+              className="backdrop-blur-2xl border rounded-3xl p-10 shadow-2xl flex flex-col items-center justify-center h-[500px]"
+              style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+            >
+              <Gamepad2 className="w-12 h-12 mb-4 animate-pulse" style={{ color: theme.primary }} />
+              <h2 className="font-bold text-xl tracking-widest animate-pulse font-mono text-white">INITIALIZING...</h2>
             </motion.div>
           )}
 
           {!loading && !gameWon && (
-            <motion.div key="game" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-gray-900/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-              
-              {/* Audio Toggle Button */}
+            <motion.div key="game" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} 
+              className="backdrop-blur-xl border rounded-3xl p-8 shadow-2xl relative"
+              style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+            >
               <button 
                 onClick={() => setAudioEnabled(!audioEnabled)}
-                className="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors border border-white/10 text-cyan-400"
+                className="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors border border-white/10"
               >
-                <Volume2 className={`w-5 h-5 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} />
+                <Volume2 className={`w-5 h-5 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} style={{ color: theme.primary }} />
               </button>
 
               <div className="text-center mb-6 mt-2">
-                <h2 className="text-lg font-bold tracking-widest text-cyan-300 mb-1 font-mono h-6">{scrambledTitle}</h2>
+                <h2 className="text-lg font-bold tracking-widest mb-1 font-mono h-6" style={{ color: theme.primary }}>{scrambledTitle}</h2>
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-xs text-gray-400 uppercase font-bold">Domain:</span>
-                  <span className="text-sm bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">{domain}</span>
+                  <span className="text-sm px-2 py-0.5 rounded border" style={{ backgroundColor: `${theme.primary}20`, color: theme.primary, borderColor: `${theme.primary}50` }}>{domain}</span>
                 </div>
               </div>
 
               <div className="flex flex-wrap justify-center gap-2 mb-8 min-h-[32px]">
-                {validWords.map((w) => (
-                  <span key={w} className={`px-4 py-1.5 rounded-full font-bold text-sm tracking-widest transition-all duration-300 ${foundWords.includes(w) ? "bg-cyan-400 text-gray-900 shadow-[0_0_15px_#22d3ee]" : "bg-black/40 text-gray-500 border border-white/10"}`}>
-                    {foundWords.includes(w) ? w : w.replace(/./g, "•")}
-                  </span>
-                ))}
+                {validWords.map((w) => {
+                  const isFound = foundWords.includes(w);
+                  return (
+                    <span key={w} className="px-4 py-1.5 rounded-full font-bold text-sm tracking-widest transition-all duration-300 border"
+                      style={{
+                        backgroundColor: isFound ? theme.primary : "rgba(0,0,0,0.4)",
+                        color: isFound ? "#000" : "#888",
+                        borderColor: isFound ? theme.primary : "rgba(255,255,255,0.1)",
+                        boxShadow: isFound ? `0 0 15px ${theme.primary}` : "none"
+                      }}
+                    >
+                      {isFound ? w : w.replace(/./g, "•")}
+                    </span>
+                  );
+                })}
               </div>
 
-              <div ref={containerRef} className="relative mx-auto w-[320px] h-[320px] touch-none select-none" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
-                <svg className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+              {/* Dynamic SVG Drawing Area */}
+              <div 
+                ref={containerRef} 
+                className="relative mx-auto touch-none select-none" 
+                style={{ width: (Math.max(120, letters.length * 8.5) + 30) * 2, height: (Math.max(120, letters.length * 8.5) + 30) * 2 }}
+                onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}
+              >
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: `drop-shadow(0 0 8px ${theme.primary})` }}>
                   {activePath.map((nodeId, i) => {
                     if (i === 0) return null;
                     const prev = letters.find(l => l.id === activePath[i - 1])!;
                     const curr = letters.find(l => l.id === nodeId)!;
-                    return <line key={i} x1={prev.x} y1={prev.y} x2={curr.x} y2={curr.y} stroke="#22d3ee" strokeWidth="6" strokeLinecap="round" />;
+                    return <line key={i} x1={prev.x} y1={prev.y} x2={curr.x} y2={curr.y} stroke={theme.primary} strokeWidth="5" strokeLinecap="round" />;
                   })}
                   {isDragging && activePath.length > 0 && (
-                    <line x1={letters.find(l=>l.id===activePath[activePath.length - 1])!.x} y1={letters.find(l=>l.id===activePath[activePath.length - 1])!.y} x2={mousePos.x} y2={mousePos.y} stroke="#22d3ee" strokeWidth="6" strokeLinecap="round" opacity="0.5" strokeDasharray="8 8" />
+                    <line x1={letters.find(l=>l.id===activePath[activePath.length - 1])!.x} y1={letters.find(l=>l.id===activePath[activePath.length - 1])!.y} x2={mousePos.x} y2={mousePos.y} stroke={theme.primary} strokeWidth="5" strokeLinecap="round" opacity="0.5" strokeDasharray="6 6" />
                   )}
                 </svg>
 
                 {letters.map((node, index) => {
                   const isActive = activePath.includes(node.id);
+                  // Scale nodes down slightly if there are many letters to prevent overlap
+                  const nodeSize = letters.length > 15 ? "w-10 h-10 -ml-5 -mt-5 text-lg" : "w-12 h-12 -ml-6 -mt-6 text-xl";
+                  
                   return (
                     <div
                       key={node.id}
                       ref={(el) => { nodesRef.current[index] = el; }}
                       onPointerDown={(e: any) => handlePointerDown(node.id, e)}
                       onPointerEnter={() => handlePointerEnter(node.id)}
-                      className={`absolute w-14 h-14 -ml-7 -mt-7 rounded-full flex items-center justify-center text-2xl font-bold cursor-pointer transition-all duration-200 z-10
-                        ${isActive ? 'bg-cyan-400 text-gray-900 shadow-[0_0_25px_rgba(34,211,238,1)] scale-110' : 'bg-white/10 text-white backdrop-blur-md border border-white/30 hover:bg-white/20 hover:border-cyan-300'}`}
-                      style={{ left: node.x, top: node.y }}
+                      className={`absolute rounded-full flex items-center justify-center font-bold cursor-pointer transition-all duration-200 z-10 border ${nodeSize}`}
+                      style={{ 
+                        left: node.x, 
+                        top: node.y,
+                        backgroundColor: isActive ? theme.primary : "rgba(255,255,255,0.05)",
+                        color: isActive ? "#000" : "#fff",
+                        borderColor: isActive ? theme.primary : "rgba(255,255,255,0.2)",
+                        boxShadow: isActive ? `0 0 20px ${theme.primary}` : "none",
+                        transform: isActive ? "scale(1.15)" : "scale(1)"
+                      }}
                     >
                       {node.letter}
                     </div>
@@ -342,17 +371,26 @@ export default function FinalNeuralLink({ domain = "AIML", onComplete }: { domai
           )}
 
           {gameWon && (
-            <motion.div key="victory" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="bg-gray-900/80 backdrop-blur-2xl border border-green-500/30 rounded-3xl p-10 text-center shadow-[0_0_50px_rgba(34,197,94,0.3)]">
-              <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", damping: 12 }} className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="w-12 h-12 text-green-400" />
+            <motion.div key="victory" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} 
+              className="backdrop-blur-2xl border rounded-3xl p-10 text-center shadow-2xl"
+              style={{ backgroundColor: theme.cardBg, borderColor: `${theme.success}50`, boxShadow: `0 0 50px ${theme.success}30` }}
+            >
+              <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", damping: 12 }} 
+                className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
+                style={{ backgroundColor: `${theme.success}20` }}
+              >
+                <CheckCircle2 className="w-12 h-12" style={{ color: theme.success }} />
               </motion.div>
-              <h2 className="text-3xl font-bold text-white mb-2 font-[Orbitron]">SYSTEM CRACKED</h2>
-              <p className="text-green-200/70 mb-8">All nodes successfully linked.</p>
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>SYSTEM CRACKED</h2>
+              <p className="text-gray-400 mb-8">All nodes successfully linked.</p>
               
-              {/* --- ADDED: Pass the finalMetrics to the parent Controller when clicked --- */}
-              <button onClick={() => onComplete ? onComplete(finalMetrics) : alert("Go to next game!")} className="w-full group bg-gradient-to-r from-green-400 to-cyan-500 hover:from-green-300 hover:to-cyan-400 text-gray-900 font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg">
+              <button 
+                onClick={() => onComplete && onComplete(finalMetrics)} 
+                className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg text-gray-900"
+                style={{ background: `linear-gradient(90deg, ${theme.success}, ${theme.primary})` }}
+              >
                 Proceed to Data Stream 
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}

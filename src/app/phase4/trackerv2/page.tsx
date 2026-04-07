@@ -22,16 +22,16 @@ import FinalDataSort from "../../../components/tracker/FinalDataSort";
 import FinalRapidChoice from "../../../components/tracker/FinalRapidChoice";
 import FinalOddManOut from "../../../components/tracker/FinalOddManOut";
 
-// --- 1. Phase 1 Theme Configuration ---
+// --- 1. Global Theme Configuration ---
 export const GLOBAL_THEME = {
-  primary: "#FFCB61", // tColor (Warm Yellow) - Drives nodes and primary buttons
-  secondary: "#77BEF0", // tBorder (Soft Blue) - Drives secondary gradients
-  accent: "#EA5B6F", // tDepthColor (Soft Red) - Drives ambient background glows
-  success: "#4ade80", // Standard UI Green for correct answers
-  danger: "#EA5B6F", // Reusing tDepthColor for errors to keep palette tight
-  background: "#0a0f16", // Deep midnight navy
-  cardBg: "rgba(10, 15, 22, 0.7)",
-  cardBorder: "rgba(119, 190, 240, 0.25)", // tBorder with 25% opacity
+  primary: "#DDA853", // tDepthColor (Muted Gold)
+  secondary: "#F3F3E0", // tBorder (Cream)
+  accent: "#183B4E", // tColor (Deep Teal)
+  success: "#34d399", // Muted Emerald
+  danger: "#fb7185", // Muted Rose
+  background: "#020608", // Almost black with a tiny hint of teal
+  cardBg: "rgba(24, 59, 78, 0.35)", // Using tColor as a tinted glass background
+  cardBorder: "rgba(243, 243, 224, 0.15)", // tBorder with 15% opacity
   fontPrimary: "'Orbitron', sans-serif",
   fontSecondary: "system-ui, -apple-system, sans-serif",
 };
@@ -406,7 +406,7 @@ export default function TrackerV2() {
                 }}
               >
                 {/* Glow on hover */}
-                <span
+                <span 
                   className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300"
                   style={{
                     background: `linear-gradient(90deg, ${GLOBAL_THEME.primary}20, transparent)`,

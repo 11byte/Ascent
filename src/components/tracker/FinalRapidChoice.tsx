@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { CheckCircle2, ChevronRight, X, Heart, Zap } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { ChevronRight, X, Heart, Zap } from "lucide-react";
 
 // --- 1. Predefined Task Banks ---
 // We show quick tasks. The user swipes right if they'd enjoy doing it, left if not.
@@ -24,11 +22,10 @@ const AudioEngine = {
   playStamp: () => {
     if (typeof window === "undefined") return;
     try {
-      // Plays the custom MP3 file you placed in the public folder
       const audio = new Audio("/tracker/stampeffect.mp3");
       audio.volume = 0.6;
       audio.play().catch(() => {
-        // Fallback synthetic "thud" if mp3 is missing or blocked
+        // Fallback synthetic "thud"
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -45,28 +42,17 @@ const AudioEngine = {
 };
 
 // --- 3. Main Game Component ---
-// UPDATED: onComplete now expects the ML metrics payload
-export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics: any) => void }) {
+export default function FinalRapidChoice({ theme, onComplete }: { theme: any, onComplete?: (metrics: any) => void }) {
   const [cards, setCards] = useState(TASKS);
   const [results, setResults] = useState<{ domain: string, liked: boolean }[]>([]);
   const [gameWon, setGameWon] = useState(false);
   
-  // --- ADDED: ML TELEMETRY TRACKERS ---
+  // --- ML TELEMETRY TRACKERS ---
   const lastSwipe = useRef<number>(0);
   const decisionTimes = useRef<number[]>([]);
   const [finalMetrics, setFinalMetrics] = useState<any>(null);
 
-  const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cloudsRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
-
-  // Background Parallax
-  useGSAP(() => {
-    gsap.to(groundRef.current, { backgroundPositionX: "1301px", duration: 20, ease: "none", repeat: -1, force3D: true });
-    gsap.to(cloudsRef.current, { backgroundPositionX: "-2247px", duration: 52, ease: "none", repeat: -1, force3D: true });
-  }, []);
-
-  // --- ADDED: Set initial time for first decision ---
+  // Set initial time for first decision
   useEffect(() => {
     lastSwipe.current = Date.now();
   }, []);
@@ -75,7 +61,7 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
   const handleSwipe = (direction: "left" | "right", task: typeof TASKS[0]) => {
     AudioEngine.playStamp();
     
-    // --- ADDED: TRACK DECISION SPEED ---
+    // TRACK DECISION SPEED
     const currentTime = Date.now();
     const timeTaken = (currentTime - lastSwipe.current) / 1000;
     decisionTimes.current.push(timeTaken);
@@ -90,7 +76,7 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
 
     // If no cards left, trigger victory sequence
     if (cards.length <= 1) {
-      // --- ADDED: COMPILE FINAL ML METRICS ---
+      // COMPILE FINAL ML METRICS
       const avgSpeed = decisionTimes.current.reduce((a, b) => a + b, 0) / decisionTimes.current.length;
       
       // Calculate choice pattern (+1 for like, -1 for nope)
@@ -110,17 +96,15 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
   };
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-screen min-h-[700px] bg-[#63D0FF] overflow-hidden flex flex-col items-center justify-center font-sans">
+    <div className="relative w-full h-full min-h-[700px] flex flex-col items-center justify-center font-sans overflow-hidden z-10">
       
-      {/* Parallax Background */}
-      <div ref={cloudsRef} className="absolute top-0 left-0 w-full h-[230px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 bottom' }} />
-      <div ref={groundRef} className="absolute bottom-0 left-0 w-full h-[192px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 0' }} />
-
       {/* Header UI */}
       <div className="absolute top-8 w-full max-w-md mx-auto z-20 px-4 text-center">
-        <h2 className="text-gray-900 font-bold text-2xl font-[Orbitron] tracking-widest drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">RAPID CHOICE</h2>
-        <p className="text-gray-800 font-semibold bg-white/40 backdrop-blur-md rounded-full py-1 px-4 inline-block mt-2 border border-white/50">
-          Trust your gut. Swipe <span className="text-green-700 font-bold">Right</span> or <span className="text-red-700 font-bold">Left</span>.
+        <h2 className="font-bold text-3xl tracking-widest text-white drop-shadow-md" style={{ fontFamily: theme.fontPrimary }}>
+          RAPID CHOICE
+        </h2>
+        <p className="font-semibold backdrop-blur-xl rounded-full py-2 px-6 inline-block mt-3 border shadow-xl text-sm" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder, color: '#e5e7eb' }}>
+          Trust your gut. Swipe <span style={{ color: theme.success }} className="font-bold">Right</span> or <span style={{ color: theme.danger }} className="font-bold">Left</span>.
         </p>
       </div>
 
@@ -135,6 +119,7 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
                 key={task.id} 
                 task={task} 
                 index={index} 
+                theme={theme}
                 onSwipe={(dir) => handleSwipe(dir, task)} 
               />
             );
@@ -147,21 +132,21 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
         {gameWon && (
           <motion.div 
             initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} 
-            className="absolute z-50 flex items-center justify-center"
+            className="absolute z-50 flex items-center justify-center w-full"
           >
-            <div className="bg-gray-900 border border-cyan-500/50 p-10 rounded-3xl shadow-[0_0_60px_rgba(34,211,238,0.3)] text-center max-w-md w-full mx-4">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 15 }} className="w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-10 h-10 text-cyan-400" />
+            <div className="border p-10 rounded-3xl text-center max-w-md w-full mx-4 shadow-2xl backdrop-blur-xl" style={{ backgroundColor: theme.cardBg, borderColor: `${theme.primary}50`, boxShadow: `0 0 60px ${theme.primary}30` }}>
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 15 }} className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `${theme.primary}20` }}>
+                <Zap className="w-10 h-10" style={{ color: theme.primary }} />
               </motion.div>
-              <h2 className="text-3xl font-bold text-white mb-2 font-[Orbitron]">PROFILE SYNCED</h2>
-              <p className="text-cyan-200/70 mb-8">Your behavioral preferences have been logged.</p>
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>PROFILE SYNCED</h2>
+              <p className="text-gray-400 mb-8">Your behavioral preferences have been logged.</p>
               
-              {/* --- ADDED: Pass the finalMetrics to the parent Controller when clicked --- */}
               <button 
                 onClick={() => onComplete ? onComplete(finalMetrics) : alert(`Metrics Data:\n${JSON.stringify(finalMetrics, null, 2)}`)} 
-                className="w-full group bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-gray-900 font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg"
+                className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg text-gray-900"
+                style={{ background: `linear-gradient(90deg, ${theme.primary}, ${theme.secondary})` }}
               >
-                Finalize Calibration <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                Finalize Calibration <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </motion.div>
@@ -173,7 +158,7 @@ export default function FinalRapidChoice({ onComplete }: { onComplete?: (metrics
 }
 
 // --- 4. Draggable Tinder Card Component ---
-function SwipeCard({ task, index, onSwipe }: { task: any, index: number, onSwipe: (dir: "left" | "right") => void }) {
+function SwipeCard({ task, index, theme, onSwipe }: { task: any, index: number, theme: any, onSwipe: (dir: "left" | "right") => void }) {
   const isTopCard = index === 0;
   
   // Motion Values for physical dragging
@@ -201,7 +186,7 @@ function SwipeCard({ task, index, onSwipe }: { task: any, index: number, onSwipe
 
   return (
     <motion.div
-      className="absolute w-[320px] h-[420px] bg-white rounded-3xl shadow-2xl flex flex-col justify-center items-center p-8 text-center cursor-grab active:cursor-grabbing border-4 border-gray-100 origin-bottom"
+      className="absolute w-[320px] h-[420px] rounded-3xl shadow-2xl flex flex-col justify-center items-center p-8 text-center cursor-grab active:cursor-grabbing border origin-bottom backdrop-blur-3xl"
       style={{
         x: isTopCard ? x : 0,
         rotate: isTopCard ? rotate : 0,
@@ -209,7 +194,10 @@ function SwipeCard({ task, index, onSwipe }: { task: any, index: number, onSwipe
         // Stack effect: lower cards are slightly smaller and lower down
         scale: 1 - index * 0.05,
         top: index * 15,
-        opacity: 1 - index * 0.2
+        opacity: 1 - index * 0.2,
+        backgroundColor: theme.cardBg,
+        borderColor: theme.cardBorder,
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
       }}
       drag={isTopCard ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }} // Snap back to center if not thrown far enough
@@ -221,48 +209,41 @@ function SwipeCard({ task, index, onSwipe }: { task: any, index: number, onSwipe
       
       {/* Visual Stamps (Visible only when dragging) */}
       <motion.div 
-        className="absolute top-10 right-8 z-20 pointer-events-none rotate-[15deg]"
+        className="absolute top-12 right-6 z-20 pointer-events-none rotate-[15deg]"
         style={{ opacity: likeOpacity }}
       >
-        {/* We use .png assuming you want transparency. Change to .jpg if absolutely necessary */}
-        <img src="/tracker/like.png" alt="LIKE" className="w-32 h-auto opacity-80 mix-blend-multiply" 
-             onError={(e) => { e.currentTarget.style.display='none'; }} // Hide if image doesn't exist yet
-        />
-        {/* Fallback CSS stamp if image isn't loaded */}
-        {/* <div className="absolute inset-0 border-4 border-green-500 text-green-500 font-bold text-4xl py-1 px-3 rounded-lg flex items-center justify-center -z-10 bg-white/50">
-          LIKE
-        </div> */}
+        <div className="border-4 font-bold text-3xl py-2 px-4 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-xl tracking-widest"
+             style={{ borderColor: theme.success, color: theme.success, backgroundColor: `${theme.success}10`, fontFamily: theme.fontPrimary }}>
+          APPROVE
+        </div>
       </motion.div>
 
       <motion.div 
-        className="absolute top-10 left-8 z-20 pointer-events-none rotate-[-15deg]"
+        className="absolute top-12 left-6 z-20 pointer-events-none rotate-[-15deg]"
         style={{ opacity: dislikeOpacity }}
       >
-        <img src="/tracker/dislike.png" alt="DISLIKE" className="w-32 h-auto opacity-80 mix-blend-multiply" 
-             onError={(e) => { e.currentTarget.style.display='none'; }}
-        />
-        {/* Fallback CSS stamp if image isn't loaded */}
-        {/* <div className="absolute inset-0 border-4 border-red-500 text-red-500 font-bold text-4xl py-1 px-3 rounded-lg flex items-center justify-center -z-10 bg-white/50">
-          NOPE
-        </div> */}
+        <div className="border-4 font-bold text-3xl py-2 px-4 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-xl tracking-widest"
+             style={{ borderColor: theme.danger, color: theme.danger, backgroundColor: `${theme.danger}10`, fontFamily: theme.fontPrimary }}>
+          REJECT
+        </div>
       </motion.div>
 
 
       {/* Card Content */}
-      <div className="bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1 rounded-full mb-6 uppercase tracking-widest pointer-events-none">
+      <div className="text-xs font-bold px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest pointer-events-none border" style={{ backgroundColor: `${theme.primary}10`, color: theme.primary, borderColor: `${theme.primary}30` }}>
         Task Simulation
       </div>
       
-      <h3 className="text-2xl font-bold text-gray-900 pointer-events-none">
+      <h3 className="text-2xl font-bold text-white pointer-events-none leading-relaxed">
         {task.text}
       </h3>
 
       {/* Helper Icons at bottom of card */}
-      <div className="absolute bottom-6 w-full px-8 flex justify-between pointer-events-none opacity-50">
-        <div className="w-12 h-12 rounded-full border-2 border-red-400 text-red-400 flex items-center justify-center bg-red-50">
+      <div className="absolute bottom-8 w-full px-8 flex justify-between pointer-events-none opacity-80">
+        <div className="w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-lg" style={{ borderColor: theme.danger, color: theme.danger, backgroundColor: `${theme.danger}20` }}>
           <X className="w-6 h-6" />
         </div>
-        <div className="w-12 h-12 rounded-full border-2 border-green-400 text-green-400 flex items-center justify-center bg-green-50">
+        <div className="w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-lg" style={{ borderColor: theme.success, color: theme.success, backgroundColor: `${theme.success}20` }}>
           <Heart className="w-6 h-6" />
         </div>
       </div>

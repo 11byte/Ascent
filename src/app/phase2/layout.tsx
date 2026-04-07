@@ -10,18 +10,37 @@ export default function Phase2Layout({
   children: React.ReactNode;
 }>) {
   const [username, setUsername] = useState<string>("");
+  const [userCredits, setUserCredits] = useState<number>(0);
 
   useEffect(() => {
-    // ✅ Fetch username from localStorage on client side
     const storedName = localStorage.getItem("userName") || "User";
+    const userId = localStorage.getItem("userId");
+
     setUsername(storedName);
+
+    if (!userId) return;
+
+    const loadUserCredits = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/auth/profile/${userId}`);
+        const data = await response.json();
+
+        if (response.ok && data?.status && typeof data?.user?.roadmap_credits === "number") {
+          setUserCredits(data.user.roadmap_credits);
+        }
+      } catch (error) {
+        console.error("Failed to load user credits:", error);
+      }
+    };
+
+    loadUserCredits();
   }, []);
   return (
     <div>
       <NavbarWrapper
         phaseNo={2}
         username={username}
-        points={7777}
+        points={userCredits}
         triangle={true}
         tBorder={{
           light: "#E53E3E",

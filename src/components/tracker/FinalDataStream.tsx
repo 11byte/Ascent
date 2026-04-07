@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { CheckCircle2, ChevronRight, Volume2, Target, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ChevronRight, Volume2, Target } from "lucide-react";
 
 // --- 1. Predefined Word Banks ---
 const WORD_BANKS: Record<string, string[]> = {
@@ -65,14 +65,24 @@ const AudioEngine = {
       const utterance = new SpeechSynthesisUtterance(word);
       utterance.rate = 1.3;
       utterance.pitch = 1.5;
+      const voices = window.speechSynthesis.getVoices();
+      const techVoice = voices.find(v => v.name.includes("Google") || v.name.includes("Samantha"));
+      if (techVoice) utterance.voice = techVoice;
       window.speechSynthesis.speak(utterance);
     }
   }
 };
 
 // --- 3. Main Game Component ---
-// UPDATED: onComplete now expects a metrics object to send to the ML payload
-export default function FinalDataStream({ domain = "Cybersecurity", onComplete }: { domain?: string, onComplete?: (metrics: any) => void }) {
+export default function FinalDataStream({ 
+  domain = "Cybersecurity", 
+  theme, 
+  onComplete 
+}: { 
+  domain?: string, 
+  theme: any, 
+  onComplete?: (metrics: any) => void 
+}) {
   const [bubbles, setBubbles] = useState<{ id: string, word: string, isTarget: boolean, x: number, y: number }[]>([]);
   const [blasts, setBlasts] = useState<{ id: string, x: number, y: number, color: string }[]>([]);
   const [score, setScore] = useState(0);
@@ -81,21 +91,13 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
   
   const targetScore = 5; // Collect 5 correct packets to win
   
-  // --- ADDED: ML TELEMETRY TRACKERS ---
+  // --- ML TELEMETRY TRACKERS ---
   const startTime = useRef<number>(0);
   const stats = useRef({ clicks: 0, misclicks: 0 });
   const [finalMetrics, setFinalMetrics] = useState<any>(null);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cloudsRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
-
-  // Background Parallax
-  useGSAP(() => {
-    gsap.to(groundRef.current, { backgroundPositionX: "1301px", duration: 20, ease: "none", repeat: -1, force3D: true });
-    gsap.to(cloudsRef.current, { backgroundPositionX: "-2247px", duration: 52, ease: "none", repeat: -1, force3D: true });
-  }, []);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Set the start time on mount for telemetry
   useEffect(() => {
@@ -146,7 +148,7 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
     // Remove bubble immediately
     setBubbles(prev => prev.filter(b => b.id !== bubble.id));
 
-    // --- ADDED: TRACK OVERALL CLICK ---
+    // TRACK OVERALL CLICK
     stats.current.clicks += 1;
 
     // Calculate click coordinates relative to the game area for the blast effect
@@ -164,7 +166,7 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
         const newScore = s + 1;
         if (newScore >= targetScore) {
           
-          // --- ADDED: COMPILE METRICS ON WIN ---
+          // COMPILE METRICS ON WIN
           const timeTaken = (Date.now() - startTime.current) / 1000;
           const accuracy = ((stats.current.clicks - stats.current.misclicks) / stats.current.clicks) * 100;
 
@@ -179,52 +181,51 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
         }
         return newScore;
       });
-      // Add Cyan blast
-      setBlasts(prev => [...prev, { id: bubble.id, x: blastX, y: blastY, color: "border-cyan-400" }]);
+      // Add success blast using theme color
+      setBlasts(prev => [...prev, { id: bubble.id, x: blastX, y: blastY, color: theme.primary }]);
     } else {
       // PENALTY / ERROR
-      // --- ADDED: TRACK MISCLICK ---
       stats.current.misclicks += 1;
 
       if (audioEnabled) AudioEngine.playError();
       setScore(s => Math.max(0, s - 1)); // Penalty, but don't drop below 0
       
       // Screen shake for error
-      if (bgContainerRef.current) {
-        gsap.fromTo(bgContainerRef.current, { x: -10 }, { x: 0, duration: 0.3, ease: "elastic.out(2, 0.1)" });
+      if (containerRef.current) {
+        gsap.fromTo(containerRef.current, { x: -10 }, { x: 0, duration: 0.3, ease: "elastic.out(2, 0.1)" });
       }
-      // Add Red blast
-      setBlasts(prev => [...prev, { id: bubble.id, x: blastX, y: blastY, color: "border-red-500" }]);
+      // Add error blast using theme color
+      setBlasts(prev => [...prev, { id: bubble.id, x: blastX, y: blastY, color: theme.danger }]);
     }
   };
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-screen min-h-[700px] bg-[#63D0FF] overflow-hidden flex items-center justify-center font-sans">
+    <div ref={containerRef} className="relative w-full h-full min-h-[700px] flex items-center justify-center font-sans overflow-hidden">
       
-      {/* Background Layers */}
-      <div ref={cloudsRef} className="absolute top-0 left-0 w-full h-[230px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 bottom' }} />
-      <div ref={groundRef} className="absolute bottom-0 left-0 w-full h-[192px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 0' }} />
-
       {/* Audio Toggle */}
-      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 backdrop-blur-md rounded-full hover:bg-black/40 transition-colors border border-white/20 text-white">
-        <Volume2 className={`w-6 h-6 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} />
+      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
+        <Volume2 className={`w-5 h-5 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} style={{ color: theme.primary }} />
       </button>
 
       {/* Main Game UI */}
-      <div className="relative z-10 w-full max-w-4xl h-[600px] mx-4 border-2 border-white/20 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-[2px] shadow-[0_0_40px_rgba(0,0,0,0.2)]" ref={gameAreaRef}>
+      <div 
+        className="relative z-10 w-full max-w-4xl h-[600px] mx-4 border rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl" 
+        ref={gameAreaRef}
+        style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+      >
         
         {/* HUD (Heads Up Display) */}
         <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start pointer-events-none z-20">
-          <div className="bg-gray-900/80 backdrop-blur-xl border border-cyan-500/50 p-4 rounded-2xl shadow-lg">
-            <h2 className="text-cyan-400 font-bold tracking-widest text-sm mb-1 flex items-center gap-2 font-mono">
+          <div className="backdrop-blur-xl border p-4 rounded-2xl shadow-lg" style={{ backgroundColor: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.1)" }}>
+            <h2 className="font-bold tracking-widest text-sm mb-1 flex items-center gap-2" style={{ color: theme.primary }}>
               <Target className="w-4 h-4" /> TARGET DOMAIN
             </h2>
-            <p className="text-white text-2xl font-[Orbitron] font-bold">{domain.toUpperCase()}</p>
+            <p className="text-white text-2xl font-bold" style={{ fontFamily: theme.fontPrimary }}>{domain.toUpperCase()}</p>
           </div>
 
-          <div className="bg-gray-900/80 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-lg text-center min-w-[120px]">
-            <h2 className="text-gray-400 font-bold tracking-widest text-sm mb-1 font-mono">SCORE</h2>
-            <p className={`text-3xl font-[Orbitron] font-bold ${score > 0 ? 'text-green-400' : 'text-white'}`}>
+          <div className="backdrop-blur-xl border p-4 rounded-2xl shadow-lg text-center min-w-[120px]" style={{ backgroundColor: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.1)" }}>
+            <h2 className="text-gray-400 font-bold tracking-widest text-sm mb-1">SCORE</h2>
+            <p className="text-3xl font-bold" style={{ fontFamily: theme.fontPrimary, color: score > 0 ? theme.success : "#fff" }}>
               {score} <span className="text-sm text-gray-500">/ {targetScore}</span>
             </p>
           </div>
@@ -252,15 +253,15 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
                   top: `${bubble.y}%`,
                   width: '100px',
                   height: '100px',
-                  // The Glass Bubble Look + Fake Reflection
-                  background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(255,255,255,0.05) 60%, rgba(255,255,255,0))',
-                  backdropFilter: 'blur(4px)',
-                  boxShadow: 'inset 0 0 20px rgba(255,255,255,0.5), 0 10px 20px rgba(0,0,0,0.1)',
-                  border: '1px solid rgba(255,255,255,0.4)'
+                  // The Glass Bubble Look
+                  background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(255,255,255,0.05) 60%, rgba(255,255,255,0))',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: 'inset 0 0 20px rgba(255,255,255,0.2), 0 10px 20px rgba(0,0,0,0.2)',
+                  border: '1px solid rgba(255,255,255,0.3)'
                 }}
               >
                 {/* Glossy top-left highlight */}
-                <div className="absolute top-2 left-3 w-4 h-2 bg-white/60 rounded-full rotate-[-45deg] blur-[1px]"></div>
+                <div className="absolute top-2 left-3 w-4 h-2 bg-white/50 rounded-full rotate-[-45deg] blur-[1px]"></div>
                 
                 <span className="text-white font-bold text-sm tracking-wider drop-shadow-md z-10 px-2 text-center pointer-events-none">
                   {bubble.word}
@@ -278,12 +279,13 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
             animate={{ scale: 3, opacity: 0, borderWidth: "1px" }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             onAnimationComplete={() => setBlasts(prev => prev.filter(b => b.id !== blast.id))}
-            className={`absolute rounded-full pointer-events-none border-solid ${blast.color} z-0`}
+            className="absolute rounded-full pointer-events-none border-solid z-0"
             style={{ 
               left: blast.x - 40, // Centering the 80x80 ring on the mouse click
               top: blast.y - 40,
               width: '80px',
-              height: '80px'
+              height: '80px',
+              borderColor: blast.color
             }}
           />
         ))}
@@ -296,20 +298,20 @@ export default function FinalDataStream({ domain = "Cybersecurity", onComplete }
               animate={{ opacity: 1, scale: 1 }} 
               className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
             >
-              <div className="bg-gray-900/90 border border-green-500/50 p-10 rounded-3xl shadow-[0_0_60px_rgba(34,197,94,0.3)] text-center max-w-md">
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-12 h-12 text-green-400" />
+              <div className="border p-10 rounded-3xl text-center max-w-md shadow-2xl" style={{ backgroundColor: theme.cardBg, borderColor: `${theme.success}50`, boxShadow: `0 0 50px ${theme.success}30` }}>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `${theme.success}20` }}>
+                  <CheckCircle2 className="w-12 h-12" style={{ color: theme.success }} />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2 font-[Orbitron]">DATA SECURED</h2>
-                <p className="text-green-200/70 mb-8">You successfully isolated the {domain} packets.</p>
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>DATA SECURED</h2>
+                <p className="text-gray-400 mb-8">You successfully isolated the {domain} packets.</p>
                 
-                {/* --- ADDED: Pass the finalMetrics to the parent Controller when clicked --- */}
                 <button 
-                  onClick={() => onComplete ? onComplete(finalMetrics) : alert(`Metrics Data:\n${JSON.stringify(finalMetrics, null, 2)}`)} 
-                  className="w-full group bg-gradient-to-r from-green-400 to-cyan-500 hover:from-green-300 hover:to-cyan-400 text-gray-900 font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg"
+                  onClick={() => onComplete && onComplete(finalMetrics)} 
+                  className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg text-gray-900"
+                  style={{ background: `linear-gradient(90deg, ${theme.success}, ${theme.primary})` }}
                 >
                   Next Challenge 
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>

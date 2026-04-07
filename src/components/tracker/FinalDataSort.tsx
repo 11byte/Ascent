@@ -4,21 +4,23 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { CheckCircle2, ChevronRight, Volume2, Shield, Brain, Code, Database, RefreshCcw } from "lucide-react";
+import { CheckCircle2, ChevronRight, Volume2, Shield, Brain, Code, Database, RefreshCcw, Cpu } from "lucide-react";
 
-// --- 1. Predefined Word Banks & Domains ---
-const DOMAINS = [
-  { id: "Cybersecurity", label: "SECURITY", color: "bg-red-500", border: "border-red-500/50", icon: Shield },
-  { id: "AIML", label: "AI / ML", color: "bg-fuchsia-500", border: "border-fuchsia-500/50", icon: Brain },
-  { id: "WebDev", label: "WEB DEV", color: "bg-blue-500", border: "border-blue-500/50", icon: Code },
-  { id: "DataScience", label: "DATA SCI", color: "bg-green-500", border: "border-green-500/50", icon: Database }
-];
-
+// --- 1. Predefined Word Banks & Dynamic Domains ---
 const WORD_BANKS: Record<string, string[]> = {
-  "Cybersecurity": ["FIREWALL", "PHISHING", "MALWARE", "ENCRYPTION"],
   "AIML": ["TENSOR", "NEURAL", "DATASET", "EPOCH"],
+  "Cybersecurity": ["FIREWALL", "PHISHING", "MALWARE", "ENCRYPTION"],
   "WebDev": ["REACT", "CSS", "HTML", "FRONTEND"],
   "DataScience": ["PANDAS", "PYTHON", "CSV", "CLEANING"]
+};
+
+// We map domains to specific icons for the UI, but colors will come from the theme
+const DOMAIN_ICONS: Record<string, any> = {
+  "AIML": Brain,
+  "Cybersecurity": Shield,
+  "WebDev": Code,
+  "DataScience": Database,
+  "Default": Cpu
 };
 
 // --- 2. Custom Audio Engine ---
@@ -79,43 +81,34 @@ const AudioEngine = {
 };
 
 // --- 3. Main Game Component ---
-// UPDATED: onComplete expects the metrics payload
-export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: any) => void }) {
+export default function FinalDataSort({ theme, onComplete }: { theme: any, onComplete?: (metrics: any) => void }) {
   // Game State
   const [items, setItems] = useState<{ id: string, word: string, domain: string, zone: string, status: 'idle' | 'correct' | 'wrong' }[]>([]);
   const [evaluating, setEvaluating] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   
-  // --- ADDED: ML TELEMETRY TRACKERS ---
+  // --- ML TELEMETRY TRACKERS ---
   const startTime = useRef<number>(0);
   const dragCount = useRef<number>(0);
   const [finalMetrics, setFinalMetrics] = useState<any>(null);
 
-  const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cloudsRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Initialize Game Data (Pick 2 random words from each domain)
   useEffect(() => {
     const generatedItems: any[] = [];
-    DOMAINS.forEach(d => {
-      const shuffled = [...WORD_BANKS[d.id]].sort(() => 0.5 - Math.random()).slice(0, 2);
+    const availableDomains = Object.keys(WORD_BANKS);
+    
+    availableDomains.forEach(domainId => {
+      const shuffled = [...WORD_BANKS[domainId]].sort(() => 0.5 - Math.random()).slice(0, 2);
       shuffled.forEach(word => {
-        generatedItems.push({ id: `${d.id}-${word}`, word, domain: d.id, zone: "pool", status: 'idle' });
+        generatedItems.push({ id: `${domainId}-${word}`, word, domain: domainId, zone: "pool", status: 'idle' });
       });
     });
     // Shuffle the final pool
     setItems(generatedItems.sort(() => 0.5 - Math.random()));
-    
-    // --- ADDED: Start timer when items are loaded ---
     startTime.current = Date.now();
-  }, []);
-
-  // Background Parallax
-  useGSAP(() => {
-    gsap.to(groundRef.current, { backgroundPositionX: "1301px", duration: 20, ease: "none", repeat: -1, force3D: true });
-    gsap.to(cloudsRef.current, { backgroundPositionX: "-2247px", duration: 52, ease: "none", repeat: -1, force3D: true });
   }, []);
 
   // --- Drag & Drop Logic ---
@@ -132,7 +125,6 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
     e.preventDefault();
     const id = e.dataTransfer.getData("text/plain");
     
-    // --- ADDED: TRACK EACH DRAG (used for confidence/hesitation metric) ---
     dragCount.current += 1;
 
     setItems(prev => prev.map(item => 
@@ -167,17 +159,15 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
         }
 
         // Screen shake on error
-        if (!isCorrect && bgContainerRef.current) {
-          gsap.fromTo(bgContainerRef.current, { x: -10 }, { x: 0, duration: 0.3, ease: "elastic.out(2, 0.1)" });
+        if (!isCorrect && containerRef.current) {
+          gsap.fromTo(containerRef.current, { x: -10 }, { x: 0, duration: 0.3, ease: "elastic.out(2, 0.1)" });
         }
       }
     }
 
     if (allCorrect) {
-      // --- ADDED: COMPILE METRICS ON WIN ---
       const timeTaken = (Date.now() - startTime.current) / 1000;
       const totalItems = items.length;
-      // If they dragged exactly minimum times, hesitation is 0. Anything over is hesitation.
       const hesitations = dragCount.current - totalItems; 
       
       setFinalMetrics({
@@ -198,33 +188,31 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
 
   const poolItems = items.filter(i => i.zone === "pool");
   const isPoolEmpty = poolItems.length === 0;
+  const availableDomains = Object.keys(WORD_BANKS);
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-screen min-h-[800px] bg-[#63D0FF] overflow-hidden flex items-center justify-center font-sans">
+    <div ref={containerRef} className="relative w-full h-full min-h-[800px] flex items-center justify-center font-sans">
       
-      {/* Parallax Background */}
-      <div ref={cloudsRef} className="absolute top-0 left-0 w-full h-[230px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 bottom' }} />
-      <div ref={groundRef} className="absolute bottom-0 left-0 w-full h-[192px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 0' }} />
-
       {/* Audio Toggle */}
-      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 backdrop-blur-md rounded-full hover:bg-black/40 transition-colors border border-white/20 text-white">
-        <Volume2 className={`w-6 h-6 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} />
+      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
+        <Volume2 className={`w-5 h-5 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} style={{ color: theme.primary }} />
       </button>
 
       {/* Main Game UI */}
       <div className="relative z-10 w-full max-w-5xl mx-4 flex flex-col gap-4">
         
         {/* Header */}
-        <div className="bg-gray-900/80 backdrop-blur-xl border border-white/20 p-4 rounded-3xl shadow-xl flex justify-between items-center px-8">
+        <div className="backdrop-blur-xl p-4 rounded-3xl shadow-xl flex justify-between items-center px-8 border" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
           <div>
-            <h2 className="text-white font-bold text-2xl font-[Orbitron] tracking-widest">DATA SORT</h2>
-            <p className="text-cyan-300 text-sm font-mono">Drag the packets into their correct subsystem.</p>
+            <h2 className="font-bold text-2xl tracking-widest text-white" style={{ fontFamily: theme.fontPrimary }}>DATA SORT</h2>
+            <p className="text-sm font-mono mt-1" style={{ color: theme.primary }}>Drag the packets into their correct subsystem.</p>
           </div>
           {isPoolEmpty && !evaluating && !gameWon && (
             <motion.button 
               initial={{ scale: 0 }} animate={{ scale: 1 }}
               onClick={handleVerify}
-              className="bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-transform hover:scale-105"
+              className="font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg transition-transform hover:scale-105 text-gray-900"
+              style={{ background: `linear-gradient(90deg, ${theme.primary}, ${theme.secondary})` }}
             >
               <RefreshCcw className="w-5 h-5" /> VERIFY SORT
             </motion.button>
@@ -232,29 +220,31 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
         </div>
 
         {/* Tier Maker Grid */}
-        <div className="flex flex-col gap-3 bg-gray-900/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl shadow-2xl">
-          {DOMAINS.map((domain) => {
-            const domainItems = items.filter(i => i.zone === domain.id);
+        <div className="flex flex-col gap-3 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
+          {availableDomains.map((domainId) => {
+            const domainItems = items.filter(i => i.zone === domainId);
+            const Icon = DOMAIN_ICONS[domainId] || DOMAIN_ICONS["Default"];
+            
             return (
-              <div key={domain.id} className="flex min-h-[80px] rounded-2xl overflow-hidden bg-black/40 border border-white/5 shadow-inner">
+              <div key={domainId} className="flex min-h-[80px] rounded-2xl overflow-hidden border shadow-inner" style={{ backgroundColor: "rgba(0,0,0,0.4)", borderColor: "rgba(255,255,255,0.05)" }}>
                 {/* Tier Label */}
-                <div className={`w-32 flex flex-col items-center justify-center text-center p-2 shadow-lg z-10 ${domain.color}`}>
-                  <domain.icon className="w-6 h-6 text-white mb-1 opacity-80" />
-                  <span className="text-white font-bold text-xs tracking-widest">{domain.label}</span>
+                <div className="w-32 flex flex-col items-center justify-center text-center p-2 shadow-lg z-10" style={{ backgroundColor: `${theme.primary}20`, borderRight: `1px solid ${theme.primary}50` }}>
+                  <Icon className="w-6 h-6 mb-1 opacity-80" style={{ color: theme.primary }} />
+                  <span className="text-white font-bold text-xs tracking-widest uppercase">{domainId}</span>
                 </div>
                 
                 {/* Drop Zone */}
                 <div 
                   className="flex-1 p-3 flex flex-wrap gap-3 items-center transition-colors duration-300 relative"
                   onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, domain.id)}
+                  onDrop={(e) => handleDrop(e, domainId)}
                 >
                   {domainItems.length === 0 && (
-                     <span className="text-gray-600 font-mono text-sm absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none">Drop {domain.label} packets here...</span>
+                     <span className="font-mono text-sm absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.2)" }}>Drop {domainId} packets here...</span>
                   )}
                   <AnimatePresence>
                     {domainItems.map(item => (
-                      <DraggableChip key={item.id} item={item} onDragStart={handleDragStart} evaluating={evaluating} />
+                      <DraggableChip key={item.id} item={item} onDragStart={handleDragStart} evaluating={evaluating} theme={theme} />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -266,17 +256,21 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
         {/* The Pool */}
         {!gameWon && (
           <div 
-            className={`min-h-[120px] bg-gray-900/80 backdrop-blur-xl border-2 border-dashed rounded-3xl p-6 shadow-2xl transition-colors duration-300 ${isPoolEmpty ? 'border-gray-700/50' : 'border-cyan-500/50'}`}
+            className="min-h-[120px] backdrop-blur-xl border-2 border-dashed rounded-3xl p-6 shadow-2xl transition-colors duration-300"
+            style={{ 
+              backgroundColor: theme.cardBg, 
+              borderColor: isPoolEmpty ? "rgba(255,255,255,0.1)" : `${theme.primary}50` 
+            }}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, "pool")}
           >
              <div className="flex flex-wrap gap-4 justify-center items-center h-full">
                 <AnimatePresence>
                   {poolItems.map(item => (
-                    <DraggableChip key={item.id} item={item} onDragStart={handleDragStart} evaluating={evaluating} />
+                    <DraggableChip key={item.id} item={item} onDragStart={handleDragStart} evaluating={evaluating} theme={theme} />
                   ))}
                 </AnimatePresence>
-                {isPoolEmpty && <span className="text-cyan-600/50 font-mono font-bold">POOL EMPTY - READY TO VERIFY</span>}
+                {isPoolEmpty && <span className="font-mono font-bold" style={{ color: `${theme.primary}80` }}>POOL EMPTY - READY TO VERIFY</span>}
              </div>
           </div>
         )}
@@ -288,19 +282,19 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
               initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} 
               className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-3xl"
             >
-              <div className="bg-gray-900 border border-green-500/50 p-10 rounded-3xl shadow-[0_0_60px_rgba(34,197,94,0.3)] text-center max-w-md">
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-12 h-12 text-green-400" />
+              <div className="border p-10 rounded-3xl text-center max-w-md shadow-2xl" style={{ backgroundColor: theme.cardBg, borderColor: `${theme.success}50`, boxShadow: `0 0 50px ${theme.success}30` }}>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `${theme.success}20` }}>
+                  <CheckCircle2 className="w-12 h-12" style={{ color: theme.success }} />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2 font-[Orbitron]">DATABASE SORTED</h2>
-                <p className="text-green-200/70 mb-8">All subsystems correctly classified.</p>
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>DATABASE SORTED</h2>
+                <p className="text-gray-400 mb-8">All subsystems correctly classified.</p>
                 
-                {/* --- ADDED: Pass the finalMetrics to the parent Controller when clicked --- */}
                 <button 
-                  onClick={() => onComplete ? onComplete(finalMetrics) : alert(`Metrics Data:\n${JSON.stringify(finalMetrics, null, 2)}`)} 
-                  className="w-full group bg-gradient-to-r from-green-400 to-cyan-500 hover:from-green-300 hover:to-cyan-400 text-gray-900 font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg"
+                  onClick={() => onComplete && onComplete(finalMetrics)} 
+                  className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg text-gray-900"
+                  style={{ background: `linear-gradient(90deg, ${theme.success}, ${theme.primary})` }}
                 >
-                  Next Challenge <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Next Challenge <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>
@@ -312,13 +306,31 @@ export default function FinalDataSort({ onComplete }: { onComplete?: (metrics: a
 }
 
 // --- Draggable Chip Sub-Component ---
-// Using Framer Motion's "layout" prop so it glides smoothly between lists!
-function DraggableChip({ item, onDragStart, evaluating }: { item: any, onDragStart: any, evaluating: boolean }) {
+function DraggableChip({ item, onDragStart, evaluating, theme }: { item: any, onDragStart: any, evaluating: boolean, theme: any }) {
   
   // Dynamic styling based on evaluation status
-  let bgColors = "bg-gray-800 border-gray-600 text-gray-200 hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)]";
-  if (item.status === 'correct') bgColors = "bg-green-500 border-green-400 text-gray-900 shadow-[0_0_15px_rgba(34,197,94,0.6)]";
-  if (item.status === 'wrong') bgColors = "bg-red-500 border-red-400 text-white shadow-[0_0_15px_rgba(239,68,68,0.6)]";
+  let currentStyles = {
+    backgroundColor: "rgba(0,0,0,0.6)",
+    color: "#e5e7eb",
+    borderColor: "rgba(255,255,255,0.1)",
+    boxShadow: "none"
+  };
+
+  if (item.status === 'correct') {
+    currentStyles = {
+      backgroundColor: theme.success,
+      color: "#000",
+      borderColor: theme.success,
+      boxShadow: `0 0 15px ${theme.success}80`
+    };
+  } else if (item.status === 'wrong') {
+    currentStyles = {
+      backgroundColor: theme.danger,
+      color: "#fff",
+      borderColor: theme.danger,
+      boxShadow: `0 0 15px ${theme.danger}80`
+    };
+  }
 
   return (
     <motion.div
@@ -326,11 +338,16 @@ function DraggableChip({ item, onDragStart, evaluating }: { item: any, onDragSta
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5 }}
-      whileHover={!evaluating ? { scale: 1.05 } : {}}
+      whileHover={!evaluating && item.status !== 'correct' ? { 
+        scale: 1.05, 
+        borderColor: theme.primary, 
+        boxShadow: `0 0 10px ${theme.primary}50` 
+      } : {}}
       whileTap={!evaluating ? { scale: 0.95 } : {}}
       draggable={!evaluating && item.status !== 'correct'}
       onDragStart={(e: any) => onDragStart(e, item.id)}
-      className={`px-4 py-2 rounded-lg font-bold text-sm tracking-wider cursor-grab active:cursor-grabbing border-2 transition-colors duration-300 ${bgColors} ${evaluating ? 'pointer-events-none' : ''}`}
+      className={`px-4 py-2 rounded-lg font-bold text-sm tracking-wider border-2 transition-colors duration-300 ${evaluating ? 'pointer-events-none' : 'cursor-grab active:cursor-grabbing'}`}
+      style={currentStyles}
     >
       {item.word}
     </motion.div>

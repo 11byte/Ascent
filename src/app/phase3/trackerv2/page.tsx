@@ -22,18 +22,18 @@ import FinalDataSort from "../../../components/tracker/FinalDataSort";
 import FinalRapidChoice from "../../../components/tracker/FinalRapidChoice";
 import FinalOddManOut from "../../../components/tracker/FinalOddManOut";
 
-// --- 1. Phase 1 Theme Configuration ---
+// --- 1. Global Theme Configuration ---
 export const GLOBAL_THEME = {
-  primary: "#FFCB61", // tColor (Warm Yellow) - Drives nodes and primary buttons
-  secondary: "#77BEF0", // tBorder (Soft Blue) - Drives secondary gradients
-  accent: "#EA5B6F", // tDepthColor (Soft Red) - Drives ambient background glows
-  success: "#4ade80", // Standard UI Green for correct answers
-  danger: "#EA5B6F", // Reusing tDepthColor for errors to keep palette tight
-  background: "#0a0f16", // Deep midnight navy
-  cardBg: "rgba(10, 15, 22, 0.7)",
-  cardBorder: "rgba(119, 190, 240, 0.25)", // tBorder with 25% opacity
+  primary: "#FCC61D",     // tColor (Bright Gold)
+  secondary: "#3338A0",   // tBorder (Deep Indigo)
+  accent: "#F7F7F7",      // tDepthColor (Off White)
+  success: "#10b981",     // Emerald Green
+  danger: "#f43f5e",      // Rose Red
+  background: "#04040a",  // Ultra-dark indigo
+  cardBg: "rgba(10, 10, 25, 0.7)", 
+  cardBorder: "rgba(51, 56, 160, 0.35)", // tBorder with 35% opacity
   fontPrimary: "'Orbitron', sans-serif",
-  fontSecondary: "system-ui, -apple-system, sans-serif",
+  fontSecondary: "system-ui, -apple-system, sans-serif"
 };
 
 // --- 2. Tarot Cards Configuration ---
@@ -396,30 +396,12 @@ export default function TrackerV2() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setCurrentStep(1)}
-                className="relative font-bold py-4 px-10 rounded-xl flex items-center gap-3 tracking-widest border backdrop-blur-md transition-all duration-300"
+                className="font-bold py-4 px-10 rounded-xl flex items-center gap-3 text-gray-900 shadow-xl tracking-widest"
                 style={{
-                  background: GLOBAL_THEME.cardBg,
-                  borderColor: GLOBAL_THEME.cardBorder,
-                  fontFamily: GLOBAL_THEME.fontPrimary,
-                  color: GLOBAL_THEME.primary,
-                  boxShadow: `0 0 20px rgba(221,168,83,0.15)`,
+                  background: `linear-gradient(90deg, ${GLOBAL_THEME.primary}, ${GLOBAL_THEME.secondary})`,
                 }}
               >
-                {/* Glow on hover */}
-                <span
-                  className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: `linear-gradient(90deg, ${GLOBAL_THEME.primary}20, transparent)`,
-                  }}
-                />
-
-                <span className="relative z-10 flex items-center gap-3">
-                  Lets Begin
-                  <ChevronRight
-                    className="w-6 h-6"
-                    style={{ color: GLOBAL_THEME.primary }}
-                  />
-                </span>
+                Lets Begin <ChevronRight className="w-6 h-6" />
               </motion.button>
             </motion.div>
           )}

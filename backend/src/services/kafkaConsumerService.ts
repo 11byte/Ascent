@@ -41,16 +41,30 @@ export async function startKafkaConsumer() {
             userCache[userId].quiz.push(msg);
             // 2. NEW: Save the ML payload permanently to PostgreSQL
             if (feature === "trackerV2" && data) {
-              await prisma.trackerSession.create({
-                data: {
-                  userId: userId,
-                  assignedDomain: data.assignedDomain,
-                  metrics: data.metrics,
-                },
+              await prisma.$transaction(async (tx) => {
+                await tx.trackerSession.create({
+                  data: {
+                    userId: userId,
+                    assignedDomain: data.assignedDomain,
+                    metrics: data.metrics,
+                  },
+                });
+
+                const creditUpdate = await tx.user.updateMany({
+                  where: { userId },
+                  data: { roadmap_credits: { increment: 50 } },
+                });
+
+                if (creditUpdate.count > 0) {
+                  console.log(
+                    `💾 Saved TrackerV2 ML Session and added 50 roadmap credits for user: ${userId}`,
+                  );
+                } else {
+                  console.log(
+                    `💾 Saved TrackerV2 ML Session for user: ${userId} but no matching user row was found for credit update`,
+                  );
+                }
               });
-              console.log(
-                `💾 Saved TrackerV2 ML Session to Database for user: ${userId}`,
-              );
             }
             break;
           case "github-tracker-events":
