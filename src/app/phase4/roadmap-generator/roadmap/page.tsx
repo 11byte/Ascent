@@ -158,8 +158,28 @@ export default function RoadmapGeneratorPage() {
   const [usePersonalKey, setUsePersonalKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tree, setTree] = useState<any>(null);
-  const [credits, setCredits] = useState(1000);
+  const [credits, setCredits] = useState(0);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    const loadCredits = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/auth/profile/${userId}`);
+        const data = await response.json();
+
+        if (response.ok && data?.status && typeof data?.user?.roadmap_credits === "number") {
+          setCredits(data.user.roadmap_credits);
+        }
+      } catch (error) {
+        console.error("Failed to load roadmap credits:", error);
+      }
+    };
+
+    loadCredits();
+  }, []);
 
   const handleGenerate = async () => {
     setError("");
@@ -193,7 +213,13 @@ export default function RoadmapGeneratorPage() {
       }
 
       setTree(data.tree);
-      if (!usePersonalKey) setCredits((prev) => prev - 100);
+      if (!usePersonalKey) {
+        if (typeof data.remainingCredits === "number") {
+          setCredits(data.remainingCredits);
+        } else {
+          setCredits((prev) => prev - 100);
+        }
+      }
     } catch (e: any) {
       setError(e.message || "Something went wrong. Please try again.");
     } finally {
@@ -236,15 +262,15 @@ export default function RoadmapGeneratorPage() {
               </select>
             </div>
 
-            <button
+            {/* <button
               onClick={() => setUsePersonalKey(!usePersonalKey)}
               className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
             >
               <KeyRound size={14} />
               {usePersonalKey ? "Personal Key Active" : "Use Personal API Key"}
-            </button>
+            </button> */}
 
-            {usePersonalKey && (
+            {/* {usePersonalKey && (
               <input
                 type="password"
                 value={apiKey}
@@ -252,7 +278,7 @@ export default function RoadmapGeneratorPage() {
                 placeholder="Paste Gemini Key..."
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs"
               />
-            )}
+            )} */}
 
             <button
               onClick={handleGenerate}

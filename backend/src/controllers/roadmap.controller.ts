@@ -65,9 +65,19 @@ export const generateRoadmap = async (req: Request, res: Response) => {
       return saved;
     });
 
+    const updatedUser = await prisma.user.findUnique({
+      where: { userId },
+      select: { roadmap_credits: true },
+    });
+
     return res
       .status(200)
-      .json({ status: true, tree, roadmapId: finalResult.id });
+      .json({
+        status: true,
+        tree,
+        roadmapId: finalResult.id,
+        remainingCredits: updatedUser?.roadmap_credits,
+      });
   } catch (error) {
     console.error("Express Roadmap Error:", error);
     return res

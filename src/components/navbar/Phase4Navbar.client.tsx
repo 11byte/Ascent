@@ -5,16 +5,12 @@ import NavbarWrapper from "./Navbar-Wrapper";
 
 const DEFAULT_CONFIG = {
   showNavItems: false,
-  showCredits: false,
-  userCredits: 0,
 };
 
 // Route-specific overrides within /phase4
 const OVERRIDES: Record<string, Partial<typeof DEFAULT_CONFIG>> = {
   "/phase4/roadmap-generator": {
     showNavItems: true,
-    showCredits: true,
-    userCredits: 1567,
   },
 };
 
@@ -31,7 +27,13 @@ function getConfigForPath(pathname: string) {
 }
 
 // make this component take json prop with username and points as key pairs
-export default function Phase4NavbarClient({ username, points }: { username: string; points: number }) {
+export default function Phase4NavbarClient({
+  username,
+  points,
+}: {
+  username: string;
+  points: number;
+}) {
   const pathname = (usePathname() || "").replace(/\/$/, ""); // normalize trailing slash
 
   const config = getConfigForPath(pathname);
@@ -48,8 +50,6 @@ export default function Phase4NavbarClient({ username, points }: { username: str
       tDepthColor={{ dark: "#DDA853", light: "#DDA853" }}
       // Route-driven props
       showNavItems={config.showNavItems}
-      showCredits={config.showCredits}
-      userCredits={config.userCredits}
     />
   );
 }
