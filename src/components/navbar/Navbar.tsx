@@ -37,7 +37,7 @@ const Navbar = ({
     const checkDarkMode = () => {
       setIsDarkMode(
         document.documentElement.classList.contains("dark") ||
-          window.matchMedia("(prefers-color-scheme: dark)").matches
+          window.matchMedia("(prefers-color-scheme: dark)").matches,
       );
     };
 
@@ -79,7 +79,7 @@ const Navbar = ({
             <Link href="/" className="block">
               <div className="relative w-[10px] h-[50px] lg:w-[50px] lg:h-[150px] mb-2 ">
                 <Image
-                  src={"/logo-ascent.png"}
+                  src={"/logo-ascent-text-nobg.png"}
                   alt="Ascent Logo"
                   width={50}
                   height={50}

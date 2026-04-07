@@ -130,9 +130,7 @@ const Login = () => {
           </center>
 
           {msg && (
-            <p className="mt-4 text-center text-sm text-emerald-500 font-[Orbitron]">
-              {msg}
-            </p>
+            <p className="mt-4 text-center text-sm text-[#009f5a] ">{msg}</p>
           )}
 
           <p className="mt-6 text-center text-sm text-gray-500">

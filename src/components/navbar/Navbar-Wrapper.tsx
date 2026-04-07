@@ -4,6 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Menu, X, User, Coins } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
+import { useRef } from "react";
 
 import { Badge } from "../../components/ui/badge";
 import {
@@ -30,13 +34,16 @@ const NavbarWrapper = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     const checkDarkMode = () => {
       setIsDarkMode(
         document.documentElement.classList.contains("dark") ||
-          window.matchMedia("(prefers-color-scheme: dark)").matches
+          window.matchMedia("(prefers-color-scheme: dark)").matches,
       );
     };
 
@@ -52,6 +59,26 @@ const NavbarWrapper = ({
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // or your key
+    sessionStorage.clear(); // optional
+    router.push("/login");
+  };
+
   return (
     <TooltipProvider delayDuration={250}>
       <motion.nav
@@ -63,20 +90,34 @@ const NavbarWrapper = ({
             ? "bg-white/20 backdrop-blur-xl shadow-2xl border-b border-white/30"
             : "bg-white/10 backdrop-blur-lg border-b border-white/20"
         }`}
-        style={{ backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)" }}
+        style={{
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16 lg:h-20 relative">
+        <div className="w-full px-2 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16 lg:h-20 relative w-full">
             {/* Left cluster: logo + nav */}
-            <div className="relative z-10 flex items-center gap-4 lg:gap-6">
+            <div className="relative z-10 flex items-center gap-3 lg:gap-4 flex-shrink-0">
+              {/* Back Button */}
+              <button
+                onClick={() => router.back()}
+                className="w-10 h-10 flex items-center justify-center rounded-full 
+               bg-white/80 hover:bg-white text-black 
+               shadow-lg hover:shadow-xl 
+               transition-all duration-300 active:scale-95"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              {/* Logo */}
               <Link href="/" className="block">
-                {/* Remove absolute/negative offsets to eliminate the big gap */}
                 <Image
-                  src={"/logo-ascent.png"}
+                  src={"/logo-ascent-text-nobg.png"}
                   alt="Ascent Logo"
                   width={50}
                   height={50}
-                  className="h-16 w-auto lg:h-20"
+                  className="h-12 w-auto lg:h-12"
                   priority
                 />
               </Link>
@@ -107,77 +148,155 @@ const NavbarWrapper = ({
                         stroke={isDarkMode ? tBorder.dark : tBorder.light}
                         strokeWidth="3"
                       />
-                      <path d="M80 100 L26 15 L135 15 Z" fill={isDarkMode ? tColor.dark : tColor.light} opacity="0.9" />
-                      <path d="M80 90 L40 25 L120 25 Z" fill={isDarkMode ? tDepthColor.dark : tDepthColor.light} opacity="0.6" />
+                      <path
+                        d="M80 100 L26 15 L135 15 Z"
+                        fill={isDarkMode ? tColor.dark : tColor.light}
+                        opacity="0.9"
+                      />
+                      <path
+                        d="M80 90 L40 25 L120 25 Z"
+                        fill={isDarkMode ? tDepthColor.dark : tDepthColor.light}
+                        opacity="0.6"
+                      />
                       <defs>
-                        <linearGradient id="triangleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor={isDarkMode ? "#EF4444" : "#E53E3E"} stopOpacity="0.1" />
-                          <stop offset="30%" stopColor={isDarkMode ? "#06B6D4" : "#14B8A6"} stopOpacity="0.15" />
-                          <stop offset="70%" stopColor={isDarkMode ? "#3B82F6" : "#059669"} stopOpacity="0.2" />
-                          <stop offset="100%" stopColor={isDarkMode ? "#EF4444" : "#E53E3E"} stopOpacity="0.3" />
+                        <linearGradient
+                          id="triangleGradient"
+                          x1="0%"
+                          y1="0%"
+                          x2="0%"
+                          y2="100%"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor={isDarkMode ? "#EF4444" : "#E53E3E"}
+                            stopOpacity="0.1"
+                          />
+                          <stop
+                            offset="30%"
+                            stopColor={isDarkMode ? "#06B6D4" : "#14B8A6"}
+                            stopOpacity="0.15"
+                          />
+                          <stop
+                            offset="70%"
+                            stopColor={isDarkMode ? "#3B82F6" : "#059669"}
+                            stopOpacity="0.2"
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={isDarkMode ? "#EF4444" : "#E53E3E"}
+                            stopOpacity="0.3"
+                          />
                         </linearGradient>
                       </defs>
                     </svg>
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ marginTop: "0px" }}>
-                      <span className="font-bold text-lg text-white drop-shadow-lg font-[Orbitron]">PHASE</span>
-                      <span className="font-bold text-4xl text-white drop-shadow-lg -mt-1">{phaseNo}</span>
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-center"
+                      style={{ marginTop: "0px" }}
+                    >
+                      <span className="font-bold text-lg text-white drop-shadow-lg font-[Orbitron]">
+                        PHASE
+                      </span>
+                      <span className="font-bold text-4xl text-white drop-shadow-lg -mt-1">
+                        {phaseNo}
+                      </span>
                     </div>
                   </div>
                 </motion.div>
               </div>
             )}
 
-            {/* Spacer to push right content */}
-            <div className="flex-1" />
-
-            {/* Right - User Profile Box */}
-            <motion.div
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="hidden lg:flex items-center z-10"
-            >
-              <div
-                className="bg-white/20 rounded-full px-4 py-0.5 mb-2 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
-                style={{ backdropFilter: "blur(16px) saturate(180%)", WebkitBackdropFilter: "blur(16px) saturate(180%)" }}
+            <div className="flex items-center gap-15 ml-auto">
+              {/* Home Tab */}
+              <button
+                onClick={() => router.push(`/phase${phaseNo}`)}
+                className="text-lg font-[Orbitron] text-white/80 hover:text-white transition-colors duration-200 cursor-pointer"
               >
-                <div className="flex items-center space-x-3 p-0.5">
-                  <div className="w-8 h-8 bg-transparent rounded-full flex items-center justify-center shadow-lg">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
+                Home
+              </button>
+              {/* Right - User Profile Box */}
+              <motion.div
+                ref={profileRef}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="hidden lg:flex items-center z-10 ml-auto flex-shrink-0 relative"
+              >
+                {/* Profile Button */}
+                <div
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="cursor-pointer bg-white/20 rounded-full px-4 py-0.5 mb-2 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
+                  style={{
+                    backdropFilter: "blur(16px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(16px) saturate(180%)",
+                  }}
+                >
+                  <div className="flex items-center space-x-3 p-0.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
 
-                  {/* Credits */}
-                  {/* {showCredits && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          className="cursor-default flex items-center gap-1 text-white"
-                          variant={userCredits > 0 ? "outline" : "destructive"}
-                        >
-                          {userCredits}
-                          <Coins size={16} />
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>Credits Remaining</TooltipContent>
-                    </Tooltip>
-                  )} */}
-
-                  <div className="flex flex-col font-[Orbitron]">
-                    <span className="text-sm font-semibold text-white drop-shadow-sm">{username}</span>
-                    <span className="text-xs font-medium text-cyan-200 drop-shadow-sm">{points} pts</span>
+                    <div className="flex flex-col font-[Orbitron]">
+                      <span className="text-sm font-semibold text-white">
+                        {username}
+                      </span>
+                      <span className="text-xs text-cyan-200">
+                        {points} pts
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+
+                {/* Dropdown Modal */}
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 8, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 top-full mt-2 w-48 rounded-2xl border border-white/20 shadow-2xl overflow-hidden z-20 bg-[#261c34]"
+                      style={{
+                        backdropFilter: "blur(40px) saturate(200%)",
+                        WebkitBackdropFilter: "blur(40px) saturate(200%)",
+                      }}
+                    >
+                      <div className="flex flex-col py-2 text-white font-[Orbitron]">
+                        {/* View Profile */}
+                        <button className="flex items-center gap-3 px-4 py-2 hover:bg-white/20 transition-all">
+                          <UserCircle className="w-4 h-4" />
+                          View Profile
+                        </button>
+
+                        {/* Logout */}
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-red-500/30 text-red-300 transition-all"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden p-2 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 transition-all duration-200 z-10 text-white hover:bg-white/30 shadow-lg"
-              style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+              style={{
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+              }}
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -191,7 +310,11 @@ const NavbarWrapper = ({
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className="lg:hidden border-t border-white/30 shadow-2xl"
-              style={{ background: "rgba(255, 255, 255, 0.1)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)" }}
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              }}
             >
               <div className="px-4 py-6">
                 {/* Mobile Phase Indicator */}
@@ -199,24 +322,62 @@ const NavbarWrapper = ({
                   <div className="flex items-center justify-center mb-6">
                     <div className="flex flex-col items-center space-y-2">
                       <div className="relative">
-                        <svg width="80" height="60" viewBox="0 0 80 60" className="drop-shadow-xl">
-                          <path d="M40 55 L5 0 L75 0 Z" fill={isDarkMode ? tBorder.dark : tBorder.light} opacity="0.3" stroke={isDarkMode ? tBorder.dark : tBorder.light} strokeWidth="2" />
-                          <path d="M40 45 L15 8 L65 8 Z" fill={isDarkMode ? tColor.dark : tColor.light} opacity="0.8" />
-                          <path d="M40 35 L25 12 L56 12 Z" fill={isDarkMode ? tDepthColor.dark : tDepthColor.light} opacity="0.6" />
+                        <svg
+                          width="80"
+                          height="60"
+                          viewBox="0 0 80 60"
+                          className="drop-shadow-xl"
+                        >
+                          <path
+                            d="M40 55 L5 0 L75 0 Z"
+                            fill={isDarkMode ? tBorder.dark : tBorder.light}
+                            opacity="0.3"
+                            stroke={isDarkMode ? tBorder.dark : tBorder.light}
+                            strokeWidth="2"
+                          />
+                          <path
+                            d="M40 45 L15 8 L65 8 Z"
+                            fill={isDarkMode ? tColor.dark : tColor.light}
+                            opacity="0.8"
+                          />
+                          <path
+                            d="M40 35 L25 12 L56 12 Z"
+                            fill={
+                              isDarkMode ? tDepthColor.dark : tDepthColor.light
+                            }
+                            opacity="0.6"
+                          />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-sm font-bold text-white drop-shadow-lg">Phase</span>
-                          <span className="text-xl font-bold text-white drop-shadow-lg -mt-1">{phaseNo}</span>
+                          <span className="text-sm font-bold text-white drop-shadow-lg">
+                            Phase
+                          </span>
+                          <span className="text-xl font-bold text-white drop-shadow-lg -mt-1">
+                            {phaseNo}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
+                <button
+                  onClick={() => {
+                    router.push(`/${phaseNo}`);
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-3 rounded-xl text-white font-[Orbitron] bg-white/10 border border-white/20 hover:bg-white/20 transition-all mb-4"
+                >
+                  Home
+                </button>
+
                 {/* Mobile User Info */}
                 <div
                   className="rounded-full p-4 text-center bg-white/20 border border-white/30 shadow-xl"
-                  style={{ backdropFilter: "blur(16px) saturate(180%)", WebkitBackdropFilter: "blur(16px) saturate(180%)" }}
+                  style={{
+                    backdropFilter: "blur(16px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(16px) saturate(180%)",
+                  }}
                 >
                   <div className="flex items-center justify-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
@@ -236,14 +397,22 @@ const NavbarWrapper = ({
                     )} */}
 
                     <div>
-                      <div className="font-semibold text-white drop-shadow-sm">{username}</div>
-                      <div className="text-sm font-medium text-cyan-200 drop-shadow-sm">{points} pts</div>
+                      <div className="font-semibold text-white drop-shadow-sm">
+                        {username}
+                      </div>
+                      <div className="text-sm font-medium text-cyan-200 drop-shadow-sm">
+                        {points} pts
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Mobile Nav Items */}
-                {showNavItems && <div className="mt-6"><NavItems phase="4" variant="mobile" /></div>}
+                {showNavItems && (
+                  <div className="mt-6">
+                    <NavItems phase="4" variant="mobile" />
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

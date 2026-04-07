@@ -112,8 +112,11 @@ export default function BackgroundTimeline() {
                   boxShadow: `0 10px 40px ${color}22`,
                 }}
               >
-                <div className="text-xs font-semibold px-2" style={{ color }}>
-                  {["Foundation", "Skill Dev", "Projects", "Achievements"][i]}
+                <div
+                  className="text-3xl font-semibold font-[Orbitron] px-2"
+                  style={{ color }}
+                >
+                  {["FE", "SE", "TE", "BE"][i]}
                 </div>
 
                 {isActive && (
