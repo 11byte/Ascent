@@ -6,10 +6,6 @@ import { sendEventToKafka } from "../utils/producer.js";
 
 const router = Router();
 
-const CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
-const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
-const REDIRECT_URI = "http://localhost:3000/phase2/githubtracker";
-
 /* =====================================================
    TEMPORARY AUTH MIDDLEWARE (Skip real verification)
 ===================================================== */
@@ -138,7 +134,9 @@ router.post("/login", async (req: Request, res: Response) => {
 
 router.get("/profile/:userId", async (req: Request, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = Array.isArray(req.params.userId)
+      ? req.params.userId[0]
+      : req.params.userId;
 
     const user = await prisma.user.findUnique({
       where: { userId },

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "src/app/components/ui/button";
+import { Button } from "../../components/ui/button";
 
 interface DomainSelectorProps {
   selectedDomain: string | null;

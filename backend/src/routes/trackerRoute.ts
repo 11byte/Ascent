@@ -43,7 +43,9 @@ router.post("/quiz/save", async (req: Request, res: Response) => {
 
 router.get("/predict/:userId", async (req: Request, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = Array.isArray(req.params.userId)
+      ? req.params.userId[0]
+      : req.params.userId;
 
     // 1. Get the key (same logic you use in roadmap)
     const apiKey = process.env.GEMINI_API_KEY;

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Brain, Users, Rocket, Calendar, ArrowLeft, Code } from "lucide-react";
 import Link from "next/link";
-import { aimlClub } from "@/data/clubs/aiml";
+import { aimlClub } from "../../../../data/clubs/aiml";
 import UpcomingEvents from "../../../../components/clubs/UpcomingEvents";
 
 export default function AIClubPage() {

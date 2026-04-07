@@ -1,0 +1,74 @@
+Docker Compose and Docker Command Cheat Sheet
+
+Run from project root (where docker-compose.yml is located).
+
+1) List containers and images
+- docker compose ps
+- docker ps -a
+- docker images
+
+2) View logs
+- docker compose logs
+- docker compose logs -f
+- docker compose logs -f frontend
+- docker compose logs -f backend
+- docker compose logs --tail=200 backend frontend
+
+3) Stop containers
+- docker compose stop
+- docker compose stop frontend backend
+- docker stop ascent-frontend ascent-backend ascent-postgres ascent-kafka ascent-zookeeper
+
+4) Start containers (without rebuild)
+- docker compose up -d
+- docker compose start
+- docker compose start frontend backend
+
+5) Restart containers
+- docker compose restart
+- docker compose restart frontend
+- docker compose restart backend
+- docker restart ascent-frontend ascent-backend
+
+6) Delete containers and network (keep images and volumes)
+- docker compose down
+
+7) Delete containers and network plus volumes (deletes DB data)
+- docker compose down -v
+
+8) Delete containers, network, volumes, and local compose images
+- docker compose down -v --rmi local
+
+9) Delete specific containers
+- docker rm -f ascent-frontend
+- docker rm -f ascent-backend
+
+10) Recreate image from Dockerfile directly
+Frontend:
+- docker build -f Dockerfile.frontend -t ascent_check-frontend:latest .
+
+Backend:
+- docker build -f backend/Dockerfile -t ascent_check-backend:latest backend
+
+11) Recreate images from docker compose file
+Build all:
+- docker compose build --no-cache
+
+Build one service:
+- docker compose build --no-cache frontend
+- docker compose build --no-cache backend
+
+12) Recreate and run containers from compose
+- docker compose up -d --build
+
+Force recreate containers:
+- docker compose up -d --build --force-recreate
+
+Clean recreate (full reset):
+- docker compose down -v --rmi local
+- docker compose up -d --build
+
+Optional daily workflow
+- docker compose up -d
+- docker compose logs -f backend frontend
+- docker compose down

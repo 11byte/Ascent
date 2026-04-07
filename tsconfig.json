@@ -27,25 +27,25 @@
     "baseUrl": "./src", // This tells TypeScript to start looking inside the 'src' folder
     "paths": {
       "@components/*": [
-        "./src/components/*"
+        "./components/*"
       ],
       "@styles/*": [
-        "./src/styles/*"
+        "./styles/*"
       ],
       "@utils/*": [
-        "./src/utils/*"
+        "./utils/*"
       ],
       "@hooks/*": [
-        "./src/hooks/*"
+        "./hooks/*"
       ],
       "@services/*": [
-        "./src/services/*"
+        "./services/*"
       ],
       "@context/*": [
-        "./src/context/*"
+        "./context/*"
       ],
       "@/components/*": [
-        "./src/components/*"
+        "./components/*"
       ],
       // The most versatile alias: Maps @/ to the src/ folder.
       // E.g., @/app/page.tsx or @/components/ui/button.tsx
@@ -67,6 +67,8 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "backend/**/*.ts",
+    "backend/**/*.tsx"
   ]
 }
