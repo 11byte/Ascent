@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { CheckCircle2, ChevronRight, Volume2, Search, AlertTriangle } from "lucide-react";
 
 // --- 1. Predefined Word Banks ---
@@ -59,8 +58,7 @@ const AudioEngine = {
 };
 
 // --- 3. Main Game Component ---
-// UPDATED: onComplete expects the ML metrics payload
-export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: any) => void }) {
+export default function FinalOddManOut({ theme, onComplete }: { theme: any, onComplete?: (metrics: any) => void }) {
   // Game State
   const [options, setOptions] = useState<{ id: string, word: string, domain: string, isOdd: boolean, state: 'idle' | 'correct' | 'wrong' | 'fade' }[]>([]);
   const [score, setScore] = useState(0);
@@ -69,26 +67,18 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false); // Prevents clicking during transitions
   
-  // --- ADDED: ML TELEMETRY TRACKERS ---
+  // --- ML TELEMETRY TRACKERS ---
   const roundStart = useRef<number>(0);
   const stats = useRef({ time: 0, clicks: 0, misclicks: 0 });
   const [finalMetrics, setFinalMetrics] = useState<any>(null);
 
   const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cloudsRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
-
-  // Background Parallax
-  useGSAP(() => {
-    gsap.to(groundRef.current, { backgroundPositionX: "1301px", duration: 20, ease: "none", repeat: -1, force3D: true });
-    gsap.to(cloudsRef.current, { backgroundPositionX: "-2247px", duration: 52, ease: "none", repeat: -1, force3D: true });
-  }, []);
 
   // --- Round Generator ---
   const generateRound = useCallback(() => {
     setIsProcessing(false);
     
-    // --- ADDED: Reset the reaction timer for the new round ---
+    // Reset the reaction timer for the new round
     roundStart.current = Date.now();
 
     const domains = Object.keys(WORD_BANKS);
@@ -124,7 +114,7 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
   const handleSelect = (selectedId: string, isOdd: boolean) => {
     if (isProcessing) return;
     
-    // --- ADDED: TRACK REACTION TIME & CLICKS ---
+    // TRACK REACTION TIME & CLICKS
     const timeTaken = (Date.now() - roundStart.current) / 1000;
     stats.current.time += timeTaken;
     stats.current.clicks += 1;
@@ -142,7 +132,7 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
       setScore(s => s + 1);
 
       if (score + 1 >= targetScore) {
-        // --- ADDED: COMPILE ML METRICS ON WIN ---
+        // COMPILE ML METRICS ON WIN
         const accuracy = (targetScore / stats.current.clicks) * 100;
         
         setFinalMetrics({
@@ -156,8 +146,7 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
         setTimeout(generateRound, 1000); // Load next round after delay
       }
     } else {
-      // WRONG
-      // --- ADDED: TRACK MISCLICKS ---
+      // WRONG (MISCLICK)
       stats.current.misclicks += 1;
 
       if (audioEnabled) AudioEngine.playError();
@@ -183,34 +172,30 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
   };
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-screen min-h-[700px] bg-[#63D0FF] overflow-hidden flex flex-col items-center justify-center font-sans">
+    <div ref={bgContainerRef} className="relative w-full h-full min-h-[700px] flex flex-col items-center justify-center font-sans overflow-hidden z-10">
       
-      {/* Background Layers */}
-      <div ref={cloudsRef} className="absolute top-0 left-0 w-full h-[230px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/bg-clouds2-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 bottom' }} />
-      <div ref={groundRef} className="absolute bottom-0 left-0 w-full h-[192px] z-0 pointer-events-none" style={{ backgroundImage: 'url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/56901/grass_tile-tinypng.png")', backgroundRepeat: 'repeat-x', backgroundPosition: '0 0' }} />
-
       {/* Audio Toggle */}
-      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 backdrop-blur-md rounded-full hover:bg-black/40 transition-colors border border-white/20 text-white">
-        <Volume2 className={`w-6 h-6 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} />
+      <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
+        <Volume2 className={`w-5 h-5 ${audioEnabled ? 'opacity-100' : 'opacity-30 line-through'}`} style={{ color: theme.primary }} />
       </button>
 
       {/* Main Game Area */}
-      <div className="relative z-10 w-full max-w-2xl mx-4 flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-2xl mx-4 flex flex-col items-center mt-10">
         
         {/* Header HUD */}
         {!gameWon && (
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex justify-between items-end mb-8 px-4">
-            <div className="bg-gray-900/80 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-xl">
-              <h2 className="text-white font-bold text-2xl font-[Orbitron] tracking-widest flex items-center gap-2">
-                <Search className="text-cyan-400 w-6 h-6" /> ANOMALY DETECT
+            <div className="backdrop-blur-xl border p-4 rounded-2xl shadow-xl" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
+              <h2 className="text-white font-bold text-2xl tracking-widest flex items-center gap-2" style={{ fontFamily: theme.fontPrimary }}>
+                <Search className="w-6 h-6" style={{ color: theme.primary }} /> ANOMALY DETECT
               </h2>
-              <p className="text-cyan-300/70 text-sm font-mono mt-1">Isolate the odd packet out.</p>
+              <p className="text-sm font-mono mt-1 opacity-80" style={{ color: theme.primary }}>Isolate the odd packet out.</p>
             </div>
             
-            <div className="bg-gray-900/80 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl shadow-xl text-center">
+            <div className="backdrop-blur-xl border px-6 py-4 rounded-2xl shadow-xl text-center" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
               <p className="text-xs text-gray-400 font-bold tracking-widest mb-1">ROUNDS</p>
-              <p className="text-2xl font-bold font-[Orbitron] text-white">
-                <span className="text-cyan-400">{score}</span> / {targetScore}
+              <p className="text-2xl font-bold text-white" style={{ fontFamily: theme.fontPrimary }}>
+                <span style={{ color: theme.primary }}>{score}</span> / {targetScore}
               </p>
             </div>
           </motion.div>
@@ -222,11 +207,41 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
             <AnimatePresence mode="popLayout">
               {options.map((opt, index) => {
                 
-                // Dynamic styling based on state
-                let cardStyle = "bg-gray-900/60 border-white/20 text-white hover:bg-white/10 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]";
-                if (opt.state === 'correct') cardStyle = "bg-green-500 border-green-400 text-gray-900 shadow-[0_0_30px_rgba(34,197,94,0.6)] scale-105 z-10";
-                if (opt.state === 'wrong') cardStyle = "bg-red-600 border-red-500 text-white shadow-[0_0_30px_rgba(239,68,68,0.6)]";
-                if (opt.state === 'fade') cardStyle = "bg-gray-900/20 border-white/5 text-gray-600 scale-95 opacity-40 blur-[2px] pointer-events-none";
+                // Dynamic styling based on state and theme
+                let currentStyles: React.CSSProperties = {
+                  backgroundColor: "rgba(0,0,0,0.4)",
+                  borderColor: "rgba(255,255,255,0.1)",
+                  color: "#fff",
+                  boxShadow: "none",
+                  opacity: 1,
+                  transform: "scale(1)"
+                };
+
+                if (opt.state === 'correct') {
+                  currentStyles = {
+                    backgroundColor: theme.success,
+                    borderColor: theme.success,
+                    color: "#000",
+                    boxShadow: `0 0 30px ${theme.success}80`,
+                    zIndex: 10
+                  };
+                } else if (opt.state === 'wrong') {
+                  currentStyles = {
+                    backgroundColor: theme.danger,
+                    borderColor: theme.danger,
+                    color: "#fff",
+                    boxShadow: `0 0 30px ${theme.danger}80`
+                  };
+                } else if (opt.state === 'fade') {
+                  currentStyles = {
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    borderColor: "rgba(255,255,255,0.05)",
+                    color: "#666",
+                    opacity: 0.4,
+                    filter: "blur(2px)",
+                    pointerEvents: "none"
+                  };
+                }
 
                 return (
                   <motion.button
@@ -234,7 +249,7 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
                     layoutId={opt.id} // Keeps animation smooth if order changes
                     initial={{ opacity: 0, scale: 0.5, y: 50 }}
                     animate={{ 
-                      opacity: opt.state === 'fade' ? 0.4 : 1, 
+                      opacity: currentStyles.opacity, 
                       scale: opt.state === 'correct' ? 1.05 : opt.state === 'fade' ? 0.95 : 1, 
                       y: 0 
                     }}
@@ -244,10 +259,34 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
                       delay: index * 0.05, // Stagger entrance
                       type: "spring", stiffness: 300, damping: 20 
                     }}
-                    onMouseEnter={() => { if(audioEnabled && !isProcessing) AudioEngine.playHover(); }}
+                    onMouseEnter={() => { 
+                      if(audioEnabled && !isProcessing) AudioEngine.playHover(); 
+                      // Apply hover styles programmatically if idle
+                      if(opt.state === 'idle') {
+                         const el = document.getElementById(opt.id);
+                         if(el) {
+                           el.style.borderColor = theme.primary;
+                           el.style.boxShadow = `0 0 20px ${theme.primary}50`;
+                           el.style.backgroundColor = "rgba(255,255,255,0.05)";
+                         }
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      // Remove hover styles if idle
+                      if(opt.state === 'idle') {
+                         const el = document.getElementById(opt.id);
+                         if(el) {
+                           el.style.borderColor = "rgba(255,255,255,0.1)";
+                           el.style.boxShadow = "none";
+                           el.style.backgroundColor = "rgba(0,0,0,0.4)";
+                         }
+                      }
+                    }}
                     onClick={() => handleSelect(opt.id, opt.isOdd)}
                     disabled={isProcessing}
-                    className={`relative w-full aspect-video rounded-3xl backdrop-blur-xl border-2 flex items-center justify-center transition-colors duration-300 group overflow-hidden ${cardStyle}`}
+                    id={opt.id}
+                    className="relative w-full aspect-video rounded-3xl backdrop-blur-xl border-2 flex items-center justify-center transition-all duration-300 group overflow-hidden"
+                    style={currentStyles}
                   >
                     {/* Glass glare effect */}
                     <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
@@ -258,7 +297,7 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
 
                     {/* Alert icon for wrong answer */}
                     {opt.state === 'wrong' && (
-                      <AlertTriangle className="absolute top-3 right-3 w-5 h-5 text-red-200 animate-ping" />
+                      <AlertTriangle className="absolute top-3 right-3 w-5 h-5 text-white animate-ping" />
                     )}
                   </motion.button>
                 );
@@ -272,21 +311,21 @@ export default function FinalOddManOut({ onComplete }: { onComplete?: (metrics: 
           {gameWon && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.8, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} 
-              className="absolute z-50 flex items-center justify-center w-full"
+              className="absolute inset-0 z-50 flex items-center justify-center w-full"
             >
-              <div className="bg-gray-900 border border-green-500/50 p-10 rounded-3xl shadow-[0_0_60px_rgba(34,197,94,0.3)] text-center w-full max-w-md">
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-12 h-12 text-green-400" />
+              <div className="border p-10 rounded-3xl text-center w-full max-w-md shadow-2xl" style={{ backgroundColor: theme.cardBg, borderColor: `${theme.success}50`, boxShadow: `0 0 60px ${theme.success}30` }}>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `${theme.success}20` }}>
+                  <CheckCircle2 className="w-12 h-12" style={{ color: theme.success }} />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2 font-[Orbitron]">ANOMALIES CLEARED</h2>
-                <p className="text-green-200/70 mb-8">You successfully identified all rogue data packets.</p>
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>ANOMALIES CLEARED</h2>
+                <p className="text-gray-400 mb-8">You successfully identified all rogue data packets.</p>
                 
-                {/* --- ADDED: Pass finalMetrics to parent Controller --- */}
                 <button 
                   onClick={() => onComplete ? onComplete(finalMetrics) : alert(`Metrics Data:\n${JSON.stringify(finalMetrics, null, 2)}`)} 
-                  className="w-full group bg-gradient-to-r from-green-400 to-cyan-500 hover:from-green-300 hover:to-cyan-400 text-gray-900 font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg"
+                  className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg text-gray-900"
+                  style={{ background: `linear-gradient(90deg, ${theme.success}, ${theme.primary})` }}
                 >
-                  Complete Assessment <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Complete Assessment <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>
