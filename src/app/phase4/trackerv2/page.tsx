@@ -24,16 +24,16 @@ import FinalOddManOut from "../../../components/tracker/FinalOddManOut";
 
 // --- 1. Global Theme Configuration ---
 export const GLOBAL_THEME = {
-  primary: "#DDA853",     // tDepthColor (Muted Gold)
-  secondary: "#F3F3E0",   // tBorder (Cream)
-  accent: "#183B4E",      // tColor (Deep Teal)
-  success: "#34d399",     // Muted Emerald
-  danger: "#fb7185",      // Muted Rose
-  background: "#020608",  // Almost black with a tiny hint of teal
+  primary: "#DDA853", // tDepthColor (Muted Gold)
+  secondary: "#F3F3E0", // tBorder (Cream)
+  accent: "#183B4E", // tColor (Deep Teal)
+  success: "#34d399", // Muted Emerald
+  danger: "#fb7185", // Muted Rose
+  background: "#020608", // Almost black with a tiny hint of teal
   cardBg: "rgba(24, 59, 78, 0.35)", // Using tColor as a tinted glass background
   cardBorder: "rgba(243, 243, 224, 0.15)", // tBorder with 15% opacity
   fontPrimary: "'Orbitron', sans-serif",
-  fontSecondary: "system-ui, -apple-system, sans-serif"
+  fontSecondary: "system-ui, -apple-system, sans-serif",
 };
 
 // --- 2. Tarot Cards Configuration ---
@@ -311,7 +311,7 @@ export default function TrackerV2() {
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
-                  className="w-8 md:w-12 h-2 rounded-full transition-all duration-500"
+                  className="w-2 h-2 rounded-full transition-all duration-500"
                   style={{
                     backgroundColor:
                       currentStep > step
@@ -396,12 +396,30 @@ export default function TrackerV2() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setCurrentStep(1)}
-                className="font-bold py-4 px-10 rounded-xl flex items-center gap-3 text-gray-900 shadow-xl tracking-widest"
+                className="relative font-bold py-4 px-10 rounded-xl flex items-center gap-3 tracking-widest border backdrop-blur-md transition-all duration-300"
                 style={{
-                  background: `linear-gradient(90deg, ${GLOBAL_THEME.primary}, ${GLOBAL_THEME.secondary})`,
+                  background: GLOBAL_THEME.cardBg,
+                  borderColor: GLOBAL_THEME.cardBorder,
+                  fontFamily: GLOBAL_THEME.fontPrimary,
+                  color: GLOBAL_THEME.primary,
+                  boxShadow: `0 0 20px rgba(221,168,83,0.15)`,
                 }}
               >
-                Lets Begin <ChevronRight className="w-6 h-6" />
+                {/* Glow on hover */}
+                <span 
+                  className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `linear-gradient(90deg, ${GLOBAL_THEME.primary}20, transparent)`,
+                  }}
+                />
+
+                <span className="relative z-10 flex items-center gap-3">
+                  Lets Begin
+                  <ChevronRight
+                    className="w-6 h-6"
+                    style={{ color: GLOBAL_THEME.primary }}
+                  />
+                </span>
               </motion.button>
             </motion.div>
           )}

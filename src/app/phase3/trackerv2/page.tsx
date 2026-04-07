@@ -311,7 +311,7 @@ export default function TrackerV2() {
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
-                  className="w-8 md:w-12 h-2 rounded-full transition-all duration-500"
+                  className="w-2 h-2 rounded-full transition-all duration-500"
                   style={{
                     backgroundColor:
                       currentStep > step

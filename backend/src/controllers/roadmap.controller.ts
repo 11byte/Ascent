@@ -5,14 +5,58 @@ import {
   resourceService,
 } from "../services/roadmap.service.js";
 
+function normalizeTopic(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenSimilarity(a: string, b: string) {
+  const aTokens = new Set(a.split(" ").filter(Boolean));
+  const bTokens = new Set(b.split(" ").filter(Boolean));
+
+  if (aTokens.size === 0 || bTokens.size === 0) return 0;
+
+  const intersection = [...aTokens].filter((t) => bTokens.has(t)).length;
+  const union = new Set([...aTokens, ...bTokens]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
 export const generateRoadmap = async (req: Request, res: Response) => {
   try {
     const { query, model, apiKey, mode, userId } = req.body;
 
-    // 1. Check for cached version
-    const normalizedQuery = query.replace(/\s+/g, "").toLowerCase();
-    const existing = await prisma.roadmap.findFirst({
-      where: { title: { contains: normalizedQuery, mode: "insensitive" } },
+    if (!query || !userId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Query and userId are required" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { userId },
+      select: { id: true, roadmap_credits: true },
+    });
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
+
+    // 1. Check cached roadmap for this user first to avoid regeneration costs.
+    const normalizedQuery = normalizeTopic(query);
+    const userRoadmaps = await prisma.roadmap.findMany({
+      where: { userId: user.id },
+      select: { id: true, title: true, content: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const existing = userRoadmaps.find((roadmap) => {
+      const normalizedTitle = normalizeTopic(roadmap.title);
+
+      if (normalizedTitle === normalizedQuery) return true;
+      if (normalizedTitle.includes(normalizedQuery)) return true;
+      if (normalizedQuery.includes(normalizedTitle)) return true;
+
+      return tokenSimilarity(normalizedTitle, normalizedQuery) >= 0.8;
     });
 
     if (existing) {
@@ -24,13 +68,10 @@ export const generateRoadmap = async (req: Request, res: Response) => {
         status: true,
         tree: JSON.parse(existing.content),
         roadmapId: existing.id,
+        fromCache: true,
+        remainingCredits: user.roadmap_credits,
       });
     }
-
-    // 2. Credit check if using system mode
-    const user = await prisma.user.findUnique({ where: { userId } });
-    if (!user)
-      return res.status(404).json({ status: false, message: "User not found" });
 
     if (mode === "credits" && user.roadmap_credits < 100) {
       return res
@@ -76,6 +117,7 @@ export const generateRoadmap = async (req: Request, res: Response) => {
         status: true,
         tree,
         roadmapId: finalResult.id,
+        fromCache: false,
         remainingCredits: updatedUser?.roadmap_credits,
       });
   } catch (error) {
@@ -152,7 +194,7 @@ export const getModuleResources = async (req: Request, res: Response) => {
         books,
       },
     });
-  } catch (error) {
+  } catch {
     return res
       .status(500)
       .json({ status: false, message: "Failed to fetch resources" });

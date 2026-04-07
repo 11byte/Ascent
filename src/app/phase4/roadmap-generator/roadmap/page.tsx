@@ -216,7 +216,7 @@ export default function RoadmapGeneratorPage() {
       if (!usePersonalKey) {
         if (typeof data.remainingCredits === "number") {
           setCredits(data.remainingCredits);
-        } else {
+        } else if (!data.fromCache) {
           setCredits((prev) => prev - 100);
         }
       }
