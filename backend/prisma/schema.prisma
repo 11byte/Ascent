@@ -122,3 +122,50 @@ model TrackerSession {
   metrics        Json
   createdAt      DateTime @default(now())
 }
+
+model Club {
+  id          Int      @id @default(autoincrement())
+  name        String
+  tagline     String
+  description String
+  president   String
+
+  events      Event[]
+  challenges  Challenge[]
+  members     ClubMember[]
+
+  createdAt   DateTime @default(now())
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  title     String
+  date      String
+  time      String
+  venue     String
+  speaker   String
+  status    String
+
+  club      Club?    @relation(fields: [clubId], references: [id])
+  clubId    Int?
+}
+
+model Challenge {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  points      Int
+
+  club        Club?    @relation(fields: [clubId], references: [id])
+  clubId      Int?
+}
+
+model ClubMember {
+  id      Int    @id @default(autoincrement())
+  name    String
+  role    String
+  tier    String
+
+  club    Club?  @relation(fields: [clubId], references: [id])
+  clubId  Int?
+}

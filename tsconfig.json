@@ -65,7 +65,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "backend/src/seeds/seedClub.js"  ],
   "exclude": [
     "node_modules",
     "backend/**/*.ts",

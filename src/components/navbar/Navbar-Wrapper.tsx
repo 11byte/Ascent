@@ -2,8 +2,20 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, Coins } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
+import { useRef } from "react";
+
+import { Badge } from "../../components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
 
 import NavItems from "./nav-items";
 
@@ -16,10 +28,15 @@ const NavbarWrapper = ({
   tColor = { dark: "#06B6D4", light: "#14B8A6" },
   tDepthColor = { dark: "#3B82F6", light: "#059669" },
   showNavItems = false,
+  showCredits = false,
+  userCredits = 0,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -42,8 +59,28 @@ const NavbarWrapper = ({
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // or your key
+    sessionStorage.clear(); // optional
+    router.push("/login");
+  };
+
   return (
-    <>
+    <TooltipProvider delayDuration={250}>
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -58,18 +95,29 @@ const NavbarWrapper = ({
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16 lg:h-20 relative">
+        <div className="w-full px-2 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16 lg:h-20 relative w-full">
             {/* Left cluster: logo + nav */}
-            <div className="relative z-10 flex items-center gap-4 lg:gap-6">
+            <div className="relative z-10 flex items-center gap-3 lg:gap-4 flex-shrink-0">
+              {/* Back Button */}
+              <button
+                onClick={() => router.back()}
+                className="w-10 h-10 flex items-center justify-center rounded-full 
+               bg-white/80 hover:bg-white text-black 
+               shadow-lg hover:shadow-xl 
+               transition-all duration-300 active:scale-95"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              {/* Logo */}
               <Link href="/" className="block">
-                {/* Remove absolute/negative offsets to eliminate the big gap */}
                 <Image
-                  src={"/logo-ascent.png"}
+                  src={"/logo-ascent-text-nobg.png"}
                   alt="Ascent Logo"
                   width={50}
                   height={50}
-                  className="h-16 w-auto lg:h-20"
+                  className="h-12 w-auto lg:h-12"
                   priority
                 />
               </Link>
@@ -158,54 +206,82 @@ const NavbarWrapper = ({
               </div>
             )}
 
-            {/* Spacer to push right content */}
-            <div className="flex-1" />
-
-            {/* Right - User Profile Box */}
-            <motion.div
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="hidden lg:flex items-center z-10"
-            >
-              <div
-                className="bg-white/20 rounded-full px-4 py-0.5 mb-2 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
-                style={{
-                  backdropFilter: "blur(16px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(16px) saturate(180%)",
-                }}
+            <div className="flex items-center gap-15 ml-auto">
+              {/* Home Tab */}
+              <button
+                onClick={() => router.push(`/phase${phaseNo}`)}
+                className="text-lg font-[Orbitron] text-white/80 hover:text-white transition-colors duration-200 cursor-pointer"
               >
-                <div className="flex items-center space-x-3 p-0.5">
-                  <div className="w-8 h-8 bg-transparent rounded-full flex items-center justify-center shadow-lg">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
+                Home
+              </button>
+              {/* Right - User Profile Box */}
+              <motion.div
+                ref={profileRef}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="hidden lg:flex items-center z-10 ml-auto flex-shrink-0 relative"
+              >
+                {/* Profile Button */}
+                <div
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="cursor-pointer bg-white/20 rounded-full px-4 py-0.5 mb-2 border border-white/30 shadow-2xl hover:bg-white/30 hover:shadow-3xl transition-all duration-300"
+                  style={{
+                    backdropFilter: "blur(16px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(16px) saturate(180%)",
+                  }}
+                >
+                  <div className="flex items-center space-x-3 p-0.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
 
-                  {/* {showCredits && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          className="cursor-default flex items-center gap-1 text-white"
-                          variant={userCredits > 0 ? "outline" : "destructive"}
-                        >
-                          {userCredits}
-                          <Coins size={16} />
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>Credits Remaining</TooltipContent>
-                    </Tooltip>
-                  )} */}
-
-                  <div className="flex flex-col font-[Orbitron]">
-                    <span className="text-sm font-semibold text-white drop-shadow-sm">
-                      {username}
-                    </span>
-                    <span className="text-xs font-medium text-cyan-200 drop-shadow-sm">
-                      {points} pts
-                    </span>
+                    <div className="flex flex-col font-[Orbitron]">
+                      <span className="text-sm font-semibold text-white">
+                        {username}
+                      </span>
+                      <span className="text-xs text-cyan-200">
+                        {points} pts
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+
+                {/* Dropdown Modal */}
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 8, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 top-full mt-2 w-48 rounded-2xl border border-white/20 shadow-2xl overflow-hidden z-20 bg-[#261c34]"
+                      style={{
+                        backdropFilter: "blur(40px) saturate(200%)",
+                        WebkitBackdropFilter: "blur(40px) saturate(200%)",
+                      }}
+                    >
+                      <div className="flex flex-col py-2 text-white font-[Orbitron]">
+                        {/* View Profile */}
+                        <button className="flex items-center gap-3 px-4 py-2 hover:bg-white/20 transition-all">
+                          <UserCircle className="w-4 h-4" />
+                          View Profile
+                        </button>
+
+                        {/* Logout */}
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-red-500/30 text-red-300 transition-all"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -285,6 +361,16 @@ const NavbarWrapper = ({
                   </div>
                 )}
 
+                <button
+                  onClick={() => {
+                    router.push(`/${phaseNo}`);
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-3 rounded-xl text-white font-[Orbitron] bg-white/10 border border-white/20 hover:bg-white/20 transition-all mb-4"
+                >
+                  Home
+                </button>
+
                 {/* Mobile User Info */}
                 <div
                   className="rounded-full p-4 text-center bg-white/20 border border-white/30 shadow-xl"
@@ -297,6 +383,18 @@ const NavbarWrapper = ({
                     <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
                       <User className="w-5 h-5 text-white" />
                     </div>
+
+                    {/* {showCredits && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="cursor-default flex items-center gap-1 text-white" variant={userCredits > 0 ? "outline" : "destructive"}>
+                            {userCredits}
+                            <Coins size={16} />
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>Credits Remaining</TooltipContent>
+                      </Tooltip>
+                    )} */}
 
                     <div>
                       <div className="font-semibold text-white drop-shadow-sm">
@@ -320,7 +418,7 @@ const NavbarWrapper = ({
           )}
         </AnimatePresence>
       </motion.nav>
-    </>
+    </TooltipProvider>
   );
 };
 
