@@ -41,9 +41,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ${DOCKER_NAMESPACE}/ascent:backend-${IMAGE_TAG:-v1}
     container_name: ascent-backend
     depends_on:
       postgres:
@@ -66,9 +64,7 @@ services:
       - ./base.sql:/app/base.sql:ro
 
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
+    image: ${DOCKER_NAMESPACE}/ascent:frontend-${IMAGE_TAG:-v1}
     container_name: ascent-frontend
     depends_on:
       - backend

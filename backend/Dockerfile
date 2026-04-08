@@ -2,7 +2,7 @@ FROM node:24-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl postgresql-client && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm ci
@@ -15,6 +15,9 @@ COPY src ./src
 
 RUN npm run build
 
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
 EXPOSE 5000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
