@@ -41,7 +41,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   backend:
-    image: ${DOCKER_NAMESPACE}/ascent:backend-${IMAGE_TAG:-v1}
+    image: ${DOCKER_NAMESPACE:?DOCKER_NAMESPACE is required}/ascent:backend-${IMAGE_TAG:-v1}
     container_name: ascent-backend
     depends_on:
       postgres:
@@ -52,7 +52,7 @@ services:
       PORT: 5000
       DATABASE_URL: postgresql://ascent:ascent@postgres:5432/ascent
       KAFKA_BROKER: kafka:29092
-      JWT_SECRET: ${JWT_SECRET:-change_me}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       POSTGRES_USER: ascent
@@ -64,7 +64,7 @@ services:
       - ./base.sql:/app/base.sql:ro
 
   frontend:
-    image: ${DOCKER_NAMESPACE}/ascent:frontend-${IMAGE_TAG:-v1}
+    image: ${DOCKER_NAMESPACE:?DOCKER_NAMESPACE is required}/ascent:frontend-${IMAGE_TAG:-v1}
     container_name: ascent-frontend
     depends_on:
       - backend
