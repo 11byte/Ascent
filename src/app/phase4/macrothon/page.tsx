@@ -1,21 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import PSCalendar from "../../../components/PScalendar";
 import LeaderboardChart from "../../../components/LeaderboardChart";
 
 /* ---------------- TYPES ---------------- */
 
-type Challenge = {
+type Macrothon = {
   id: number;
   title: string;
-  domain: string;
-  difficulty: string;
   description: string;
-  start: string;
-  expiry: string;
-  requirements: string[];
+  prize: string;
+  startDate: string;
+  deadline: string;
+  domain: string;
+  club?: {
+    name: string;
+  };
 };
 
 /* ---------------- THEME ---------------- */
@@ -27,121 +29,98 @@ const theme = {
   soft: "rgba(230,183,106,0.08)",
 };
 
-/* ---------------- DATA ---------------- */
+/* ---------------- CONSTANTS ---------------- */
 
 const DOMAINS = ["all", "frontend", "backend", "ai", "dsa"];
-
-const CHALLENGES: Challenge[] = [
-  {
-    id: 1,
-    title: "AI Email Generator",
-    domain: "ai",
-    difficulty: "Advanced",
-    start: "2026-04-01",
-    expiry: "2026-04-10",
-    description: "Generate emails using user style modeling.",
-    requirements: ["LLM", "Prompting"],
-  },
-  {
-    id: 2,
-    title: "Realtime Chat App",
-    domain: "backend",
-    difficulty: "Intermediate",
-    start: "2026-04-05",
-    expiry: "2026-04-18",
-    description: "Build socket-based chat system.",
-    requirements: ["WebSockets", "Auth"],
-  },
-  {
-    id: 3,
-    title: "Portfolio UI",
-    domain: "frontend",
-    difficulty: "Beginner",
-    start: "2026-04-08",
-    expiry: "2026-04-22",
-    description: "Modern animated portfolio.",
-    requirements: ["Responsive"],
-  },
-];
 
 const LEADERBOARD = [
   { name: "Omkar", score: 320 },
   { name: "DevX", score: 280 },
-  { name: "User_02", score: 250 },
-  { name: "User_02", score: 250 },
-  { name: "User_02", score: 250 },
-  { name: "User_02", score: 250 },
 ];
-
-/* ---------------- LEADERBOARD COMPONENT ---------------- */
 
 /* ---------------- MAIN ---------------- */
 
 export default function Macrothon() {
   const [activeDomain, setActiveDomain] = useState("all");
-  const [selected, setSelected] = useState<Challenge | null>(null);
-  const [locked, setLocked] = useState<Challenge[]>([]);
+  const [macrothons, setMacrothons] = useState<Macrothon[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"explore" | "myspace">("explore");
 
-  const lockPS = (ps: Challenge) => {
-    if (locked.length >= 2) {
-      alert("You can only lock 2 PS per month");
-      return;
-    }
+  const [selected, setSelected] = useState<Macrothon | null>(null);
+  const [locked, setLocked] = useState<Macrothon[]>([]);
+  const [submitModal, setSubmitModal] = useState<Macrothon | null>(null);
 
-    if (!locked.find((l) => l.id === ps.id)) {
-      setLocked([...locked, ps]);
-      setSelected(null);
-    }
-  };
+  const [submission, setSubmission] = useState({
+    github: "",
+    demo: "",
+  });
+
+  /* ---------------- FETCH ---------------- */
+
+  useEffect(() => {
+    const fetchMacrothons = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/club/macrothons/all",
+        );
+        const data = await res.json();
+
+        if (!data.ok) throw new Error("Failed");
+
+        setMacrothons(data.macrothons);
+      } catch (err) {
+        console.error("Macrothon fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMacrothons();
+  }, []);
+
+  /* ---------------- LOGIC ---------------- */
+  const calendarData = macrothons.map((m) => ({
+    id: m.id,
+    title: m.title,
+    start: m.startDate, // ✅ real start
+    expiry: m.deadline,
+  }));
 
   const filtered =
     activeDomain === "all"
-      ? CHALLENGES
-      : CHALLENGES.filter((c) => c.domain === activeDomain);
+      ? macrothons
+      : macrothons.filter((c) => c.domain === activeDomain);
 
   const getDaysLeft = (date: string) => {
     const diff = new Date(date).getTime() - new Date().getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
+  const lockPS = (ps: Macrothon) => {
+    if (locked.length >= 2) {
+      alert("Max 2 macrothons allowed");
+      return;
+    }
+    if (!locked.find((l) => l.id === ps.id)) {
+      setLocked([...locked, ps]);
+      setSelected(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading Macrothons...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0b0b0c] text-white px-6 py-16 mt-8">
       <div className="max-w-6xl mx-auto space-y-12">
-        <h1 className="text-5xl font-bold tracking-tight font-[Orbitron]">
-          Macrothon
-        </h1>
-        {/* HERO LEADERBOARD */}
+        <h1 className="text-5xl font-bold font-[Orbitron]">Macrothon</h1>
+
         <LeaderboardChart data={LEADERBOARD} theme={theme} />
-
-        {/* STATS */}
-        <div className="grid grid-cols-3 gap-4">
-          <div
-            className="p-4 rounded-xl border"
-            style={{ borderColor: theme.border }}
-          >
-            <div className="text-gray-400 text-sm">Challenges</div>
-            <div className="text-2xl">{CHALLENGES.length}</div>
-          </div>
-
-          <div
-            className="p-4 rounded-xl border"
-            style={{ borderColor: theme.border }}
-          >
-            <div className="text-gray-400 text-sm">Ending Soon</div>
-            <div className="text-2xl">
-              {CHALLENGES.filter((c) => getDaysLeft(c.expiry) <= 2).length}
-            </div>
-          </div>
-
-          <div
-            className="p-4 rounded-xl border"
-            style={{ borderColor: theme.border }}
-          >
-            <div className="text-gray-400 text-sm">Domains</div>
-            <div className="text-2xl">{DOMAINS.length - 1}</div>
-          </div>
-        </div>
 
         {/* DOMAIN FILTER */}
         <div className="flex gap-2">
@@ -160,12 +139,14 @@ export default function Macrothon() {
             </button>
           ))}
         </div>
-        <div className="flex gap-4 mb-8">
+
+        {/* TABS */}
+        <div className="flex gap-4">
           {["explore", "myspace"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className="px-4 py-2 rounded-lg text-sm capitalize"
+              className="px-4 py-2 rounded-lg text-sm"
               style={{
                 background: activeTab === tab ? theme.accent : "transparent",
                 color: activeTab === tab ? "#000" : "#9ca3af",
@@ -177,316 +158,282 @@ export default function Macrothon() {
           ))}
         </div>
 
-        {/* ===================== CHALLENGE GRID ===================== */}
+        {/* ================= EXPLORE ================= */}
         {activeTab === "explore" && (
-          <>
-            {filtered.length === 0 ? (
-              <div className="text-gray-500 text-sm">
-                No challenges in this domain.
+          <div className="grid md:grid-cols-2 gap-6">
+            {filtered.map((c) => {
+              const daysLeft = getDaysLeft(c.deadline);
+              const isLocked = locked.some((l) => l.id === c.id);
+
+              return (
+                <motion.div
+                  key={c.id}
+                  whileHover={!isLocked ? { y: -6, scale: 1.02 } : {}}
+                  onClick={() => !isLocked && setSelected(c)}
+                  className="p-6 rounded-2xl cursor-pointer"
+                  style={{
+                    border: `1px solid ${theme.border}`,
+                    background: theme.soft,
+                  }}
+                >
+                  <div className="flex justify-between text-xs mb-3">
+                    <span>{c.domain}</span>
+                    <span>{daysLeft}d</span>
+                  </div>
+
+                  <h3 className="text-lg mb-2">{c.title}</h3>
+                  <p className="text-sm text-gray-400">{c.description}</p>
+
+                  <div className="mt-3 flex gap-2 text-xs">
+                    <span style={{ color: theme.accent }}>
+                      Prize: {c.prize}
+                    </span>
+                    <span className="text-gray-500">{c.club?.name}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ================= MY SPACE ================= */}
+        {activeTab === "myspace" && (
+          <div className="space-y-8">
+            {locked.length === 0 ? (
+              <div className="text-gray-500 text-sm text-center py-12">
+                No active macrothons yet.
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-6">
-                {filtered.map((c) => {
-                  const daysLeft = getDaysLeft(c.expiry);
-                  const isLocked = locked.some((l) => l.id === c.id);
+              locked.map((ps) => {
+                const daysLeft = Math.ceil(
+                  (new Date(ps.deadline).getTime() - new Date().getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
 
-                  return (
-                    <motion.div
-                      key={c.id}
-                      whileHover={!isLocked ? { y: -6, scale: 1.02 } : {}}
-                      onClick={() => !isLocked && setSelected(c)}
-                      className={`relative rounded-2xl p-6 overflow-hidden ${
-                        isLocked
-                          ? "opacity-70 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
+                return (
+                  <motion.div
+                    key={ps.id}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    className="relative p-8 rounded-3xl overflow-hidden"
+                    style={{
+                      border: `1px solid ${theme.border}`,
+                      background: `linear-gradient(145deg, rgba(20,20,25,0.9), rgba(10,10,12,0.9))`,
+                    }}
+                  >
+                    {/* 🔥 Glow Layer */}
+                    <div
+                      className="absolute inset-0 opacity-0 hover:opacity-100 transition duration-500"
                       style={{
-                        border: `1px solid ${theme.border}`,
-                        background: theme.soft,
+                        background: `radial-gradient(circle at top left, ${theme.accent}22, transparent)`,
                       }}
-                    >
-                      {/* Glow */}
-                      {!isLocked && (
-                        <div
-                          className="absolute inset-0 opacity-0 hover:opacity-100 transition"
-                          style={{
-                            background: `radial-gradient(circle at top left, ${theme.accent}22, transparent)`,
-                          }}
-                        />
-                      )}
+                    />
 
-                      {/* LOCKED BADGE */}
-                      {isLocked && (
-                        <div className="absolute top-3 right-3 text-[10px] px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/30">
-                          🔒 Locked
+                    {/* HEADER */}
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div>
+                        <h3 className="text-xl font-semibold tracking-tight">
+                          {ps.title}
+                        </h3>
+
+                        <div className="text-xs text-gray-500 mt-1">
+                          {ps.domain} • {ps.club?.name || "Club"}
                         </div>
-                      )}
-
-                      {/* HEADER */}
-                      <div className="flex justify-between items-center text-xs mb-3">
-                        <div className="flex gap-2 items-center">
-                          <span className="px-2 py-1 rounded bg-white/5 border border-white/10">
-                            {c.domain}
-                          </span>
-
-                          {daysLeft <= 2 && (
-                            <span className="text-[10px] px-2 py-1 rounded bg-red-500/10 text-red-400 border border-red-500/30">
-                              ⚡ Urgent
-                            </span>
-                          )}
-                        </div>
-
-                        <span className="text-gray-400">{daysLeft}d</span>
                       </div>
 
-                      {/* TITLE */}
-                      <h3 className="text-lg font-medium mb-2">{c.title}</h3>
-
-                      {/* DESCRIPTION */}
-                      <p className="text-gray-400 text-sm line-clamp-2">
-                        {c.description}
-                      </p>
-
-                      {/* FOOTER */}
-                      <div className="mt-4 flex justify-between items-center text-xs">
-                        <span className="text-gray-500">{c.difficulty}</span>
-
+                      <div className="flex flex-col items-end gap-2">
                         <span
-                          className="text-[10px] px-2 py-1 rounded"
+                          className="text-[10px] px-3 py-1 rounded-full border"
+                          style={{
+                            borderColor: `${theme.accent}40`,
+                            color: theme.accent,
+                            background: `${theme.accent}10`,
+                          }}
+                        >
+                          Active
+                        </span>
+
+                        <span className="text-xs text-gray-400">
+                          {daysLeft > 0 ? `${daysLeft} days left` : "Expired"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* DESCRIPTION */}
+                    <p className="text-sm text-gray-300 leading-relaxed mb-6 relative z-10">
+                      {ps.description}
+                    </p>
+
+                    {/* PROGRESS BAR */}
+                    <div className="mb-6 relative z-10">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress</span>
+                        <span>In Progress</span>
+                      </div>
+
+                      <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                        <motion.div
+                          initial={{ width: "20%" }}
+                          animate={{ width: "60%" }} // 🔥 replace later with real progress
+                          className="h-full"
+                          style={{
+                            background: `linear-gradient(90deg, ${theme.accent}, #FFD54F)`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div className="flex justify-between items-center relative z-10">
+                      <div className="flex gap-2 text-xs">
+                        <span
+                          className="px-2 py-1 rounded"
                           style={{
                             background: `${theme.accent}15`,
                             color: theme.accent,
                           }}
                         >
-                          View →
+                          Prize: {ps.prize}
                         </span>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        )}
 
-        {/* ===================== MY SPACE ===================== */}
-        {activeTab === "myspace" && (
-          <div className="space-y-8">
-            {locked.length === 0 ? (
-              <div className="text-gray-500 text-sm">
-                No locked challenges yet.
-              </div>
-            ) : (
-              locked.map((ps) => (
-                <div
-                  key={ps.id}
-                  className="relative p-8 rounded-3xl space-y-6"
-                  style={{
-                    border: `1px solid ${theme.border}`,
-                    background: `linear-gradient(to bottom, ${theme.soft}, transparent)`,
-                  }}
-                >
-                  {/* HEADER */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-semibold tracking-tight">
-                        {ps.title}
-                      </h3>
+                      <div className="flex gap-3">
+                        <button className="px-4 py-2 rounded-full text-xs border border-white/10 hover:bg-white/5 transition">
+                          View Details
+                        </button>
 
-                      <div className="text-xs text-gray-500 mt-1">
-                        {ps.domain} • {ps.difficulty}
+                        <button
+                          onClick={() => setSubmitModal(ps)}
+                          className="px-5 py-2 rounded-full text-sm font-medium transition"
+                          style={{
+                            background: theme.accent,
+                            color: "#000",
+                            boxShadow: `0 0 20px ${theme.accent}33`,
+                          }}
+                        >
+                          Submit
+                        </button>
                       </div>
                     </div>
-
-                    <span className="text-[10px] px-3 py-1 rounded-full border border-green-500/30 bg-green-500/10 text-green-400">
-                      Active
-                    </span>
-                  </div>
-
-                  {/* META */}
-                  <div className="flex justify-between items-center text-xs text-gray-400 border-b border-white/10 pb-4">
-                    <span>
-                      {ps.start} → {ps.expiry}
-                    </span>
-
-                    <span
-                      className="px-2 py-1 rounded"
-                      style={{
-                        background: `${theme.accent}15`,
-                        color: theme.accent,
-                      }}
-                    >
-                      Submission Open
-                    </span>
-                  </div>
-
-                  {/* DESCRIPTION */}
-                  <div>
-                    <h4 className="text-xs text-gray-400 mb-2">Overview</h4>
-                    <p className="text-sm text-gray-300 leading-relaxed">
-                      {ps.description}
-                    </p>
-                  </div>
-
-                  {/* REQUIREMENTS */}
-                  <div>
-                    <h4 className="text-xs text-gray-400 mb-2">Requirements</h4>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      {ps.requirements.map((r, i) => (
-                        <div
-                          key={i}
-                          className="text-xs px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
-                        >
-                          {r}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* SUBMISSION SECTION */}
-                  <div className="space-y-4 pt-2">
-                    <h4 className="text-xs text-gray-400">Submission</h4>
-
-                    <div className="space-y-3">
-                      <input
-                        placeholder="GitHub Repository Link"
-                        className="w-full px-5 py-3 rounded-full bg-black border border-white/10 focus:outline-none focus:border-white/30 transition"
-                      />
-
-                      <input
-                        placeholder="Live Demo Link"
-                        className="w-full px-5 py-3 rounded-full bg-black border border-white/10 focus:outline-none focus:border-white/30 transition"
-                      />
-                    </div>
-                  </div>
-
-                  {/* ACTION */}
-                  <div className="flex justify-end pt-2">
-                    <button
-                      className="px-6 py-2 rounded-lg text-sm font-medium transition"
-                      style={{
-                        background: theme.accent,
-                        color: "#000",
-                        boxShadow: `0 0 20px ${theme.accent}33`,
-                      }}
-                    >
-                      Submit Solution
-                    </button>
-                  </div>
-
-                  {/* SUBTLE GLOW */}
-                  <div
-                    className="absolute inset-0 opacity-0 hover:opacity-100 transition pointer-events-none"
-                    style={{
-                      background: `radial-gradient(circle at top left, ${theme.accent}22, transparent)`,
-                    }}
-                  />
-                </div>
-              ))
+                  </motion.div>
+                );
+              })
             )}
           </div>
         )}
 
-        {/* CALENDAR */}
-        <PSCalendar challenges={CHALLENGES} theme={theme} />
+        {/* MODAL */}
         {selected && (
+          <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
+            <div className="bg-[#111] p-6 rounded-xl max-w-lg w-full">
+              <h2 className="text-xl">{selected.title}</h2>
+              <p className="text-gray-400">{selected.description}</p>
+
+              <button
+                onClick={() => lockPS(selected)}
+                className="mt-4 px-4 py-2 bg-yellow-500 text-black rounded"
+              >
+                Lock Macrothon
+              </button>
+            </div>
+          </div>
+        )}
+
+        {submitModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
             <motion.div
-              initial={{ opacity: 0, y: 40, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.25 }}
-              className="relative w-full max-w-2xl p-8 rounded-3xl"
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="w-full max-w-md p-6 rounded-2xl"
               style={{
+                background: "#111",
                 border: `1px solid ${theme.border}`,
-                background: `linear-gradient(to bottom, #111, #0b0b0c)`,
               }}
             >
               {/* HEADER */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    {selected.title}
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {selected.domain} • {selected.difficulty}
-                  </p>
-                </div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">
+                  Submit – {submitModal.title}
+                </h2>
 
                 <button
-                  onClick={() => setSelected(null)}
-                  className="text-gray-500 text-sm hover:text-white transition"
+                  onClick={() => setSubmitModal(null)}
+                  className="text-gray-400 hover:text-white"
                 >
-                  Close
+                  ✕
                 </button>
               </div>
 
-              {/* META */}
-              <div className="flex justify-between items-center text-xs text-gray-400 mb-6 border-b border-white/10 pb-4">
-                <span>
-                  {selected.start} → {selected.expiry}
-                </span>
+              {/* INPUTS */}
+              <div className="space-y-4">
+                <input
+                  placeholder="GitHub Repository Link"
+                  value={submission.github}
+                  onChange={(e) =>
+                    setSubmission({ ...submission, github: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-full bg-black border border-white/10 focus:outline-none focus:border-white/30"
+                />
 
-                <span
-                  className="px-2 py-1 rounded"
-                  style={{
-                    background: `${theme.accent}15`,
-                    color: theme.accent,
-                  }}
-                >
-                  Active Window
-                </span>
-              </div>
-
-              {/* DESCRIPTION */}
-              <div className="mb-6">
-                <h3 className="text-sm text-gray-400 mb-2">Overview</h3>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  {selected.description}
-                </p>
-              </div>
-
-              {/* REQUIREMENTS */}
-              <div className="mb-8">
-                <h3 className="text-sm text-gray-400 mb-2">Requirements</h3>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {selected.requirements.map((r, i) => (
-                    <div
-                      key={i}
-                      className="text-xs px-3 py-2 rounded-lg border border-white/10 bg-white/5"
-                    >
-                      {r}
-                    </div>
-                  ))}
-                </div>
+                <input
+                  placeholder="Live Demo Link"
+                  value={submission.demo}
+                  onChange={(e) =>
+                    setSubmission({ ...submission, demo: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-full bg-black border border-white/10 focus:outline-none focus:border-white/30"
+                />
               </div>
 
               {/* ACTIONS */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mt-6">
                 <button
-                  onClick={() => setSelected(null)}
-                  className="text-sm text-gray-400 hover:text-white transition"
+                  onClick={() => setSubmitModal(null)}
+                  className="text-sm text-gray-400 hover:text-white"
                 >
                   Cancel
                 </button>
 
                 <button
-                  onClick={() => lockPS(selected)}
-                  className="px-5 py-2 rounded-lg text-sm font-medium transition"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(
+                        "http://localhost:5000/api/macrothon/submit",
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            macrothonId: submitModal.id,
+                            github: submission.github,
+                            demo: submission.demo,
+                          }),
+                        },
+                      );
+
+                      const data = await res.json();
+
+                      if (data.ok) {
+                        setSubmitModal(null);
+                        setSubmission({ github: "", demo: "" });
+                      }
+                    } catch (err) {
+                      console.error("Submission error:", err);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-full text-sm font-medium"
                   style={{
                     background: theme.accent,
                     color: "#000",
-                    boxShadow: `0 0 20px ${theme.accent}33`,
                   }}
                 >
-                  Lock Challenge
+                  Submit
                 </button>
               </div>
             </motion.div>
           </div>
         )}
       </div>
+      <PSCalendar challenges={calendarData} theme={theme} />
     </div>
   );
 }

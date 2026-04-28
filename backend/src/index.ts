@@ -11,6 +11,7 @@ import roadmapRouter from "./routes/roadmap.route.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import skillRouter from "./routes/skillRoute.js";
 import clubRoutes from "./routes/clubRoutes.js";
+import DashboardRoutes from "./routes/dashboardRoutes.js";
 
 import { connectProducer, sendEventToKafka } from "./utils/producer.js";
 import {
@@ -47,6 +48,7 @@ app.use("/api", domainRoute);
 app.use("/api/roadmap", roadmapRouter);
 app.use("/api/skills", skillRouter);
 app.use("/api/club", clubRoutes);
+app.use("/dashboard", DashboardRoutes);
 /* =====================================================
    Health Check Route
 ===================================================== */

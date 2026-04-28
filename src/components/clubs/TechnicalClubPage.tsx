@@ -143,8 +143,14 @@ const IconShield = () => (
 );
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-type Tab = "events" | "challenges" | "members";
+type Tab = "events" | "challenges" | "members" | "macrothon";
 type TeamMember = { name: string; role: string; tier: string };
+type MacrothonType = {
+  title: string;
+  description: string;
+  prize: string;
+  deadline: string;
+};
 
 // Accepts any real-world club data shape — field normalization happens inside
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,6 +236,43 @@ function MemberCard({ member }: { member: TeamMember }) {
   );
 }
 
+const CLUB_THEMES: Record<string, any> = {
+  aiml: {
+    accent: "#C026D3",
+    tagBg: "rgba(192,38,211,0.12)",
+    tagText: "#E879F9",
+    borderAccent: "rgba(192,38,211,0.35)",
+  },
+
+  devops: {
+    accent: "#06B6D4",
+    tagBg: "rgba(6,182,212,0.12)",
+    tagText: "#67E8F9",
+    borderAccent: "rgba(6,182,212,0.35)",
+  },
+
+  cyber: {
+    accent: "#EF4444",
+    tagBg: "rgba(239,68,68,0.12)",
+    tagText: "#FCA5A5",
+    borderAccent: "rgba(239,68,68,0.35)",
+  },
+
+  datascience: {
+    accent: "#84CC16",
+    tagBg: "rgba(132,204,22,0.12)",
+    tagText: "#BEF264",
+    borderAccent: "rgba(132,204,22,0.35)",
+  },
+
+  gdg: {
+    accent: "#3B82F6",
+    tagBg: "rgba(59,130,246,0.12)",
+    tagText: "#93C5FD",
+    borderAccent: "rgba(59,130,246,0.35)",
+  },
+};
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function TechnicalClubPage({
@@ -259,6 +302,7 @@ export default function TechnicalClubPage({
     description: "",
     points: 0,
   });
+
   const [editingChallengeId, setEditingChallengeId] = useState<number | null>(
     null,
   );
@@ -287,6 +331,25 @@ export default function TechnicalClubPage({
     status: "UPCOMING",
   });
 
+  const [editingMacrothonId, setEditingMacrothonId] = useState<number | null>(
+    null,
+  );
+
+  const [editedMacrothon, setEditedMacrothon] = useState({
+    title: "",
+    description: "",
+    prize: "",
+    startDate: "", // 🔥 NEW
+    deadline: "",
+  });
+  const [newMacrothon, setNewMacrothon] = useState({
+    title: "",
+    description: "",
+    prize: "",
+    startDate: "", // 🔥 NEW
+    deadline: "",
+  });
+
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
   const [editedRole, setEditedRole] = useState("");
   const [editedName, setEditedName] = useState("");
@@ -311,18 +374,22 @@ export default function TechnicalClubPage({
       .catch(() => setLoading(false));
   }, [clubProp]);
 
+  const theme = CLUB_THEMES[clubProp?.toLowerCase() || "aiml"];
+
   const C = {
     base: "#0C0C12",
     surface: "#13131C",
     surface2: "#1B1B27",
     surface3: "#222232",
-    accent: "#C026D3",
+
+    accent: theme?.accent || "#C026D3",
+    tagBg: theme?.tagBg,
+    tagText: theme?.tagText,
+    borderAccent: theme?.borderAccent,
+
     muted: "rgba(255,255,255,0.45)",
     border: "rgba(255,255,255,0.07)",
-    borderAccent: "rgba(192,38,211,0.35)",
     text: "#F0EFF8",
-    tagBg: "rgba(192,38,211,0.12)",
-    tagText: "#E879F9",
   };
 
   if (loading) return <div>Loading...</div>;
@@ -351,6 +418,12 @@ export default function TechnicalClubPage({
       label: "Members",
       count: club?.members?.length || 0,
       icon: <IconUsers />,
+    },
+    {
+      id: "macrothon",
+      label: "Macrothons",
+      count: club.macrothons?.length || 0,
+      icon: <IconPin />,
     },
   ];
 
@@ -1258,6 +1331,338 @@ export default function TechnicalClubPage({
                   }}
                 >
                   <IconPlus /> Publish Challenge
+                </button>
+              </center>
+            </div>
+          )}
+        </div>
+      )}
+      {activeTab === "macrothon" && (
+        <div className="flex flex-col gap-3">
+          {(club.macrothons ?? []).map((mc: any, i: number) => {
+            const isEditing = editingMacrothonId === mc.id;
+
+            return (
+              <div
+                key={mc.id ?? i}
+                className="grid grid-cols-[1fr_auto] gap-4 items-center p-5 rounded-xl transition-all cursor-pointer"
+                style={{
+                  background: C.surface,
+                  border: `0.5px solid ${C.border}`,
+                }}
+                onClick={() => {
+                  if (!isEditing) window.location.href = "/macrothon";
+                }}
+              >
+                {/* LEFT */}
+                <div>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={editedMacrothon.title}
+                        onChange={(e) =>
+                          setEditedMacrothon({
+                            ...editedMacrothon,
+                            title: e.target.value,
+                          })
+                        }
+                        className="px-3 py-2 rounded-full text-sm"
+                        style={{ background: C.surface3, color: C.text }}
+                      />
+
+                      <textarea
+                        value={editedMacrothon.description}
+                        onChange={(e) =>
+                          setEditedMacrothon({
+                            ...editedMacrothon,
+                            description: e.target.value,
+                          })
+                        }
+                        className="px-3 py-2 rounded-xl text-sm"
+                        style={{ background: C.surface3, color: C.text }}
+                      />
+
+                      <div className="flex gap-2">
+                        <input
+                          type="date"
+                          value={editedMacrothon.startDate}
+                          onChange={(e) =>
+                            setEditedMacrothon({
+                              ...editedMacrothon,
+                              startDate: e.target.value,
+                            })
+                          }
+                          className="px-3 py-2 rounded-full text-sm"
+                          style={{ background: C.surface3, color: C.text }}
+                        />
+
+                        <input
+                          type="date"
+                          value={editedMacrothon.deadline}
+                          onChange={(e) =>
+                            setEditedMacrothon({
+                              ...editedMacrothon,
+                              deadline: e.target.value,
+                            })
+                          }
+                          className="px-3 py-2 rounded-full text-sm"
+                          style={{ background: C.surface3, color: C.text }}
+                        />
+
+                        <input
+                          type="date"
+                          value={editedMacrothon.deadline}
+                          onChange={(e) =>
+                            setEditedMacrothon({
+                              ...editedMacrothon,
+                              deadline: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className="text-[15px] font-bold mb-1.5"
+                        style={{ color: C.text }}
+                      >
+                        {mc.title}
+                      </div>
+
+                      <p
+                        className="text-[12.5px] mb-2"
+                        style={{ color: C.muted }}
+                      >
+                        {mc.description}
+                      </p>
+
+                      <div className="flex gap-2 text-[11px] font-mono">
+                        <span
+                          className="px-2 py-1 rounded-full"
+                          style={{
+                            background: C.tagBg,
+                            color: C.tagText,
+                          }}
+                        >
+                          Prize: {mc.prize}
+                        </span>
+
+                        <span
+                          className="px-2 py-1 rounded-full"
+                          style={{
+                            background: C.surface3,
+                            color: C.muted,
+                          }}
+                        >
+                          {mc.startDate
+                            ? `${mc.startDate} → ${mc.deadline}`
+                            : `Ends: ${mc.deadline}`}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* RIGHT */}
+                <div
+                  className="flex flex-col items-end gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {isAdmin && (
+                    <>
+                      {isEditing ? (
+                        <div className="flex gap-2">
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.accent, color: "white" }}
+                            onClick={async () => {
+                              const res = await fetch(
+                                `${API_BASE}/macrothon/${mc.id}`,
+                                {
+                                  method: "PUT",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify(editedMacrothon),
+                                },
+                              );
+
+                              const data = await res.json();
+
+                              if (data.ok) {
+                                setClub((prev: any) => ({
+                                  ...prev,
+                                  macrothons: prev.macrothons.map((m: any) =>
+                                    m.id === mc.id
+                                      ? { ...m, ...editedMacrothon }
+                                      : m,
+                                  ),
+                                }));
+                                setEditingMacrothonId(null);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.surface3, color: C.muted }}
+                            onClick={() => setEditingMacrothonId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <EditBtn
+                          onClick={() => {
+                            setEditingMacrothonId(mc.id);
+                            setEditedMacrothon({
+                              title: mc.title || "",
+                              description: mc.description || "",
+                              prize: mc.prize || "",
+                              startDate: mc.startDate || "",
+                              deadline: mc.deadline || "",
+                            });
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* CREATE FORM */}
+          {isAdmin && (
+            <div
+              className="p-4 rounded-2xl flex flex-col gap-3 w-3/4 mx-auto"
+              style={{
+                background: C.surface,
+                border: `0.5px solid ${C.borderAccent}`,
+              }}
+            >
+              {/* TITLE */}
+              <input
+                placeholder="Hackathon Title"
+                value={newMacrothon.title}
+                onChange={(e) =>
+                  setNewMacrothon({ ...newMacrothon, title: e.target.value })
+                }
+                className="px-4 py-2 rounded-full text-sm"
+                style={{ background: C.surface3, color: C.text }}
+              />
+
+              {/* DESCRIPTION */}
+              <textarea
+                placeholder="Description"
+                value={newMacrothon.description}
+                onChange={(e) =>
+                  setNewMacrothon({
+                    ...newMacrothon,
+                    description: e.target.value,
+                  })
+                }
+                className="px-4 py-2 rounded-xl text-sm"
+                style={{ background: C.surface3, color: C.text }}
+              />
+
+              {/* META */}
+              <div className="flex gap-2">
+                {/* PRIZE */}
+                <input
+                  placeholder="Prize"
+                  value={newMacrothon.prize}
+                  onChange={(e) =>
+                    setNewMacrothon({ ...newMacrothon, prize: e.target.value })
+                  }
+                  className="px-4 py-2 rounded-full text-sm"
+                  style={{ background: C.surface3, color: C.text }}
+                />
+
+                {/* START DATE ✅ FIXED */}
+                <input
+                  type="date"
+                  value={newMacrothon.startDate}
+                  onChange={(e) =>
+                    setNewMacrothon({
+                      ...newMacrothon,
+                      startDate: e.target.value,
+                    })
+                  }
+                  className="px-3 py-2 rounded-full text-sm"
+                  style={{ background: C.surface3, color: C.text }}
+                />
+
+                {/* DEADLINE ✅ FIXED */}
+                <input
+                  type="date"
+                  value={newMacrothon.deadline}
+                  onChange={(e) =>
+                    setNewMacrothon({
+                      ...newMacrothon,
+                      deadline: e.target.value,
+                    })
+                  }
+                  className="px-3 py-2 rounded-full text-sm"
+                  style={{ background: C.surface3, color: C.text }}
+                />
+              </div>
+
+              {/* SUBMIT */}
+              <center>
+                <button
+                  className="px-4 py-2 rounded-full text-sm font-semibold transition hover:opacity-80"
+                  style={{
+                    color: C.accent,
+                    border: `0.5px solid ${C.accent}`,
+                  }}
+                  onClick={async () => {
+                    if (
+                      !newMacrothon.title ||
+                      !newMacrothon.deadline ||
+                      !newMacrothon.startDate
+                    ) {
+                      alert("Please fill all fields");
+                      return;
+                    }
+
+                    if (newMacrothon.startDate > newMacrothon.deadline) {
+                      alert("Start date cannot be after deadline");
+                      return;
+                    }
+
+                    const res = await fetch(`${API_BASE}/macrothon`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        ...newMacrothon,
+                        clubId: club.id, // ✅ ONLY THIS
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      setClub((prev: any) => ({
+                        ...prev,
+                        macrothons: [...prev.macrothons, data.macrothon],
+                      }));
+
+                      // reset form
+                      setNewMacrothon({
+                        title: "",
+                        description: "",
+                        prize: "",
+                        startDate: "",
+                        deadline: "",
+                      });
+                    }
+                  }}
+                >
+                  🚀 Post Macrothon
                 </button>
               </center>
             </div>

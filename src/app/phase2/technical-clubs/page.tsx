@@ -10,6 +10,7 @@ import { Button } from "./components/ui/button";
 // FIX 2: Corrected local Component import path
 // Assuming ClubCard.tsx is located at src/app/phase2/technical-clubs/components/ClubCard.tsx
 import ClubCard from "./components/clubs/ClubCard";
+
 // --- Data Structure for the 5 clubs (UNCHANGED) ---
 const clubs = [
   {
@@ -105,44 +106,43 @@ export default function TechnicalClubsPage() {
 
         {/* Domain Selector with Animated Underline and Slide-Fill Buttons */}
         <motion.div
-          className="flex flex-wrap gap-3 sm:gap-4 mt-10 p-2 bg-gray-800/50 rounded-full border border-fuchsia-500/40"
+          className="flex flex-wrap gap-3 sm:gap-4 mt-10 p-2 bg-[#1a1a12]/60 rounded-full border border-[#DDA853]/40"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, type: "spring", stiffness: 100 }}
         >
-          {/* All Clubs Button */}
-          <Button
-            onClick={() => setSelectedDomain(null)}
-            // When ACTIVE: Use 'default' (fuchsia background, solid color)
-            // When INACTIVE: Use 'slide-fill' (transparent, ready for hover animation)
-            variant={!selectedDomain ? "default" : "slide-fill"}
-            className={`relative rounded-full px-5 py-2 font-semibold transition-colors z-10`}
-          >
-            All Clubs
-            {/* The active pill is now handled purely by Framer Motion on the default button */}
+          {/* All Clubs */}
+          <div className="relative">
             {!selectedDomain && (
               <motion.div
                 layoutId="activePill"
-                className="absolute inset-0 bg-fuchsia-600/80 rounded-full -z-10 shadow-lg shadow-fuchsia-500/30"
+                className="absolute inset-0 bg-[#DDA853]/80 rounded-full shadow-lg shadow-[#DDA853]/30"
               />
             )}
-          </Button>
-          {/* Filter Buttons */}
-          {domains.map((domain) => (
-            <Button
-              key={domain.key}
-              onClick={() => setSelectedDomain(domain.key)}
-              variant={selectedDomain === domain.key ? "default" : "slide-fill"}
-              className={`relative rounded-full px-5 py-2 font-semibold transition-colors z-10`}
+            <button
+              onClick={() => setSelectedDomain(null)}
+              className="relative z-10 px-5 py-2 rounded-full font-semibold text-[#F5E6C8]"
             >
-              {domain.label}
+              All Clubs
+            </button>
+          </div>
+
+          {/* Domains */}
+          {domains.map((domain) => (
+            <div key={domain.key} className="relative">
               {selectedDomain === domain.key && (
                 <motion.div
                   layoutId="activePill"
-                  className="absolute inset-0 bg-fuchsia-600/80 rounded-full -z-10 shadow-lg shadow-fuchsia-500/30"
+                  className="absolute inset-0 bg-[#DDA853]/80 rounded-full shadow-lg shadow-[#DDA853]/30"
                 />
               )}
-            </Button>
+              <button
+                onClick={() => setSelectedDomain(domain.key)}
+                className="relative z-10 px-5 py-2 rounded-full font-semibold text-[#F5E6C8]"
+              >
+                {domain.label}
+              </button>
+            </div>
           ))}
         </motion.div>
 
@@ -155,7 +155,7 @@ export default function TechnicalClubsPage() {
         >
           <AnimatePresence mode="popLayout">
             {filteredClubs.map((club, index) => (
-              <ClubCard key={club.name} club={club} index={index} phaseNo={2} />
+              <ClubCard key={club.name} club={club} index={index} phaseNo={4} />
             ))}
           </AnimatePresence>
         </motion.div>

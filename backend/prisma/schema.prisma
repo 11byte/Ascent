@@ -38,6 +38,7 @@ model User {
   interactions BlogInteraction[] @relation("UserInteractions")
   skills       Skill[]
   achievements Achievement[]
+  trackerSessions  TrackerSession[]
 
   //roadmap
   roadmaps        Roadmap[]         @relation("UserRoadmaps")
@@ -121,6 +122,9 @@ model TrackerSession {
   assignedDomain String
   metrics        Json
   createdAt      DateTime @default(now())
+
+  user            User    @relation(fields: [userId], references: [userId])
+
 }
 
 model Club {
@@ -133,6 +137,7 @@ model Club {
   events      Event[]
   challenges  Challenge[]
   members     ClubMember[]
+  macrothons Macrothon[]
 
   createdAt   DateTime @default(now())
 }
@@ -169,4 +174,19 @@ model ClubMember {
 
   club    Club?  @relation(fields: [clubId], references: [id])
   clubId  Int?
+}
+
+model Macrothon {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  prize       String
+  startDate   String?
+  deadline    String
+  domain      String?
+
+  clubId      Int?
+  club        Club?    @relation(fields: [clubId], references: [id])
+
+  createdAt   DateTime @default(now())
 }

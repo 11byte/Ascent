@@ -48,6 +48,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         events: true,
         challenges: true,
         members: true,
+        macrothons: true,
       },
     });
 
@@ -236,6 +237,81 @@ router.delete(
 
       res.json({ ok: true });
     } catch (err) {
+      res.status(500).json({ error: "Delete failed" });
+    }
+  },
+);
+
+router.get("/macrothons/all", async (req: Request, res: Response) => {
+  try {
+    const macrothons = await prisma.macrothon.findMany({
+      include: { club: true },
+      orderBy: { id: "desc" },
+    });
+
+    res.json({ ok: true, macrothons });
+  } catch (err) {
+    console.error("Get macrothons error:", err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+router.post("/macrothon", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { title, description, prize, startDate, deadline, domain, clubId } =
+      req.body;
+
+    const macrothon = await prisma.macrothon.create({
+      data: {
+        title,
+        description,
+        prize,
+        startDate,
+        deadline,
+        domain,
+        clubId,
+      },
+    });
+
+    res.status(201).json({ ok: true, macrothon });
+  } catch (err) {
+    console.error("Create macrothon error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.put(
+  "/macrothon/:id",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const macrothonId = Number(req.params.id);
+
+      const updated = await prisma.macrothon.update({
+        where: { id: macrothonId },
+        data: req.body,
+      });
+
+      res.json({ ok: true, macrothon: updated });
+    } catch (err) {
+      console.error("Update macrothon error:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
+router.delete(
+  "/macrothon/:id",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      await prisma.macrothon.delete({
+        where: { id: Number(req.params.id) },
+      });
+
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("Delete macrothon error:", err);
       res.status(500).json({ error: "Delete failed" });
     }
   },
