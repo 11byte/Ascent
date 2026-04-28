@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
@@ -14,6 +14,8 @@ import {
   MousePointerClick,
   Search,
   Info,
+  Clock3,
+  SkipForward,
 } from "lucide-react";
 
 import FinalNeuralLink from "../../../components/tracker/FinalNeuralLink";
@@ -81,6 +83,25 @@ const TAROT_CARDS = [
 ];
 
 const DOMAINS = ["AIML", "Cybersecurity", "WebDev", "DataScience"];
+const GAME_TIME_LIMIT_SECONDS = 75;
+
+const GAME_STEPS = [
+  { id: "neural_link", title: "NEURAL LINK" },
+  { id: "data_stream", title: "DATA STREAM" },
+  { id: "data_sort", title: "DATA SORT" },
+  { id: "rapid_choice", title: "RAPID CHOICE" },
+  { id: "odd_man_out", title: "ANOMALY" },
+] as const;
+
+function formatGameTime(totalSeconds: number) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safeSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (safeSeconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${seconds}`;
+}
 
 // --- 3. Persistent Ambient Background Component ---
 // --- 3. Persistent Ambient Background Component ---
@@ -229,12 +250,138 @@ export function AmbientBackground({ theme }: { theme: any }) {
   );
 }
 
+function TrackerGameChrome({
+  theme,
+  title,
+  stepNumber,
+  remainingTime,
+  playCount,
+  playCountLoading,
+  onNext,
+  children,
+}: {
+  theme: any;
+  title: string;
+  stepNumber: number;
+  remainingTime: number;
+  playCount: number | null;
+  playCountLoading: boolean;
+  onNext: () => void;
+  children: React.ReactNode;
+}) {
+  const isUrgent = remainingTime <= 10;
+
+  return (
+    <div className="relative isolate flex min-h-[calc(100vh-70px)] w-full items-stretch justify-center overflow-hidden px-3 py-3 md:px-6">
+      <div className="pointer-events-none absolute left-0 right-0 top-3 z-20 px-3 md:px-6">
+        <div
+          className="mx-auto flex w-full max-w-6xl flex-col gap-2 rounded-[1.5rem] border bg-black/45 px-3 py-2.5 shadow-2xl backdrop-blur-2xl md:flex-row md:items-center md:justify-between md:px-4"
+          style={{
+            borderColor: isUrgent ? "rgba(251, 113, 133, 0.35)" : theme.cardBorder,
+            boxShadow: isUrgent
+              ? "0 0 35px rgba(251, 113, 133, 0.12)"
+              : "0 0 35px rgba(0, 0, 0, 0.25)",
+          }}
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className="rounded-2xl border px-3 py-2"
+              style={{ borderColor: theme.cardBorder }}
+            >
+              <p className="text-[10px] uppercase tracking-[0.35em] text-gray-400">
+                Stage
+              </p>
+              <p
+                className="mt-1 text-sm font-semibold tracking-[0.28em]"
+                style={{ color: theme.primary, fontFamily: theme.fontPrimary }}
+              >
+                {stepNumber}/5
+              </p>
+            </div>
+
+            <div
+              className="rounded-2xl border px-3 py-2"
+              style={{ borderColor: theme.cardBorder }}
+            >
+              <p className="text-[10px] uppercase tracking-[0.35em] text-gray-400">
+                Previous runs
+              </p>
+              <p
+                className="mt-1 text-sm font-semibold tracking-[0.2em] text-white"
+                style={{ fontFamily: theme.fontPrimary }}
+              >
+                {playCountLoading ? "SYNCING" : playCount ?? 0}
+              </p>
+            </div>
+
+            <div
+              className="rounded-2xl border px-3 py-2"
+              style={{ borderColor: theme.cardBorder }}
+            >
+              <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] text-gray-400">
+                <Clock3 className="h-3.5 w-3.5" />
+                Time left
+              </p>
+              <p
+                className="mt-1 text-sm font-semibold tracking-[0.24em]"
+                style={{
+                  color: isUrgent ? theme.danger : theme.secondary,
+                  fontFamily: theme.fontPrimary,
+                }}
+              >
+                {formatGameTime(remainingTime)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 md:justify-end">
+            <div className="hidden text-right md:block">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400">
+                Active stage
+              </p>
+              <p
+                className="mt-1 text-sm font-semibold tracking-[0.24em]"
+                style={{ fontFamily: theme.fontPrimary, color: theme.secondary }}
+              >
+                {title}
+              </p>
+            </div>
+
+            <button
+              onClick={onNext}
+              className="pointer-events-auto inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] transition-all hover:scale-[1.02]"
+              style={{
+                background: `linear-gradient(90deg, ${theme.primary}20, ${theme.accent}40)`,
+                borderColor: theme.cardBorder,
+                color: theme.secondary,
+                boxShadow: `0 0 18px rgba(221, 168, 83, 0.12)`,
+                fontFamily: theme.fontPrimary,
+              }}
+            >
+              <SkipForward className="h-4 w-4" />
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 flex w-full items-center justify-center pt-20 pb-2 md:pt-24">
+        <div className="w-full max-w-7xl">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 // --- 4. Main Controller ---
 export default function TrackerV2() {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [showRawJson, setShowRawJson] = useState(false);
   const [userId, setUserId] = useState<string>("guest");
+  const [trackerPlayCount, setTrackerPlayCount] = useState<number | null>(null);
+  const [trackerStatsLoading, setTrackerStatsLoading] = useState(true);
+  const [remainingTime, setRemainingTime] = useState(GAME_TIME_LIMIT_SECONDS);
+  const stepAdvanceLockRef = useRef(false);
 
   const [mlPayload, setMlPayload] = useState<any>({
     timestamp: 0,
@@ -256,14 +403,117 @@ export default function TrackerV2() {
       userId: id,
       assigned_target_domain: randomTarget,
     }));
+
+    const loadTrackerStats = async () => {
+      setTrackerStatsLoading(true);
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/tracker/quiz/stats/${id}`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load tracker stats");
+        }
+
+        const result = await response.json();
+        setTrackerPlayCount(Number(result.playCount ?? 0));
+      } catch (error) {
+        console.error("Tracker stats fetch error:", error);
+        setTrackerPlayCount(0);
+      } finally {
+        setTrackerStatsLoading(false);
+      }
+    };
+
+    loadTrackerStats();
   }, []);
 
-  const handleGameComplete = (gameId: string, metrics: any) => {
+  useEffect(() => {
+    if (currentStep < 1 || currentStep > 5) {
+      setRemainingTime(GAME_TIME_LIMIT_SECONDS);
+      return;
+    }
+
+    stepAdvanceLockRef.current = false;
+    setRemainingTime(GAME_TIME_LIMIT_SECONDS);
+
+    const timer = window.setInterval(() => {
+      setRemainingTime((timeLeft) => Math.max(timeLeft - 1, 0));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [currentStep]);
+
+  useEffect(() => {
+    if (currentStep < 1 || currentStep > 5 || remainingTime > 0) {
+      return;
+    }
+
+    const activeGame = GAME_STEPS[currentStep - 1];
+
+    if (activeGame && !stepAdvanceLockRef.current) {
+      stepAdvanceLockRef.current = true;
+      setMlPayload((prev: any) => ({
+        ...prev,
+        games: {
+          ...prev.games,
+          [activeGame.id]: {
+            status: "timeout",
+            skipped: true,
+            autoAdvanced: true,
+            timeLimitSec: GAME_TIME_LIMIT_SECONDS,
+            timeSpentSec: GAME_TIME_LIMIT_SECONDS,
+            timeRemainingSec: 0,
+          },
+        },
+      }));
+      setCurrentStep((prev) => Math.min(prev + 1, 6));
+    }
+  }, [currentStep, remainingTime]);
+
+  const handleGameAdvance = (
+    gameId: string,
+    metrics: any,
+    status: "completed" | "skipped" | "timeout",
+  ) => {
+    if (stepAdvanceLockRef.current) {
+      return;
+    }
+
+    stepAdvanceLockRef.current = true;
     setMlPayload((prev: any) => ({
       ...prev,
-      games: { ...prev.games, [gameId]: metrics },
+      games: {
+        ...prev.games,
+        [gameId]: {
+          ...(metrics || {}),
+          status,
+          skipped: status !== "completed",
+          autoAdvanced: status === "timeout",
+          timeLimitSec: GAME_TIME_LIMIT_SECONDS,
+          timeSpentSec: Math.max(0, GAME_TIME_LIMIT_SECONDS - remainingTime),
+          timeRemainingSec: Math.max(0, remainingTime),
+        },
+      },
     }));
     setCurrentStep((prev) => prev + 1);
+  };
+
+  const handleGameComplete = (gameId: string, metrics: any) => {
+    handleGameAdvance(gameId, metrics, "completed");
+  };
+
+  const handleSkipCurrentGame = () => {
+    const activeGame = GAME_STEPS[currentStep - 1];
+
+    if (!activeGame) {
+      return;
+    }
+
+    handleGameAdvance(activeGame.id, { reason: "Skipped by user" }, "skipped");
   };
 
   const submitToBackend = async () => {
@@ -292,17 +542,16 @@ export default function TrackerV2() {
   };
 
   return (
-    <div className="w-full min-h-screen relative font-sans text-white flex flex-col items-center justify-center selection:bg-cyan-500/30 overflow-hidden">
+    <div className="relative flex w-full min-h-[calc(100vh-70px)] flex-col items-center justify-center overflow-hidden font-sans text-white selection:bg-cyan-500/30">
       <AmbientBackground theme={GLOBAL_THEME} />
 
       {/* Global Progress HUD */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {currentStep > 0 && currentStep < 6 && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            // UPDATED: Changed top-8 to top-24 (lower) and justify-between to justify-end (right side)
-            className="absolute top-24 left-0 w-full z-50 px-8 flex justify-end items-center pointer-events-none"
+            className="absolute top-4 left-0 w-full z-20 px-4 flex justify-end items-center pointer-events-none md:px-8"
           >
             <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/10">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2 hidden md:block">
@@ -329,10 +578,10 @@ export default function TrackerV2() {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Main Content Area */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center min-h-screen">
+      <div className="relative z-10 flex h-full w-full items-center justify-center min-h-[calc(100vh-70px)]">
         <AnimatePresence mode="wait">
           {/* STEP 0: TAROT ONBOARDING */}
           {currentStep === 0 && (
@@ -378,6 +627,15 @@ export default function TrackerV2() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="mb-8 inline-flex items-center gap-3 rounded-full border px-5 py-3 text-sm backdrop-blur-md" style={{ background: GLOBAL_THEME.cardBg, borderColor: GLOBAL_THEME.cardBorder }}>
+                <span className="text-gray-400 uppercase tracking-[0.35em] text-[10px]">
+                  Previous tracker runs
+                </span>
+                <span className="text-base font-semibold tracking-[0.25em]" style={{ color: GLOBAL_THEME.secondary, fontFamily: GLOBAL_THEME.fontPrimary }}>
+                  {trackerStatsLoading ? "SYNCING" : trackerPlayCount ?? 0}
+                </span>
               </div>
 
               {/* 3D Tarot Cards Grid */}
@@ -433,11 +691,21 @@ export default function TrackerV2() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <FinalNeuralLink
+              <TrackerGameChrome
                 theme={GLOBAL_THEME}
-                domain={selectedDomain}
-                onComplete={(m) => handleGameComplete("neural_link", m)}
-              />
+                title={GAME_STEPS[0].title}
+                stepNumber={1}
+                remainingTime={remainingTime}
+                playCount={trackerPlayCount}
+                playCountLoading={trackerStatsLoading}
+                onNext={handleSkipCurrentGame}
+              >
+                <FinalNeuralLink
+                  theme={GLOBAL_THEME}
+                  domain={selectedDomain}
+                  onComplete={(m) => handleGameComplete("neural_link", m)}
+                />
+              </TrackerGameChrome>
             </motion.div>
           )}
           {currentStep === 2 && (
@@ -448,11 +716,21 @@ export default function TrackerV2() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <FinalDataStream
+              <TrackerGameChrome
                 theme={GLOBAL_THEME}
-                domain={selectedDomain}
-                onComplete={(m) => handleGameComplete("data_stream", m)}
-              />
+                title={GAME_STEPS[1].title}
+                stepNumber={2}
+                remainingTime={remainingTime}
+                playCount={trackerPlayCount}
+                playCountLoading={trackerStatsLoading}
+                onNext={handleSkipCurrentGame}
+              >
+                <FinalDataStream
+                  theme={GLOBAL_THEME}
+                  domain={selectedDomain}
+                  onComplete={(m) => handleGameComplete("data_stream", m)}
+                />
+              </TrackerGameChrome>
             </motion.div>
           )}
           {currentStep === 3 && (
@@ -463,10 +741,20 @@ export default function TrackerV2() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <FinalDataSort
+              <TrackerGameChrome
                 theme={GLOBAL_THEME}
-                onComplete={(m) => handleGameComplete("data_sort", m)}
-              />
+                title={GAME_STEPS[2].title}
+                stepNumber={3}
+                remainingTime={remainingTime}
+                playCount={trackerPlayCount}
+                playCountLoading={trackerStatsLoading}
+                onNext={handleSkipCurrentGame}
+              >
+                <FinalDataSort
+                  theme={GLOBAL_THEME}
+                  onComplete={(m) => handleGameComplete("data_sort", m)}
+                />
+              </TrackerGameChrome>
             </motion.div>
           )}
           {currentStep === 4 && (
@@ -477,10 +765,20 @@ export default function TrackerV2() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <FinalRapidChoice
+              <TrackerGameChrome
                 theme={GLOBAL_THEME}
-                onComplete={(m) => handleGameComplete("rapid_choice", m)}
-              />
+                title={GAME_STEPS[3].title}
+                stepNumber={4}
+                remainingTime={remainingTime}
+                playCount={trackerPlayCount}
+                playCountLoading={trackerStatsLoading}
+                onNext={handleSkipCurrentGame}
+              >
+                <FinalRapidChoice
+                  theme={GLOBAL_THEME}
+                  onComplete={(m) => handleGameComplete("rapid_choice", m)}
+                />
+              </TrackerGameChrome>
             </motion.div>
           )}
           {currentStep === 5 && (
@@ -491,10 +789,20 @@ export default function TrackerV2() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
             >
-              <FinalOddManOut
+              <TrackerGameChrome
                 theme={GLOBAL_THEME}
-                onComplete={(m) => handleGameComplete("odd_man_out", m)}
-              />
+                title={GAME_STEPS[4].title}
+                stepNumber={5}
+                remainingTime={remainingTime}
+                playCount={trackerPlayCount}
+                playCountLoading={trackerStatsLoading}
+                onNext={handleSkipCurrentGame}
+              >
+                <FinalOddManOut
+                  theme={GLOBAL_THEME}
+                  onComplete={(m) => handleGameComplete("odd_man_out", m)}
+                />
+              </TrackerGameChrome>
             </motion.div>
           )}
 

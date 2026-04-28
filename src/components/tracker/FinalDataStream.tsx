@@ -200,7 +200,7 @@ export default function FinalDataStream({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[700px] flex items-center justify-center font-sans overflow-hidden">
+    <div ref={containerRef} className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden font-sans">
       
       {/* Audio Toggle */}
       <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
@@ -209,7 +209,7 @@ export default function FinalDataStream({
 
       {/* Main Game UI */}
       <div 
-        className="relative z-10 w-full max-w-4xl h-[600px] mx-4 border rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl" 
+        className="relative z-10 mx-3 h-[min(58vh,560px)] w-full max-w-4xl overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-xl md:mx-4" 
         ref={gameAreaRef}
         style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
       >

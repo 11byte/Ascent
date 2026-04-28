@@ -191,7 +191,7 @@ export default function FinalDataSort({ theme, onComplete }: { theme: any, onCom
   const availableDomains = Object.keys(WORD_BANKS);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[800px] flex items-center justify-center font-sans">
+    <div ref={containerRef} className="relative flex h-full min-h-0 w-full items-center justify-center font-sans">
       
       {/* Audio Toggle */}
       <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
@@ -199,10 +199,10 @@ export default function FinalDataSort({ theme, onComplete }: { theme: any, onCom
       </button>
 
       {/* Main Game UI */}
-      <div className="relative z-10 w-full max-w-5xl mx-4 flex flex-col gap-4">
+      <div className="relative z-10 mx-3 flex h-[min(60vh,620px)] w-full max-w-5xl flex-col gap-3 md:mx-4">
         
         {/* Header */}
-        <div className="backdrop-blur-xl p-4 rounded-3xl shadow-xl flex justify-between items-center px-8 border" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
+        <div className="flex items-center justify-between rounded-3xl border px-5 py-3 shadow-xl backdrop-blur-xl md:px-8" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
           <div>
             <h2 className="font-bold text-2xl tracking-widest text-white" style={{ fontFamily: theme.fontPrimary }}>DATA SORT</h2>
             <p className="text-sm font-mono mt-1" style={{ color: theme.primary }}>Drag the packets into their correct subsystem.</p>
@@ -220,13 +220,13 @@ export default function FinalDataSort({ theme, onComplete }: { theme: any, onCom
         </div>
 
         {/* Tier Maker Grid */}
-        <div className="flex flex-col gap-3 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
+        <div className="flex flex-1 flex-col gap-2 rounded-3xl border p-3 shadow-2xl backdrop-blur-xl" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
           {availableDomains.map((domainId) => {
             const domainItems = items.filter(i => i.zone === domainId);
             const Icon = DOMAIN_ICONS[domainId] || DOMAIN_ICONS["Default"];
             
             return (
-              <div key={domainId} className="flex min-h-[80px] rounded-2xl overflow-hidden border shadow-inner" style={{ backgroundColor: "rgba(0,0,0,0.4)", borderColor: "rgba(255,255,255,0.05)" }}>
+              <div key={domainId} className="flex min-h-[64px] rounded-2xl overflow-hidden border shadow-inner" style={{ backgroundColor: "rgba(0,0,0,0.4)", borderColor: "rgba(255,255,255,0.05)" }}>
                 {/* Tier Label */}
                 <div className="w-32 flex flex-col items-center justify-center text-center p-2 shadow-lg z-10" style={{ backgroundColor: `${theme.primary}20`, borderRight: `1px solid ${theme.primary}50` }}>
                   <Icon className="w-6 h-6 mb-1 opacity-80" style={{ color: theme.primary }} />
@@ -256,7 +256,7 @@ export default function FinalDataSort({ theme, onComplete }: { theme: any, onCom
         {/* The Pool */}
         {!gameWon && (
           <div 
-            className="min-h-[120px] backdrop-blur-xl border-2 border-dashed rounded-3xl p-6 shadow-2xl transition-colors duration-300"
+            className="min-h-[90px] rounded-3xl border-2 border-dashed p-4 shadow-2xl transition-colors duration-300 backdrop-blur-xl"
             style={{ 
               backgroundColor: theme.cardBg, 
               borderColor: isPoolEmpty ? "rgba(255,255,255,0.1)" : `${theme.primary}50` 

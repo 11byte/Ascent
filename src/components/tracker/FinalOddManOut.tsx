@@ -3,7 +3,22 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
-import { CheckCircle2, ChevronRight, Volume2, Search, AlertTriangle } from "lucide-react";
+import { Volume2, Search, AlertTriangle } from "lucide-react";
+
+type TrackerTheme = {
+  primary: string;
+  success: string;
+  danger: string;
+  cardBg: string;
+  cardBorder: string;
+  fontPrimary: string;
+};
+
+type OddManOutMetrics = {
+  avg_reaction_sec: number;
+  accuracy_pct: number;
+  misclicks: number;
+};
 
 // --- 1. Predefined Word Banks ---
 const WORD_BANKS: Record<string, string[]> = {
@@ -18,7 +33,9 @@ const AudioEngine = {
   playHover: () => {
     if (typeof window === "undefined") return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx = window.AudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine"; osc.frequency.setValueAtTime(600, ctx.currentTime);
@@ -26,12 +43,14 @@ const AudioEngine = {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(); osc.stop(ctx.currentTime + 0.05);
-    } catch (e) {}
+    } catch {}
   },
   playSuccess: () => {
     if (typeof window === "undefined") return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx = window.AudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "triangle"; osc.frequency.setValueAtTime(600, ctx.currentTime);
@@ -40,12 +59,14 @@ const AudioEngine = {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(); osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
+    } catch {}
   },
   playError: () => {
     if (typeof window === "undefined") return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx = window.AudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sawtooth"; osc.frequency.setValueAtTime(150, ctx.currentTime);
@@ -53,26 +74,25 @@ const AudioEngine = {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(); osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
+    } catch {}
   }
 };
 
 // --- 3. Main Game Component ---
-export default function FinalOddManOut({ theme, onComplete }: { theme: any, onComplete?: (metrics: any) => void }) {
+export default function FinalOddManOut({ theme, onComplete }: { theme: TrackerTheme, onComplete?: (metrics: OddManOutMetrics) => void }) {
   // Game State
   const [options, setOptions] = useState<{ id: string, word: string, domain: string, isOdd: boolean, state: 'idle' | 'correct' | 'wrong' | 'fade' }[]>([]);
   const [score, setScore] = useState(0);
   const [targetScore] = useState(5); // Win after 5 correct rounds
-  const [gameWon, setGameWon] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false); // Prevents clicking during transitions
   
   // --- ML TELEMETRY TRACKERS ---
   const roundStart = useRef<number>(0);
   const stats = useRef({ time: 0, clicks: 0, misclicks: 0 });
-  const [finalMetrics, setFinalMetrics] = useState<any>(null);
-
   const bgContainerRef = useRef<HTMLDivElement>(null);
+  const completionSentRef = useRef(false);
 
   // --- Round Generator ---
   const generateRound = useCallback(() => {
@@ -129,24 +149,34 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
         state: opt.id === selectedId ? 'correct' : 'fade' // Highlight winner, fade losers
       })));
 
-      setScore(s => s + 1);
+      const nextScore = score + 1;
+      setScore(nextScore);
 
-      if (score + 1 >= targetScore) {
+      if (nextScore >= targetScore) {
         // COMPILE ML METRICS ON WIN
         const accuracy = (targetScore / stats.current.clicks) * 100;
-        
-        setFinalMetrics({
+        const metrics = {
           avg_reaction_sec: Number((stats.current.time / stats.current.clicks).toFixed(2)),
           accuracy_pct: Number(accuracy.toFixed(2)),
           misclicks: stats.current.misclicks
-        });
+        };
 
-        setTimeout(() => setGameWon(true), 800);
+        setIsCompleting(true);
+
+        // Auto-advance to telemetry dashboard step
+        setTimeout(() => {
+          if (!completionSentRef.current) {
+            completionSentRef.current = true;
+            onComplete?.(metrics);
+          }
+        }, 450);
       } else {
-        setTimeout(generateRound, 1000); // Load next round after delay
+        // Faster round handoff to avoid delayed/game-feels-stuck perception
+        setTimeout(generateRound, 350);
       }
     } else {
       // WRONG (MISCLICK)
+      setIsProcessing(true);
       stats.current.misclicks += 1;
 
       if (audioEnabled) AudioEngine.playError();
@@ -167,12 +197,13 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
           ...opt,
           state: opt.state === 'wrong' ? 'idle' : opt.state
         })));
+        setIsProcessing(false);
       }, 600);
     }
   };
 
   return (
-    <div ref={bgContainerRef} className="relative w-full h-full min-h-[700px] flex flex-col items-center justify-center font-sans overflow-hidden z-10">
+    <div ref={bgContainerRef} className="relative z-10 flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden font-sans">
       
       {/* Audio Toggle */}
       <button onClick={() => setAudioEnabled(!audioEnabled)} className="absolute top-4 right-4 z-50 p-2 bg-white/5 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors border border-white/10">
@@ -180,11 +211,11 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
       </button>
 
       {/* Main Game Area */}
-      <div className="relative z-10 w-full max-w-2xl mx-4 flex flex-col items-center mt-10">
+      <div className="relative z-10 mx-3 flex w-full max-w-2xl flex-col items-center md:mx-4">
         
         {/* Header HUD */}
-        {!gameWon && (
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex justify-between items-end mb-8 px-4">
+        {!isCompleting && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex w-full items-end justify-between px-3 md:px-4">
             <div className="backdrop-blur-xl border p-4 rounded-2xl shadow-xl" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
               <h2 className="text-white font-bold text-2xl tracking-widest flex items-center gap-2" style={{ fontFamily: theme.fontPrimary }}>
                 <Search className="w-6 h-6" style={{ color: theme.primary }} /> ANOMALY DETECT
@@ -202,10 +233,10 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
         )}
 
         {/* The 2x2 Grid */}
-        {!gameWon && (
-          <div className="grid grid-cols-2 gap-4 w-full max-w-[500px]">
-            <AnimatePresence mode="popLayout">
-              {options.map((opt, index) => {
+        {!isCompleting && (
+          <div className="grid w-full max-w-[500px] grid-cols-2 gap-3">
+            <AnimatePresence>
+              {options.map((opt) => {
                 
                 // Dynamic styling based on state and theme
                 let currentStyles: React.CSSProperties = {
@@ -246,45 +277,31 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
                 return (
                   <motion.button
                     key={opt.id}
-                    layoutId={opt.id} // Keeps animation smooth if order changes
-                    initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                    initial={{ opacity: 0, scale: 0.92, y: 16 }}
                     animate={{ 
                       opacity: currentStyles.opacity, 
                       scale: opt.state === 'correct' ? 1.05 : opt.state === 'fade' ? 0.95 : 1, 
                       y: 0 
                     }}
-                    exit={{ opacity: 0, scale: 0, transition: { duration: 0.2 } }}
+                    exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.14 } }}
                     transition={{ 
-                      duration: 0.3, 
-                      delay: index * 0.05, // Stagger entrance
-                      type: "spring", stiffness: 300, damping: 20 
+                      duration: 0.16,
+                      ease: "easeOut",
                     }}
-                    onMouseEnter={() => { 
-                      if(audioEnabled && !isProcessing) AudioEngine.playHover(); 
-                      // Apply hover styles programmatically if idle
-                      if(opt.state === 'idle') {
-                         const el = document.getElementById(opt.id);
-                         if(el) {
-                           el.style.borderColor = theme.primary;
-                           el.style.boxShadow = `0 0 20px ${theme.primary}50`;
-                           el.style.backgroundColor = "rgba(255,255,255,0.05)";
-                         }
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      // Remove hover styles if idle
-                      if(opt.state === 'idle') {
-                         const el = document.getElementById(opt.id);
-                         if(el) {
-                           el.style.borderColor = "rgba(255,255,255,0.1)";
-                           el.style.boxShadow = "none";
-                           el.style.backgroundColor = "rgba(0,0,0,0.4)";
-                         }
+                    whileHover={!isProcessing && opt.state === 'idle' ? {
+                      scale: 1.03,
+                      borderColor: theme.primary,
+                      boxShadow: `0 0 20px ${theme.primary}50`,
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                    } : {}}
+                    whileTap={!isProcessing && opt.state === 'idle' ? { scale: 0.98 } : {}}
+                    onMouseEnter={() => {
+                      if (audioEnabled && !isProcessing && opt.state === 'idle') {
+                        AudioEngine.playHover();
                       }
                     }}
                     onClick={() => handleSelect(opt.id, opt.isOdd)}
                     disabled={isProcessing}
-                    id={opt.id}
                     className="relative w-full aspect-video rounded-3xl backdrop-blur-xl border-2 flex items-center justify-center transition-all duration-300 group overflow-hidden"
                     style={currentStyles}
                   >
@@ -306,27 +323,30 @@ export default function FinalOddManOut({ theme, onComplete }: { theme: any, onCo
           </div>
         )}
 
-        {/* Victory Screen */}
+        {/* Completion Overlay */}
         <AnimatePresence>
-          {gameWon && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} 
-              className="absolute inset-0 z-50 flex items-center justify-center w-full"
+          {isCompleting && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-center justify-center"
             >
-              <div className="border p-10 rounded-3xl text-center w-full max-w-md shadow-2xl" style={{ backgroundColor: theme.cardBg, borderColor: `${theme.success}50`, boxShadow: `0 0 60px ${theme.success}30` }}>
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: 360 }} transition={{ type: "spring", damping: 15 }} className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `${theme.success}20` }}>
-                  <CheckCircle2 className="w-12 h-12" style={{ color: theme.success }} />
-                </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2 tracking-widest" style={{ fontFamily: theme.fontPrimary }}>ANOMALIES CLEARED</h2>
-                <p className="text-gray-400 mb-8">You successfully identified all rogue data packets.</p>
-                
-                <button 
-                  onClick={() => onComplete ? onComplete(finalMetrics) : alert(`Metrics Data:\n${JSON.stringify(finalMetrics, null, 2)}`)} 
-                  className="w-full font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.03] shadow-lg text-gray-900"
-                  style={{ background: `linear-gradient(90deg, ${theme.success}, ${theme.primary})` }}
+              <div
+                className="rounded-3xl border px-8 py-6 text-center shadow-2xl backdrop-blur-2xl"
+                style={{
+                  backgroundColor: theme.cardBg,
+                  borderColor: `${theme.success}50`,
+                  boxShadow: `0 0 40px ${theme.success}35`,
+                }}
+              >
+                <p
+                  className="text-sm uppercase tracking-[0.28em]"
+                  style={{ color: theme.primary, fontFamily: theme.fontPrimary }}
                 >
-                  Complete Assessment <ChevronRight className="w-5 h-5" />
-                </button>
+                  ANOMALY CLEARED
+                </p>
+                <p className="mt-2 text-gray-200">Syncing telemetry...</p>
               </div>
             </motion.div>
           )}

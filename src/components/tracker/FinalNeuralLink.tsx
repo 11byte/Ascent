@@ -128,6 +128,7 @@ export default function FinalNeuralLink({
   const [loading, setLoading] = useState(true);
   const [gameWon, setGameWon] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   // --- ML TELEMETRY TRACKERS ---
   const startTime = useRef<number>(0);
@@ -205,6 +206,37 @@ export default function FinalNeuralLink({
     }
   }, [loading, gameWon]);
 
+  useEffect(() => {
+    if (loading || gameWon) return;
+
+    const timer = window.setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [loading, gameWon]);
+
+  const getHintedWord = (word: string) => {
+    if (foundWords.includes(word)) return word;
+
+    const masked = Array.from(word).map(() => "•");
+    const midIndex = Math.floor((word.length - 1) / 2);
+
+    if (elapsedSeconds >= 12) {
+      masked[0] = word[0];
+    }
+
+    if (elapsedSeconds >= 24) {
+      masked[word.length - 1] = word[word.length - 1];
+    }
+
+    if (elapsedSeconds >= 36) {
+      masked[midIndex] = word[midIndex];
+    }
+
+    return masked.join("");
+  };
+
   // --- Interaction Logic ---
   const handlePointerDown = (id: number, e: React.PointerEvent) => {
     e.preventDefault(); 
@@ -268,14 +300,14 @@ export default function FinalNeuralLink({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[700px] flex items-center justify-center font-sans overflow-hidden">
+    <div className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden font-sans">
       
-      <div className="relative z-10 w-full max-w-md mx-4">
+      <div className="relative z-10 w-full max-w-xl px-3 md:px-4">
         <AnimatePresence mode="wait">
           
           {loading && (
             <motion.div key="loading" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} 
-              className="backdrop-blur-2xl border rounded-3xl p-10 shadow-2xl flex flex-col items-center justify-center h-[500px]"
+              className="flex h-[min(58vh,500px)] flex-col items-center justify-center rounded-3xl border p-10 shadow-2xl backdrop-blur-2xl"
               style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
             >
               <Gamepad2 className="w-12 h-12 mb-4 animate-pulse" style={{ color: theme.primary }} />
@@ -285,7 +317,7 @@ export default function FinalNeuralLink({
 
           {!loading && !gameWon && (
             <motion.div key="game" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} 
-              className="backdrop-blur-xl border rounded-3xl p-8 shadow-2xl relative"
+              className="relative rounded-3xl border p-5 shadow-2xl backdrop-blur-xl md:p-6"
               style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
             >
               <button 
@@ -303,7 +335,15 @@ export default function FinalNeuralLink({
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-2 mb-8 min-h-[32px]">
+              {/* <div className="mb-2 text-center">
+                {!gameWon && (
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-gray-400">
+                    Hints unlock at 12s, 24s, 36s
+                  </p>
+                )}
+              </div> */}
+
+              <div className="mb-6 flex min-h-[32px] flex-wrap justify-center gap-2">
                 {validWords.map((w) => {
                   const isFound = foundWords.includes(w);
                   return (
@@ -315,7 +355,7 @@ export default function FinalNeuralLink({
                         boxShadow: isFound ? `0 0 15px ${theme.primary}` : "none"
                       }}
                     >
-                      {isFound ? w : w.replace(/./g, "•")}
+                      {getHintedWord(w)}
                     </span>
                   );
                 })}

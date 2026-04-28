@@ -1,8 +1,23 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 const Navig = () => {
+  const [showAuthActions, setShowAuthActions] = useState(false);
+
+  useEffect(() => {
+    const hasLocalAuth =
+      Boolean(localStorage.getItem("token")) ||
+      Boolean(localStorage.getItem("userId"));
+    const hasCookieAuth = /(?:^|;\s*)(token|userId)=/.test(document.cookie);
+
+    setShowAuthActions(!(hasLocalAuth || hasCookieAuth));
+  }, []);
+
+  if (!showAuthActions) {
+    return null;
+  }
+
   return (
     <div className="fixed top-0 right-0 z-50 flex justify-end p-4 bg-[#3a256600] rounded-3xl m-2 w-fit backdrop-blur-md">
       <button

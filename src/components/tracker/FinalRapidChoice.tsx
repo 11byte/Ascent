@@ -96,10 +96,10 @@ export default function FinalRapidChoice({ theme, onComplete }: { theme: any, on
   };
 
   return (
-    <div className="relative w-full h-full min-h-[700px] flex flex-col items-center justify-center font-sans overflow-hidden z-10">
+    <div className="relative z-10 flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden font-sans">
       
       {/* Header UI */}
-      <div className="absolute top-8 w-full max-w-md mx-auto z-20 px-4 text-center">
+      <div className="absolute top-3 z-20 mx-auto w-full max-w-md px-4 text-center">
         <h2 className="font-bold text-3xl tracking-widest text-white drop-shadow-md" style={{ fontFamily: theme.fontPrimary }}>
           RAPID CHOICE
         </h2>
@@ -109,7 +109,7 @@ export default function FinalRapidChoice({ theme, onComplete }: { theme: any, on
       </div>
 
       {/* Card Deck Area */}
-      <div className="relative w-full max-w-sm h-[400px] flex items-center justify-center z-10 mt-10">
+      <div className="relative z-10 mt-2 flex h-[min(60vh,480px)] w-full max-w-sm items-center justify-center">
         <AnimatePresence>
           {!gameWon && cards.map((task, index) => {
             // Only render the top 3 cards for performance and visual stacking effect
@@ -186,7 +186,7 @@ function SwipeCard({ task, index, theme, onSwipe }: { task: any, index: number, 
 
   return (
     <motion.div
-      className="absolute w-[320px] h-[420px] rounded-3xl shadow-2xl flex flex-col justify-center items-center p-8 text-center cursor-grab active:cursor-grabbing border origin-bottom backdrop-blur-3xl"
+      className="absolute flex h-[min(52vh,410px)] w-[min(82vw,320px)] cursor-grab flex-col items-center justify-center rounded-3xl border p-6 text-center shadow-2xl origin-bottom backdrop-blur-3xl active:cursor-grabbing md:p-8"
       style={{
         x: isTopCard ? x : 0,
         rotate: isTopCard ? rotate : 0,

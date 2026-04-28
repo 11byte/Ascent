@@ -41,6 +41,40 @@ router.post("/quiz/save", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/quiz/stats/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = Array.isArray(req.params.userId)
+      ? req.params.userId[0]
+      : req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    const [playCount, latestSession] = await Promise.all([
+      prisma.trackerSession.count({ where: { userId } }),
+      prisma.trackerSession.findFirst({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        select: {
+          createdAt: true,
+          assignedDomain: true,
+        },
+      }),
+    ]);
+
+    return res.status(200).json({
+      ok: true,
+      userId,
+      playCount,
+      latestSession,
+    });
+  } catch (err) {
+    console.error("Failed to fetch tracker stats:", err);
+    return res.status(500).json({ error: "Failed to fetch tracker stats" });
+  }
+});
+
 router.get("/predict/:userId", async (req: Request, res: Response) => {
   try {
     const userId = Array.isArray(req.params.userId)

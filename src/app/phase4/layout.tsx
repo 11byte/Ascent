@@ -37,7 +37,7 @@ export default function Phase4Layout({
   }, []);
 
   return (
-    <div>
+    <div className="relative min-h-screen pt-[70px] isolate">
       <Phase4NavbarClient username={username} points={userCredits} />
       <Phase2Provider value={{ username }}>{children}</Phase2Provider>
     </div>
