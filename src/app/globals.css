@@ -137,3 +137,11 @@ body {
 .react-flow__node:focus-visible {
   outline: none !important;
 }
+
+.gradient-stroke {
+  color: transparent;
+  -webkit-text-stroke: 1.5px transparent;
+  background: linear-gradient(to right, #c084fc, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+}

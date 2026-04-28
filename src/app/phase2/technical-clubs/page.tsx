@@ -10,7 +10,6 @@ import { Button } from "./components/ui/button";
 // FIX 2: Corrected local Component import path
 // Assuming ClubCard.tsx is located at src/app/phase2/technical-clubs/components/ClubCard.tsx
 import ClubCard from "./components/clubs/ClubCard";
-
 // --- Data Structure for the 5 clubs (UNCHANGED) ---
 const clubs = [
   {
@@ -156,7 +155,7 @@ export default function TechnicalClubsPage() {
         >
           <AnimatePresence mode="popLayout">
             {filteredClubs.map((club, index) => (
-              <ClubCard key={club.name} club={club} index={index} />
+              <ClubCard key={club.name} club={club} index={index} phaseNo={2} />
             ))}
           </AnimatePresence>
         </motion.div>

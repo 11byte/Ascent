@@ -155,6 +155,7 @@ model Challenge {
   title       String
   description String
   points      Int
+  clubName    String?
 
   club        Club?    @relation(fields: [clubId], references: [id])
   clubId      Int?

@@ -32,7 +32,7 @@ export const WidgetSystem = () => {
   const [widgets, setWidgets] = useState<Widget[]>([
     {
       id: "calculator",
-      name: "Calculator",
+      name: "CGPA Calculator",
       icon: <CalcIcon className="w-5 h-5" />,
       component: <Calculator />,
       defaultPosition: { x: 50, y: 100 },

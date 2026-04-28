@@ -236,9 +236,16 @@ export default function TechnicalClubPage({
   club: clubProp,
   phaseNo = 1,
 }: {
-  club?: ClubProp;
+  club?: string;
   phaseNo?: number;
 }) {
+  const CLUB_MAP: Record<string, number> = {
+    aiml: 1,
+    devops: 2,
+    cyber: 3,
+    datascience: 4,
+    gdg: 5,
+  };
   // Normalize incoming data — handles legacy field names from real data sources
   const API_BASE = "http://localhost:5000/api/club";
 
@@ -247,16 +254,62 @@ export default function TechnicalClubPage({
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("events");
   const rawStats = club?.stats || {};
+  const [newChallenge, setNewChallenge] = useState({
+    title: "",
+    description: "",
+    points: 0,
+  });
+  const [editingChallengeId, setEditingChallengeId] = useState<number | null>(
+    null,
+  );
+  const [editedChallenge, setEditedChallenge] = useState({
+    title: "",
+    description: "",
+    points: 0,
+  });
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+
+  const [editedEvent, setEditedEvent] = useState({
+    title: "",
+    date: "",
+    time: "",
+    venue: "",
+    speaker: "",
+    status: "UPCOMING",
+  });
+
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    date: "",
+    time: "",
+    venue: "",
+    speaker: "",
+    status: "UPCOMING",
+  });
+
+  const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
+  const [editedRole, setEditedRole] = useState("");
+  const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE}/1`)
+    if (!clubProp) return;
+
+    const clubId = CLUB_MAP[clubProp.toLowerCase()];
+
+    if (!clubId) {
+      console.error("Invalid club:", clubProp);
+      setLoading(false);
+      return;
+    }
+
+    fetch(`${API_BASE}/${clubId}`)
       .then((res) => res.json())
       .then((data) => {
         setClub(data.club);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [clubProp]);
 
   const C = {
     base: "#0C0C12",
@@ -591,96 +644,323 @@ export default function TechnicalClubPage({
       {activeTab === "events" && (
         <div className="flex flex-col gap-3">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(club.events ?? []).map((ev: any, i: number) => (
-            <div
-              key={ev.id ?? i}
-              className="grid grid-cols-[1fr_auto] gap-4 items-center p-5 rounded-xl transition-colors"
-              style={{
-                background: C.surface,
-                border: `0.5px solid ${C.border}`,
-              }}
-            >
-              <div>
-                <div
-                  className="flex items-center gap-1.5 text-[11px] font-mono mb-2"
-                  style={{ color: C.muted }}
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{
-                      background:
-                        ev.status === "UPCOMING" ? "#10B981" : C.muted,
-                    }}
-                  />
-                  {ev.status} &nbsp;—&nbsp; {ev.date} &nbsp;·&nbsp; {ev.time}
+          {(club.events ?? []).map((ev: any, i: number) => {
+            const isEditing = editingEventId === ev.id;
+
+            return (
+              <div
+                key={ev.id ?? i}
+                className="grid grid-cols-[1fr_auto] gap-4 items-center p-5 rounded-xl transition-colors"
+                style={{
+                  background: C.surface,
+                  border: `0.5px solid ${C.border}`,
+                }}
+              >
+                {/* LEFT */}
+                <div>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={editedEvent.title}
+                        onChange={(e) =>
+                          setEditedEvent({
+                            ...editedEvent,
+                            title: e.target.value,
+                          })
+                        }
+                        placeholder="Title"
+                        className="px-3 py-2 rounded-full text-sm"
+                        style={{ background: C.surface3, color: C.text }}
+                      />
+
+                      <div className="flex gap-2">
+                        <input
+                          value={editedEvent.date}
+                          onChange={(e) =>
+                            setEditedEvent({
+                              ...editedEvent,
+                              date: e.target.value,
+                            })
+                          }
+                          placeholder="Date"
+                          className="px-3 py-2 rounded-full text-sm w-full"
+                          style={{ background: C.surface3, color: C.text }}
+                        />
+                        <input
+                          value={editedEvent.time}
+                          onChange={(e) =>
+                            setEditedEvent({
+                              ...editedEvent,
+                              time: e.target.value,
+                            })
+                          }
+                          placeholder="Time"
+                          className="px-3 py-2 rounded-full text-sm w-full"
+                          style={{ background: C.surface3, color: C.text }}
+                        />
+                      </div>
+
+                      <input
+                        value={editedEvent.venue}
+                        onChange={(e) =>
+                          setEditedEvent({
+                            ...editedEvent,
+                            venue: e.target.value,
+                          })
+                        }
+                        placeholder="Venue"
+                        className="px-3 py-2 rounded-full text-sm"
+                        style={{ background: C.surface3, color: C.text }}
+                      />
+
+                      <input
+                        value={editedEvent.speaker}
+                        onChange={(e) =>
+                          setEditedEvent({
+                            ...editedEvent,
+                            speaker: e.target.value,
+                          })
+                        }
+                        placeholder="Speaker"
+                        className="px-3 py-2 rounded-full text-sm"
+                        style={{ background: C.surface3, color: C.text }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className="flex items-center gap-1.5 text-[11px] font-mono mb-2"
+                        style={{ color: C.muted }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{
+                            background:
+                              ev.status === "UPCOMING" ? "#10B981" : C.muted,
+                          }}
+                        />
+                        {ev.status} — {ev.date} · {ev.time}
+                      </div>
+
+                      <div
+                        className="text-[15px] font-bold mb-3"
+                        style={{
+                          fontFamily: "'Syne', sans-serif",
+                          color: C.text,
+                        }}
+                      >
+                        {ev.title}
+                      </div>
+
+                      <div className="flex gap-4">
+                        <div
+                          className="flex items-center gap-1.5 text-[12px]"
+                          style={{ color: C.muted }}
+                        >
+                          <IconPin /> {ev.venue}
+                        </div>
+                        <div
+                          className="flex items-center gap-1.5 text-[12px]"
+                          style={{ color: C.muted }}
+                        >
+                          <IconPerson /> {ev.speaker}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div
-                  className="text-[15px] font-bold mb-3"
-                  style={{ fontFamily: "'Syne', sans-serif", color: C.text }}
-                >
-                  {ev.title}
-                </div>
-                <div className="flex flex-wrap gap-4">
-                  <div
-                    className="flex items-center gap-1.5 text-[12px] font-mono"
-                    style={{ color: C.muted }}
-                  >
-                    <IconPin /> {ev.venue}
-                  </div>
-                  <div
-                    className="flex items-center gap-1.5 text-[12px] font-mono"
-                    style={{ color: C.muted }}
-                  >
-                    <IconPerson /> {ev.speaker}
-                  </div>
+
+                {/* RIGHT */}
+                <div className="flex flex-col items-end gap-2">
+                  {isAdmin && (
+                    <>
+                      {isEditing ? (
+                        <div className="flex gap-2">
+                          {/* SAVE (UPDATE EXISTING) */}
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.accent, color: "white" }}
+                            onClick={async () => {
+                              const res = await fetch(
+                                `${API_BASE}/event/${ev.id}`,
+                                {
+                                  method: "PUT",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify(editedEvent),
+                                },
+                              );
+
+                              const data = await res.json();
+
+                              if (data.ok) {
+                                setClub((prev: any) => ({
+                                  ...prev,
+                                  events: prev.events.map((e: any) =>
+                                    e.id === ev.id
+                                      ? { ...e, ...editedEvent }
+                                      : e,
+                                  ),
+                                }));
+
+                                setEditingEventId(null);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+
+                          {/* POST NEW EVENT */}
+
+                          {/* CANCEL */}
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.surface3, color: C.muted }}
+                            onClick={() => setEditingEventId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <EditBtn
+                          onClick={() => {
+                            setEditingEventId(ev.id);
+                            setEditedEvent(ev);
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                {isAdmin && <EditBtn />}
-                <button
-                  className="px-4 py-1.5 rounded-full text-[12px] font-semibold text-white transition-opacity hover:opacity-80"
-                  style={{ background: C.accent }}
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+
           {isAdmin && (
-            <button
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[13px] font-medium transition-colors"
+            <div
+              className="p-4 rounded-2xl flex flex-col gap-3 w-3/4 mx-auto"
               style={{
                 background: C.surface,
-                border: `1px dashed ${C.borderAccent}`,
-                color: C.tagText,
-              }}
-              onClick={async () => {
-                const res = await fetch(`${API_BASE}/event`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    title: "New Event",
-                    date: "20 FEB",
-                    time: "4 PM",
-                    venue: "Lab",
-                    speaker: "TBD",
-                    status: "UPCOMING",
-                    clubId: club.id,
-                  }),
-                });
-
-                const data = await res.json();
-
-                if (data.ok) {
-                  setClub((prev: any) => ({
-                    ...prev,
-                    events: [...prev.events, data.event],
-                  }));
-                }
+                border: `0.5px solid ${C.borderAccent}`,
               }}
             >
-              <IconPlus /> Add New Event
-            </button>
+              <input
+                placeholder="Event Title"
+                className="px-4 py-2 rounded-full text-sm outline-none"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newEvent.title}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, title: e.target.value })
+                }
+              />
+
+              <div className="flex gap-2">
+                <input
+                  placeholder="Date"
+                  className="px-4 py-2 rounded-full text-sm w-full"
+                  style={{
+                    background: C.surface3,
+                    border: `0.5px solid ${C.border}`,
+                    color: C.text,
+                  }}
+                  value={newEvent.date}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, date: e.target.value })
+                  }
+                />
+
+                <input
+                  placeholder="Time"
+                  className="px-4 py-2 rounded-full text-sm w-full"
+                  style={{
+                    background: C.surface3,
+                    border: `0.5px solid ${C.border}`,
+                    color: C.text,
+                  }}
+                  value={newEvent.time}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, time: e.target.value })
+                  }
+                />
+              </div>
+
+              <input
+                placeholder="Venue"
+                className="px-4 py-2 rounded-full text-sm outline-none"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newEvent.venue}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, venue: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Speaker"
+                className="px-4 py-2 rounded-full text-sm outline-none"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newEvent.speaker}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, speaker: e.target.value })
+                }
+              />
+
+              <center>
+                <button
+                  className="flex items-center gap-2 py-2 px-4 rounded-full text-sm font-semibold transition-opacity hover:opacity-80"
+                  style={{
+                    color: "#22c55e",
+                    border: "0.5px solid #22c55e",
+                    background: "transparent",
+                  }}
+                  onClick={async () => {
+                    if (!newEvent.title) return;
+
+                    const res = await fetch(`${API_BASE}/event`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        ...newEvent,
+                        clubId: club.id,
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      setClub((prev: any) => ({
+                        ...prev,
+                        events: [...prev.events, data.event],
+                      }));
+
+                      // reset form
+                      setNewEvent({
+                        title: "",
+                        date: "",
+                        time: "",
+                        venue: "",
+                        speaker: "",
+                        status: "UPCOMING",
+                      });
+                    }
+                  }}
+                >
+                  <IconPlus /> Post Event
+                </button>
+              </center>
+            </div>
           )}
         </div>
       )}
@@ -691,95 +971,296 @@ export default function TechnicalClubPage({
       {activeTab === "challenges" && (
         <div className="flex flex-col gap-3">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(club.challenges ?? []).map((ch: any, i: number) => (
-            <div
-              key={ch.id ?? i}
-              className="grid grid-cols-[1fr_auto] gap-4 items-center p-5 rounded-xl cursor-pointer transition-all"
-              style={{
-                background: C.surface,
-                border: `0.5px solid ${C.border}`,
-              }}
-              onClick={() => (window.location.href = "/bounty")}
-            >
-              <div>
-                <div
-                  className="text-[15px] font-bold mb-1.5"
-                  style={{ fontFamily: "'Syne', sans-serif", color: C.text }}
-                >
-                  {ch.title}
+          {(club.challenges ?? []).map((ch: any, i: number) => {
+            const isEditing = editingChallengeId === ch.id;
+
+            return (
+              <div
+                key={ch.id ?? i}
+                className="grid grid-cols-[1fr_auto] gap-4 items-center p-5 rounded-xl transition-all"
+                style={{
+                  background: C.surface,
+                  border: `0.5px solid ${C.border}`,
+                }}
+                onClick={() => {
+                  if (!isEditing) window.location.href = "/bounty";
+                }}
+              >
+                {/* LEFT SIDE */}
+                <div>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={editedChallenge.title}
+                        onChange={(e) =>
+                          setEditedChallenge({
+                            ...editedChallenge,
+                            title: e.target.value,
+                          })
+                        }
+                        className="px-3 py-2 rounded-full text-sm outline-none"
+                        style={{
+                          background: C.surface3,
+                          border: `0.5px solid ${C.border}`,
+                          color: C.text,
+                        }}
+                      />
+
+                      <textarea
+                        value={editedChallenge.description}
+                        onChange={(e) =>
+                          setEditedChallenge({
+                            ...editedChallenge,
+                            description: e.target.value,
+                          })
+                        }
+                        className="px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{
+                          background: C.surface3,
+                          border: `0.5px solid ${C.border}`,
+                          color: C.text,
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        value={editedChallenge.points}
+                        onChange={(e) =>
+                          setEditedChallenge({
+                            ...editedChallenge,
+                            points: Number(e.target.value),
+                          })
+                        }
+                        className="px-3 py-2 rounded-full text-sm outline-none"
+                        style={{
+                          background: C.surface3,
+                          border: `0.5px solid ${C.border}`,
+                          color: C.text,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className="text-[15px] font-bold mb-1.5"
+                        style={{
+                          fontFamily: "'Syne', sans-serif",
+                          color: C.text,
+                        }}
+                      >
+                        {ch.title}
+                      </div>
+
+                      <p
+                        className="text-[12.5px] leading-relaxed mb-3"
+                        style={{ color: C.muted }}
+                      >
+                        {ch.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        {(ch.tags ?? []).map((t: string, ti: number) => (
+                          <span
+                            key={`${t}-${ti}`}
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+                            style={{
+                              background: C.surface3,
+                              border: `0.5px solid ${C.border}`,
+                              color: "rgba(255,255,255,0.5)",
+                            }}
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
-                <p
-                  className="text-[12.5px] leading-relaxed mb-3"
-                  style={{ color: C.muted }}
+
+                {/* RIGHT SIDE */}
+                <div
+                  className="flex flex-col items-end gap-2"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {ch.description}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(ch.tags ?? []).map((t: string, ti: number) => (
+                  {isAdmin && (
+                    <>
+                      {isEditing ? (
+                        <div className="flex gap-2">
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.accent, color: "white" }}
+                            onClick={async () => {
+                              const res = await fetch(
+                                `${API_BASE}/challenge/${ch.id}`,
+                                {
+                                  method: "PUT",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify(editedChallenge),
+                                },
+                              );
+
+                              const data = await res.json();
+
+                              if (data.ok) {
+                                setClub((prev: any) => ({
+                                  ...prev,
+                                  challenges: prev.challenges.map((c: any) =>
+                                    c.id === ch.id
+                                      ? { ...c, ...editedChallenge }
+                                      : c,
+                                  ),
+                                }));
+
+                                setEditingChallengeId(null);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+
+                          <button
+                            className="px-3 py-1 rounded-full text-[11px]"
+                            style={{ background: C.surface3, color: C.muted }}
+                            onClick={() => setEditingChallengeId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <EditBtn
+                          onClick={() => {
+                            setEditingChallengeId(ch.id);
+                            setEditedChallenge({
+                              title: ch.title,
+                              description: ch.description,
+                              points: ch.points,
+                            });
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+
+                  {!isEditing && (
                     <span
-                      key={`${t}-${ti}`}
-                      className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+                      className="text-[13px] font-mono font-medium px-3 py-1.5 rounded-full"
                       style={{
-                        background: C.surface3,
-                        border: `0.5px solid ${C.border}`,
-                        color: "rgba(255,255,255,0.5)",
+                        background: C.tagBg,
+                        border: `0.5px solid ${C.borderAccent}`,
+                        color: C.tagText,
                       }}
                     >
-                      {t}
+                      {ch.points} pts
                     </span>
-                  ))}
+                  )}
                 </div>
               </div>
-              <div
-                className="flex flex-col items-end gap-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {isAdmin && <EditBtn />}
-                <span
-                  className="text-[13px] font-mono font-medium px-3 py-1.5 rounded-full"
-                  style={{
-                    background: C.tagBg,
-                    border: `0.5px solid ${C.borderAccent}`,
-                    color: C.tagText,
-                  }}
-                >
-                  {ch.points} pts
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+
           {isAdmin && (
-            <button
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[13px] font-medium transition-colors"
+            <div
+              className="p-4 rounded-2xl flex flex-col gap-3 w-3/4 justify-center  mx-auto"
               style={{
                 background: C.surface,
-                border: `1px dashed ${C.borderAccent}`,
-                color: C.tagText,
-              }}
-              onClick={async () => {
-                const res = await fetch(`${API_BASE}/challenge`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    title: "New Challenge",
-                    description: "Solve problem",
-                    points: 100,
-                    clubId: club.id,
-                  }),
-                });
-
-                const data = await res.json();
-
-                if (data.ok) {
-                  setClub((prev: any) => ({
-                    ...prev,
-                    challenges: [...prev.challenges, data.challenge],
-                  }));
-                }
+                border: `0.5px solid ${C.borderAccent}`,
               }}
             >
-              <IconPlus /> Post New Challenge
-            </button>
+              <input
+                placeholder="Challenge Title"
+                className="px-4 py-2 rounded-full text-sm outline-none"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newChallenge.title}
+                onChange={(e) =>
+                  setNewChallenge({ ...newChallenge, title: e.target.value })
+                }
+              />
+
+              <textarea
+                placeholder="Challenge Description"
+                className="px-4 py-2 rounded-2xl text-sm outline-none"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newChallenge.description}
+                onChange={(e) =>
+                  setNewChallenge({
+                    ...newChallenge,
+                    description: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="number"
+                placeholder="Points"
+                className="px-4 py-2 rounded-full text-sm outline-none w-1/6"
+                style={{
+                  background: C.surface3,
+                  border: `0.5px solid ${C.border}`,
+                  color: C.text,
+                }}
+                value={newChallenge.points}
+                onChange={(e) =>
+                  setNewChallenge({
+                    ...newChallenge,
+                    points: Number(e.target.value),
+                  })
+                }
+              />
+              <center>
+                <button
+                  className="flex items-center justify-center gap-2 py-2 rounded-full text-sm font-semibold transition-opacity hover:opacity-80 w-1/6"
+                  style={{
+                    color: C.accent,
+                    background: "transparent",
+                    border: `0.5px solid ${C.accent}`,
+                    cursor: "pointer",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onClick={async () => {
+                    if (!newChallenge.title) return;
+
+                    const res = await fetch(`${API_BASE}/challenge`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        ...newChallenge,
+                        clubId: club.id,
+                        clubName: clubProp,
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      setClub((prev: any) => ({
+                        ...prev,
+                        challenges: [...prev.challenges, data.challenge],
+                      }));
+
+                      // reset form
+                      setNewChallenge({
+                        title: "",
+                        description: "",
+                        points: 0,
+                      });
+                    }
+                  }}
+                >
+                  <IconPlus /> Publish Challenge
+                </button>
+              </center>
+            </div>
           )}
         </div>
       )}
@@ -869,10 +1350,100 @@ export default function TechnicalClubPage({
                 >
                   {m.role}
                 </div>
-                {isAdmin && (
-                  <div className="mt-3 flex justify-center">
-                    <EditBtn label="Edit Role" />
+                {editingMemberId === m.id ? (
+                  <div className="mt-3 flex flex-col items-center gap-2">
+                    <input
+                      placeholder="Name"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="px-3 py-1 rounded-full text-[11px] outline-none"
+                      style={{
+                        background: C.surface3,
+                        border: `0.5px solid ${C.border}`,
+                        color: C.text,
+                      }}
+                    />
+
+                    <input
+                      placeholder="Role"
+                      value={editedRole}
+                      onChange={(e) => setEditedRole(e.target.value)}
+                      className="px-3 py-1 rounded-full text-[11px] outline-none"
+                      style={{
+                        background: C.surface3,
+                        border: `0.5px solid ${C.border}`,
+                        color: C.text,
+                      }}
+                    />
+
+                    <div className="flex gap-2">
+                      <button
+                        className="px-3 py-1 rounded-full text-[10px] font-mono"
+                        style={{
+                          background: C.accent,
+                          color: "white",
+                        }}
+                        onClick={async () => {
+                          const res = await fetch(
+                            `${API_BASE}/member/${m.id}`,
+                            {
+                              method: "PUT",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                role: editedRole,
+                                name: editedName,
+                              }),
+                            },
+                          );
+
+                          const data = await res.json();
+
+                          if (data.ok) {
+                            setClub((prev: any) => ({
+                              ...prev,
+                              members: prev.members.map((mem: any) =>
+                                mem.id === m.id
+                                  ? {
+                                      ...mem,
+                                      role: editedRole,
+                                      name: editedName,
+                                    }
+                                  : mem,
+                              ),
+                            }));
+
+                            setEditingMemberId(null);
+                          }
+                        }}
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        className="px-3 py-1 rounded-full text-[10px] font-mono"
+                        style={{
+                          background: C.surface3,
+                          color: C.muted,
+                        }}
+                        onClick={() => setEditingMemberId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+                ) : (
+                  isAdmin && (
+                    <div className="mt-3 flex justify-center">
+                      <EditBtn
+                        label="Edit Role"
+                        onClick={() => {
+                          setEditingMemberId(m.id);
+                          setEditedRole(m.role);
+                          setEditedName(m.name);
+                        }}
+                      />
+                    </div>
+                  )
                 )}
               </div>
             ))}

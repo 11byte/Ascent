@@ -185,16 +185,36 @@ export default function BackgroundTimeline() {
       />
 
       {/* Theme toggle */}
-      <div className="absolute top-20 left-6 z-50">
+      <div className="absolute top-20 left-6 z-50 flex items-center gap-3">
+        {/* Toggle Button */}
         <motion.div
           onClick={() => setThemeIndex((p) => (p + 1) % themeKeys.length)}
           className="w-16 h-8 rounded-full cursor-pointer bg-white/10 relative"
         >
           <motion.div
-            className="absolute top-1 w-6 h-6 rounded-full bg-white"
+            className="absolute top-1 w-6 h-6 rounded-full"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors[0]}, #ffffffcc)`,
+            }}
             animate={{ x: themeIndex * 20 }}
           />
         </motion.div>
+
+        {/* Text (Column) */}
+        <div className="flex flex-col leading-tight">
+          <span
+            className="font-[Orbitron] text-xs"
+            style={{ color: themeColors[0] }}
+          >
+            Theme
+          </span>
+          <span
+            className="font-[Orbitron] text-xs"
+            style={{ color: themeColors[0] }}
+          >
+            Toggle
+          </span>
+        </div>
       </div>
 
       <div className="w-full h-full pointer-events-none">

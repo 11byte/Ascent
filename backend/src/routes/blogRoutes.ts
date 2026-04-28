@@ -115,9 +115,10 @@ router.get("/", async (req, res) => {
         author: blog.user.name,
         published_at: blog.published_at,
         url: blog.url,
-        cover_image: blog.cover_image || generateImage(blog.title),
+        cover_image: blog.cover_image || null,
         reactions: blog.public_reactions_count,
         comments: blog.comments_count,
+        tag_list: blog.tag_list || [],
         difficulty,
       };
     });

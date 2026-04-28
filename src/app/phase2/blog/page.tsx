@@ -13,6 +13,7 @@ type BlogPost = {
   url: string;
   cover_image?: string;
   difficulty: string;
+  tag_list?: string[];
 };
 
 export default function BlogPage() {
@@ -22,6 +23,16 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   const year = "FE";
+  const domainImages: Record<string, string> = {
+    ai: "/domains/ai.png",
+    programming: "/domains/programming.png",
+    web: "/domains/web.png",
+    blockchain: "/domains/blockchain.png",
+    cybersecurity: "/domains/cybersecurity.png",
+    data: "/domains/data.png",
+    cloud: "/domains/cloud.png",
+    default: "/domains/default.png",
+  };
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -68,9 +79,6 @@ export default function BlogPage() {
 
   /* Fallback image */
 
-  const fallback =
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60";
-
   if (loading)
     return (
       <div className="flex justify-center mt-32 text-gray-400 text-lg">
@@ -78,18 +86,45 @@ export default function BlogPage() {
       </div>
     );
 
+  const getDomain = (blog: BlogPost) => {
+    if (!blog.tag_list || blog.tag_list.length === 0) return "default";
+
+    const tags = blog.tag_list.map((t) => t.toLowerCase());
+
+    if (tags.includes("ai") || tags.includes("ml") || tags.includes("llm"))
+      return "ai";
+    if (tags.includes("programming")) return "programming";
+    if (
+      tags.includes("web") ||
+      tags.includes("frontend") ||
+      tags.includes("backend")
+    )
+      return "web";
+    if (tags.includes("blockchain") || tags.includes("crypto"))
+      return "blockchain";
+    if (tags.includes("security")) return "cybersecurity";
+    if (tags.includes("data")) return "data";
+    if (tags.includes("cloud")) return "cloud";
+
+    return "default";
+  };
+
   return (
     <div className="min-h-screen bg-[#0b0b0b] text-white px-5 md:px-10 py-16">
       {/* HEADER */}
 
       <div className="max-w-6xl mx-auto text-center mb-16">
-        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-          Engineering Blog Feed
+        <h1
+          className="text-4xl md:text-6xl font-bold mt-5 text-transparent 
+  [-webkit-text-stroke:1.5px_#c084fc]"
+        >
+          Tech Blog Feed
         </h1>
 
         <p className="text-gray-400 mt-4 max-w-xl mx-auto text-sm md:text-base">
-          Curated technical articles ranked according to academic stage and
-          engineering relevance.
+          Curated technical articles across domains. Tap a blog to see details
+          and express your interest. Your interactions help us recommend better
+          content for you!
         </p>
       </div>
 
@@ -107,8 +142,15 @@ export default function BlogPage() {
             {/* IMAGE */}
 
             <img
-              src={blog.cover_image || fallback}
-              onError={(e) => (e.currentTarget.src = fallback)}
+              src={
+                blog.cover_image ||
+                domainImages[getDomain(blog)] ||
+                domainImages.default
+              }
+              onError={(e) =>
+                (e.currentTarget.src =
+                  domainImages[getDomain(blog)] || domainImages.default)
+              }
               alt={blog.title}
               className="w-full h-48 object-cover"
             />
@@ -168,11 +210,17 @@ export default function BlogPage() {
               {/* IMAGE */}
 
               <img
-                src={selected.cover_image || fallback}
-                onError={(e) => (e.currentTarget.src = fallback)}
+                src={
+                  selected.cover_image ||
+                  domainImages[getDomain(selected)] ||
+                  domainImages.default
+                }
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    domainImages[getDomain(selected)] || domainImages.default)
+                }
                 className="w-full h-72 object-cover"
               />
-
               {/* DETAILS */}
 
               <div className="p-6">

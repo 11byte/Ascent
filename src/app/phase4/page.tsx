@@ -13,6 +13,15 @@ import BackgroundTimeline from "../../components/BackgroundTimeline";
 export default function Home() {
   const { username } = usePhase2();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [greetIndex, setGreetIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreetIndex((prev) => (prev + 1) % greetings.length);
+    }, 2000); // change every 2 sec
+
+    return () => clearInterval(interval);
+  }, []);
 
   const [binaryElements, setBinaryElements] = useState<
     {
@@ -73,6 +82,34 @@ export default function Home() {
     [currentTime],
   );
 
+  const greetings = [
+    // Global
+    "Hola",
+    "Hello",
+    "Bonjour",
+    "Ciao",
+    "Hallo",
+    "Olá",
+
+    // Indian Languages (English script)
+    "Namaste", // Hindi / Sanskrit
+    "Namaskaram", // Telugu / Malayalam
+    "Vanakkam", // Tamil
+    "Namaskara", // Kannada
+    "Kem Cho", // Gujarati
+    "Nomoshkar", // Bengali
+    "Sat Sri Akal", // Punjabi
+    "Jai Jagannath", // Odia (cultural greeting)
+    "Khamma Ghani", // Rajasthani
+    "Ram Ram", // Haryanvi / Hindi belt
+    "Adaab", // Urdu
+
+    // Asian (kept in English script as per your requirement)
+    "Konnichiwa", // Japanese
+    "Annyeonghaseyo", // Korean
+    "Marhaba", // Arabic
+  ];
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* ✅ NEW BACKGROUND TIMELINE */}
@@ -87,7 +124,7 @@ export default function Home() {
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.8 }}
-          className="absolute top-28 lg:top-36 right-8 text-right"
+          className="absolute top-28 lg:top-36 right-8 text-right font-[Georgia] pointer-events-auto"
         >
           <div className="text-4xl lg:text-6xl font-bold text-white/95 font-mono tracking-wider drop-shadow-2xl">
             {timeData.time}
@@ -104,8 +141,21 @@ export default function Home() {
           transition={{ delay: 0.5, duration: 0.8 }}
           className="absolute bottom-28 lg:bottom-10 right-10"
         >
-          <h1 className="font-bold text-white mb-2 font-[Orbitron] text-6xl">
-            <span className="text-accent-teal ">Hola</span> {username}!
+          <h1 className="  mb-2 text-6xl flex gap-3">
+            <motion.span
+              key={greetIndex}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="text-[#f5ff64] text-accent-teal mx-1 font-[Georgia] italic"
+            >
+              {greetings[greetIndex]}
+            </motion.span>
+
+            <span className="font-[Orbitron] text-[#fcffce]">
+              {username?.split(" ")[0]} !
+            </span>
           </h1>
         </motion.div>
 

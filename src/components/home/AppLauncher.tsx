@@ -26,7 +26,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "timeline",
         name: "Timeline",
-        icon: <Timeline className="w-7 h-7" />,
+        iconpath: "/icons/timeline-icon.png",
+        iconSize: "w-[200px] h-[200px]",
         color: "from-blue-500 to-cyan-400",
         description: "Track your development journey",
         link: `/${phase}/timeline`,
@@ -35,7 +36,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "blogs",
         name: "Blogs",
-        icon: <BookOpen className="w-7 h-7" />,
+        iconpath: "/icons/blog-icon.png",
+        iconSize: "w-[120px] h-[120px]",
         color: "from-green-400 to-emerald-500",
         description: "Read and write technical blogs",
         link: `/${phase}/blog`,
@@ -44,7 +46,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "tracker",
         name: "Tracker",
-        icon: <Brain className="w-7 h-7" />,
+        iconpath: "/icons/tracker-icon.png",
+        iconSize: "w-[200px] h-[200px]",
         color: "from-purple-500 to-violet-500",
         description: "Daily Data Feed",
         link: `/${phase}/tracker`,
@@ -53,7 +56,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "trackerv2",
         name: "TrackerV2",
-        icon: <Brain className="w-7 h-7" />,
+        iconpath: "/icons/trackerv2-icon.png",
+        iconSize: "w-[200px] h-[200px]",
         color: "from-purple-500 to-violet-500",
         description: "Enhanced Daily Data Feed",
         link: `/${phase}/trackerv2`,
@@ -62,7 +66,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "marathons",
         name: "Macro-thons",
-        icon: <Trophy className="w-7 h-7" />,
+        iconpath: "/icons/macrothon-icon.png",
+        iconSize: "w-[200px] h-[200px]",
         color: "from-yellow-400 to-orange-500",
         description: "Participate in coding marathons",
         link: `/${phase}/macrothon`,
@@ -71,7 +76,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "leetspace",
         name: "LeetSpace",
-        icon: <Code className="w-7 h-7" />,
+        iconpath: "/icons/leet-icon.png",
+        iconSize: "w-[100px] h-[100px]",
         color: "from-red-500 to-pink-500",
         description: "Practice coding problems",
         link: `/${phase}/leetTracker`,
@@ -80,7 +86,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "gittrack",
         name: "GitTrack",
-        icon: <GitBranch className="w-7 h-7" />,
+        iconpath: "/icons/git-icon.png",
+        iconSize: "w-[100px] h-[100px]",
         color: "from-gray-500 to-gray-700",
         description: "Monitor your Git activity",
         link: `/${phase}/githubtracker`,
@@ -89,7 +96,8 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "bountyhub",
         name: "BountyHub",
-        icon: <DollarSign className="w-7 h-7" />,
+        iconpath: "/icons/bounty-icon.png",
+        iconSize: "w-[200px] h-[200px]",
         color: "from-emerald-400 to-green-600",
         description: "Discover coding bounties",
         link: `/${phase}/Bountyboard`,
@@ -98,11 +106,22 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       {
         id: "roadmap-generator",
         name: "RoadMap",
-        icon: <Network className="w-7 h-7" />,
+        iconpath: "/icons/roadmap-icon.png",
+        iconSize: "w-[100px] h-[100px]",
         color: "from-indigo-400 to-purple-600",
         description: "Generate learning roadmap",
         link: `/${phase}/roadmap-generator`,
         phases: ["phase4"],
+      },
+      {
+        id: "tech-club",
+        name: "Technical Clubs",
+        iconpath: "/icons/club-icon.png",
+        iconSize: "w-[100px] h-[100px]",
+        color: "from-navy-400 to-blue-600",
+        description: "Explore and join technical clubs",
+        link: `/${phase}/technical-clubs`,
+        phases: ["phase2", "phase3", "phase4"],
       },
     ],
     [phase],
@@ -152,11 +171,12 @@ export const AppLauncher = ({ phase = "phase1" }) => {
       <AnimatePresence>
         {isLauncherOpen && (
           <motion.div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 flex-1 overflow-y-auto px-6 pb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleLauncher}
+            style={{ touchAction: "auto" }}
           >
             {/* Background Blur */}
             <div className="absolute inset-0 bg-black/50 backdrop-blur-2xl" />
@@ -168,12 +188,14 @@ export const AppLauncher = ({ phase = "phase1" }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
             >
-              <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)]">
+              <div className="w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_20px_80px_rgba(0,0,0,0.6)] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-white/10">
                   <div>
-                    <h2 className="text-3xl font-semibold text-white">
+                    <h2 className="text-3xl font-semibold font-[Orbitron] text-[#ffffffa5]">
                       Applications
                     </h2>
                     <p className="text-white/50 text-sm mt-1">
@@ -204,47 +226,55 @@ export const AppLauncher = ({ phase = "phase1" }) => {
                 </div>
 
                 {/* Grid */}
-                <div className="px-6 pb-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {filteredApps.map((app, index) => (
-                    <motion.div
-                      key={app.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                    >
-                      <Link href={app.link}>
-                        <motion.div
-                          whileHover={{
-                            scale: 1.06,
-                            y: -6,
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          className="relative p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden group"
-                        >
-                          {/* Glow */}
-                          <div
-                            className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition bg-gradient-to-br ${app.color}`}
-                          />
-
-                          {/* Icon */}
+                <div className="flex-1 overflow-y-auto px-6 pb-8 pt-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {filteredApps.map((app, index) => (
+                      <motion.div
+                        key={app.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                      >
+                        <Link href={app.link}>
                           <motion.div
-                            whileHover={{ y: -2 }}
-                            className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${app.color}`}
+                            whileHover={{
+                              scale: 1.06,
+                              y: -6,
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                            className="relative p-5 rounded-2xl border border-white/10 bg-[#00000081] backdrop-blur-xl overflow-hidden group"
                           >
-                            {app.icon}
-                          </motion.div>
+                            {/* Glow */}
+                            <div
+                              className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition bg-gradient-to-br ${app.color}`}
+                            />
 
-                          {/* Text */}
-                          <h3 className="text-white font-semibold text-lg">
-                            {app.name}
-                          </h3>
-                          <p className="text-white/50 text-sm mt-1">
-                            {app.description}
-                          </p>
-                        </motion.div>
-                      </Link>
-                    </motion.div>
-                  ))}
+                            {/* Icon */}
+                            <motion.div
+                              whileHover={{ y: -2 }}
+                              className={`w-full h-full rounded-xl flex items-center justify-center mb-20 bg-transparent relative`}
+                            >
+                              <img
+                                src={app.iconpath}
+                                alt={app.name}
+                                className={`${app.iconSize} object-contain absolute top-[30px] left-1/2 -translate-x-1/2 -translate-y-1/2`}
+                              />
+                            </motion.div>
+
+                            {/* Text */}
+                            <center>
+                              <h3 className="text-white font-semibold text-lg font-[Orbitron]">
+                                {app.name}
+                              </h3>
+                              <p className="text-white/50 text-sm mt-1">
+                                {app.description}
+                              </p>
+                            </center>
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -19,6 +19,25 @@ function verifyToken(req: Request, res: Response, next: NextFunction) {
 /* =====================================================
    GET CLUB (FULL DATA)
 ===================================================== */
+
+router.get("/challenges/all", async (req: Request, res: Response) => {
+  try {
+    const challenges = await prisma.challenge.findMany({
+      include: {
+        club: true, // 🔥 gives club name
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    res.json({ ok: true, challenges });
+  } catch (err) {
+    console.error("Get all challenges error:", err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const clubId = Number(req.params.id);
@@ -118,7 +137,7 @@ router.put("/event/:id", verifyToken, async (req: Request, res: Response) => {
 ===================================================== */
 router.post("/challenge", verifyToken, async (req: Request, res: Response) => {
   try {
-    const { title, description, points, clubId } = req.body;
+    const { title, description, points, clubId, clubName } = req.body;
 
     const challenge = await prisma.challenge.create({
       data: {
@@ -126,6 +145,7 @@ router.post("/challenge", verifyToken, async (req: Request, res: Response) => {
         description,
         points,
         clubId,
+        clubName,
       },
     });
 
@@ -139,6 +159,7 @@ router.post("/challenge", verifyToken, async (req: Request, res: Response) => {
 /* =====================================================
    UPDATE CHALLENGE
 ===================================================== */
+
 router.put(
   "/challenge/:id",
   verifyToken,
