@@ -2,11 +2,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -26,36 +22,18 @@
     // --- Path Resolution Configuration ---
     "baseUrl": "./src", // This tells TypeScript to start looking inside the 'src' folder
     "paths": {
-      "@components/*": [
-        "./src/components/*"
-      ],
-      "@styles/*": [
-        "./src/styles/*"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@services/*": [
-        "./src/services/*"
-      ],
-      "@context/*": [
-        "./src/context/*"
-      ],
-      "@/components/*": [
-        "./src/components/*"
-      ],
+      "@components/*": ["./components/*"],
+      "@styles/*": ["./styles/*"],
+      "@utils/*": ["./utils/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@services/*": ["./services/*"],
+      "@context/*": ["./context/*"],
+      "@/components/*": ["./components/*"],
       // The most versatile alias: Maps @/ to the src/ folder.
       // E.g., @/app/page.tsx or @/components/ui/button.tsx
-      "@/*": [
-        "./*"
-      ],
+      "@/*": ["./*"],
       // We must define app explicitly since Next.js uses it heavily
-      "@/app/*": [
-        "./app/*"
-      ]
+      "@/app/*": ["./app/*"]
     }
     // ------------------------------------
   },
@@ -64,9 +42,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-, "backend/src/seeds/seedClub.js"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    ".next/dev/types/**/*.ts",
+    "backend/src/seeds/seedClub.js"
+  ],
+  "exclude": ["node_modules", "backend/**/*.ts", "backend/**/*.tsx"]
 }

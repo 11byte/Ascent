@@ -1,0 +1,54 @@
+# ============================================
+# STEP 1: BUILD NEW IMAGES LOCALLY (on your dev machine)
+# ============================================
+
+# From project root, rebuild both images with new version tag
+docker compose build --no-cache
+
+# Verify new images were created
+docker images | grep ascent_check
+
+# ============================================
+# STEP 2: TAG AND PUSH TO PRIVATE REPO
+# ============================================
+
+$env:DOCKER_ID = "YOUR_DOCKER_ID"
+$env:NEW_VERSION = "v2"  # Increment from v1 to v2, v3, etc.
+
+# Tag local images with new version
+docker tag ascent_check-backend:latest ${env:DOCKER_ID}/ascent:backend-${env:NEW_VERSION}
+docker tag ascent_check-frontend:latest ${env:DOCKER_ID}/ascent:frontend-${env:NEW_VERSION}
+
+# Verify tags
+docker images | grep ascent
+
+# Login (if not already logged in)
+docker login
+
+# Push to private repo
+docker push ${env:DOCKER_ID}/ascent:backend-${env:NEW_VERSION}
+docker push ${env:DOCKER_ID}/ascent:frontend-${env:NEW_VERSION}
+
+# ============================================
+# STEP 3: ON NEW PC (PULL LATEST VERSION)
+# ============================================
+
+# Set env vars with NEW version
+$env:DOCKER_NAMESPACE = "YOUR_DOCKER_ID"
+$env:IMAGE_TAG = "v2"  # Match the version you just pushed
+
+# Login to private repo
+docker login
+
+# Pull the new images (replaces old v1 images)
+docker compose -f docker-compose.images.yml pull
+
+# Stop old containers and remove them
+docker compose -f docker-compose.images.yml down
+
+# Start new version
+docker compose -f docker-compose.images.yml up -d
+
+# Verify
+docker compose -f docker-compose.images.yml ps
+docker compose -f docker-compose.images.yml logs --tail=100 backend

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma.js";
 import {
   roadmapService,
@@ -43,7 +44,12 @@ export const generateRoadmap = async (req: Request, res: Response) => {
 
     // 1. Check cached roadmap for this user first to avoid regeneration costs.
     const normalizedQuery = normalizeTopic(query);
-    const userRoadmaps = await prisma.roadmap.findMany({
+    const userRoadmaps: Array<{
+      id: number;
+      title: string;
+      content: string;
+      createdAt: Date;
+    }> = await prisma.roadmap.findMany({
       where: { userId: user.id },
       select: { id: true, title: true, content: true, createdAt: true },
       orderBy: { createdAt: "desc" },
@@ -88,7 +94,7 @@ export const generateRoadmap = async (req: Request, res: Response) => {
     );
 
     // 4. Atomic Update: Save roadmap and decrement credits
-    const finalResult = await prisma.$transaction(async (tx) => {
+    const finalResult = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const saved = await tx.roadmap.create({
         data: {
           title: query,

@@ -272,10 +272,21 @@ Now open the app at **[http://localhost:3000](http://localhost:3000)** 🎉
 If you prefer containerization:
 
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
-This will spin up all services (client, backend, AI service, MongoDB) together.
+This starts the full stack defined in [docker-compose.yml](docker-compose.yml):
+- `frontend` (Next.js) on `http://localhost:3000`
+- `backend` (Express + Prisma) on `http://localhost:5000`
+- `postgres` on `localhost:5432`
+- `kafka` on `localhost:9092`
+- `zookeeper` on `localhost:2181`
+
+To stop everything:
+
+```bash
+docker compose down
+```
 
 ---
 

@@ -3,7 +3,7 @@ import { prisma } from "../utils/prisma.js";
 
 const kafka = new Kafka({
   clientId: "ascent-domain-service",
-  brokers: ["localhost:9092"],
+  brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
 });
 
 const consumer = kafka.consumer({ groupId: "ascent-shared-consumer-v3" });

@@ -228,7 +228,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user.id;
-      const { phase } = req.params;
+      const phase = Array.isArray(req.params.phase)
+        ? req.params.phase[0]
+        : req.params.phase;
 
       const skills = await prisma.skill.findMany({
         where: {

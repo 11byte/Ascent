@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
-import { upcomingEvents } from "@/data/clubs/events";
+import { upcomingEvents } from "../../data/clubs/events";
 
 interface UpcomingEventsProps {
   color?: "fuchsia" | "red" | "blue" | "green";

@@ -7,7 +7,7 @@ export async function warmupKafkaCache() {
 
   const kafka = new Kafka({
     clientId: "ascent-warmup",
-    brokers: ["localhost:9092"],
+    brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
   });
 
   const topics = [

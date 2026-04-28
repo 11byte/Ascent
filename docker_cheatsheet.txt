@@ -1,0 +1,196 @@
+Docker Compose and Docker Command Cheat Sheet
+
+Run from project root (where docker-compose.yml is located).
+
+1) List containers and images
+- docker compose ps
+- docker ps -a
+- docker images
+
+2) View logs
+- docker compose logs
+- docker compose logs -f
+- docker compose logs -f frontend
+- docker compose logs -f backend
+- docker compose logs --tail=200 backend frontend
+
+3) Stop containers
+- docker compose stop
+- docker compose stop frontend backend
+- docker stop ascent-frontend ascent-backend ascent-postgres ascent-kafka ascent-zookeeper
+
+4) Start containers (without rebuild)
+- docker compose up -d
+- docker compose start
+- docker compose start frontend backend
+
+5) Restart containers
+- docker compose restart
+- docker compose restart frontend
+- docker compose restart backend
+- docker restart ascent-frontend ascent-backend
+
+6) Delete containers and network (keep images and volumes)
+- docker compose down
+
+7) Delete containers and network plus volumes (deletes DB data)
+- docker compose down -v
+
+8) Delete containers, network, volumes, and local compose images
+- docker compose down -v --rmi local
+
+9) Delete specific containers
+- docker rm -f ascent-frontend
+- docker rm -f ascent-backend
+
+10) Recreate image from Dockerfile directly
+Frontend:
+- docker build -f Dockerfile.frontend -t ascent_check-frontend:latest .
+
+Backend:
+- docker build -f backend/Dockerfile -t ascent_check-backend:latest backend
+
+11) Recreate images from docker compose file
+Build all:
+- docker compose build --no-cache
+
+Build one service:
+- docker compose build --no-cache frontend
+- docker compose build --no-cache backend
+
+12) Recreate and run containers from compose
+- docker compose up -d --build
+
+Force recreate containers:
+- docker compose up -d --build --force-recreate
+
+Clean recreate (full reset):
+- docker compose down -v --rmi local
+- docker compose up -d --build
+
+13) One-time export from Neon to local SQL file (base.sql)
+- PowerShell: $env:NEON_DATABASE_URL = "postgresql://user:pass@ep-xxx.neon.tech/dbname?sslmode=require"
+- PowerShell: docker run --rm postgres:17-alpine pg_dump "$env:NEON_DATABASE_URL" --data-only --column-inserts --rows-per-insert=1 --no-owner --no-privileges --exclude-table-data=_prisma_migrations > base.sql
+
+Notes:
+- base.sql is imported automatically by backend startup when the DB is empty.
+- Keep base.sql in repo root.
+- If you regenerate it, commit the new base.sql so teammates get updated baseline data.
+
+14) Reset DB and re-import base.sql
+- docker compose down -v
+- docker compose up -d --build
+
+15) Publish private images to unified Docker Hub repo (recommended)
+Assume:
+- Docker Hub username: YOUR_DOCKER_ID
+- Repository name: ascent (single repo for both images)
+- Version tag: v1
+
+Step A: Login
+- docker login
+
+Step B: Tag local images with UNIFIED REPO and different tags
+- docker tag ascent_check-backend:latest YOUR_DOCKER_ID/ascent:backend-v1
+- docker tag ascent_check-frontend:latest YOUR_DOCKER_ID/ascent:frontend-v1
+
+Step C: Push both images to same repo
+- docker push YOUR_DOCKER_ID/ascent:backend-v1
+- docker push YOUR_DOCKER_ID/ascent:frontend-v1
+
+Step D: Make the repo private on Docker Hub
+- Go to: https://hub.docker.com/ → Repositories → ascent
+- Click Settings → Visibility → Change to Private
+- Save changes
+Now both images are in ONE private repo!
+
+16) Use private images in docker-compose.yml (unified repo)
+Replace build blocks for backend/frontend with unified repo image tags:
+- image: YOUR_DOCKER_ID/ascent:backend-v1
+- image: YOUR_DOCKER_ID/ascent:frontend-v1
+
+Keep postgres, kafka, zookeeper services as they are.
+
+17) Setup on a new PC (pull and run)
+Step A: Prerequisites
+- Install Docker Desktop
+- docker login (same private registry account or a permitted account)
+
+Step B: Get project files
+- git clone <your-repo-url>
+- cd <repo-folder>
+
+Files that must be present in repo folder:
+- docker-compose.yml
+- base.sql (if you want seeded baseline DB)
+- .env.example
+
+Step C: Create .env from template
+- PowerShell: copy .env.example .env
+- Edit .env and set required values (JWT_SECRET, GEMINI_API_KEY, GOOGLE_API_KEY, etc.)
+
+Step D: Pull private images and run
+- docker compose pull
+- docker compose up -d
+
+Step E: Verify
+- docker compose ps
+- docker compose logs --tail=150 backend
+- docker compose logs --tail=150 frontend
+
+18) When .env changes
+Runtime env changes (mostly backend):
+- docker compose up -d --force-recreate backend
+
+Frontend build-time env changes (NEXT_PUBLIC_*):
+- docker compose up -d --build --force-recreate frontend
+
+If not sure, do full refresh:
+- docker compose down
+- docker compose up -d --build
+
+19) Verify env actually loaded in containers
+- docker compose config
+- docker compose exec backend env
+- docker compose exec frontend env
+
+20) Use separate compose file for private images (recommended method)
+Purpose:
+- Keep docker-compose.yml for local build workflow.
+- Use docker-compose.images.yml for pull-only workflow from unified private registry.
+
+Both images now in SAME private repo: YOUR_DOCKER_ID/ascent
+- Backend image: YOUR_DOCKER_ID/ascent:backend-v1
+- Frontend image: YOUR_DOCKER_ID/ascent:frontend-v1
+
+Setup on new PC with unified private repo:
+Step A: Set environment variables
+- PowerShell: $env:DOCKER_NAMESPACE = "YOUR_DOCKER_ID"
+- PowerShell: $env:IMAGE_TAG = "v1"
+
+Step B: Authenticate (required for private repo)
+- docker login
+- Enter your Docker Hub username and access token
+
+Step C: Pull and run using image compose file
+- docker compose -f docker-compose.images.yml pull
+- docker compose -f docker-compose.images.yml up -d
+
+Step D: Check status and logs
+- docker compose -f docker-compose.images.yml ps
+- docker compose -f docker-compose.images.yml logs --tail=150 backend
+- docker compose -f docker-compose.images.yml logs --tail=150 frontend
+
+Step E: Stop/cleanup
+- docker compose -f docker-compose.images.yml down
+- docker compose -f docker-compose.images.yml down -v (deletes DB data)
+
+Advantages of unified repo:
+- Single private repo = easier to manage access permissions
+- Both images with different tags in one place
+- Cleaner Docker Hub organization
+
+Important notes:
+- docker-compose.images.yml expects base.sql in repo root for automatic DB import.
+- docker-compose.images.yml expects .env values for backend secrets.
+- All teammates need docker login access to the private ascent repo.
