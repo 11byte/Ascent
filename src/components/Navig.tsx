@@ -1,20 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React from "react";
+import { usePathname } from "next/navigation";
 
 const Navig = () => {
-  const [showAuthActions, setShowAuthActions] = useState(false);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const hasLocalAuth =
-      Boolean(localStorage.getItem("token")) ||
-      Boolean(localStorage.getItem("userId"));
-    const hasCookieAuth = /(?:^|;\s*)(token|userId)=/.test(document.cookie);
-
-    setShowAuthActions(!(hasLocalAuth || hasCookieAuth));
-  }, []);
-
-  if (!showAuthActions) {
+  // ✅ Show ONLY on landing page
+  if (pathname !== "/") {
     return null;
   }
 

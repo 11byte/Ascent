@@ -11,11 +11,10 @@ export default function LayoutWrapper({
 }) {
   const pathname = usePathname();
 
-  const hiddenPrefixes = ["/dashboard", "/login", "/signup"];
-
-  const hideNavbar = hiddenPrefixes.some((prefix) =>
-    pathname.startsWith(prefix)
-  );
+  const hideNavbar =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup");
 
   return (
     <>
