@@ -3,9 +3,16 @@ import { prisma } from "../utils/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendEventToKafka } from "../utils/producer.js";
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
 
 const router = Router();
+const HOD_EMAIL = "omkarchandgaonkar@gmail.com";
 
+// generate once and store in ENV in production
+const HOD_SECRET = speakeasy.generateSecret({
+  length: 20,
+}).base32;
 /* =====================================================
    TEMPORARY AUTH MIDDLEWARE (Skip real verification)
 ===================================================== */
@@ -156,7 +163,9 @@ router.get("/profile/:userId", async (req: Request, res: Response) => {
     return res.status(200).json({ status: true, user });
   } catch (err) {
     console.error("Profile fetch error:", err);
-    return res.status(500).json({ status: false, message: "Failed to fetch profile" });
+    return res
+      .status(500)
+      .json({ status: false, message: "Failed to fetch profile" });
   }
 });
 
@@ -271,6 +280,65 @@ router.get("/leetcode/:username", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("LeetCode API Error:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/hod-qr", async (req: Request, res: Response) => {
+  try {
+    const otpauth = speakeasy.otpauthURL({
+      secret: HOD_SECRET,
+      label: HOD_EMAIL,
+      issuer: "Ascent",
+      encoding: "base32",
+    });
+
+    const qr = await QRCode.toDataURL(otpauth);
+
+    res.json({ ok: true, qr });
+  } catch (err) {
+    console.error("QR generation error:", err);
+    res.status(500).json({ error: "Failed to generate QR" });
+  }
+});
+
+router.post("/hod-login", async (req: Request, res: Response) => {
+  try {
+    const { otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({ error: "OTP required" });
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: HOD_SECRET,
+      encoding: "base32",
+      token: otp,
+      window: 1,
+    });
+
+    if (!verified) {
+      return res.status(401).json({ error: "Invalid OTP" });
+    }
+
+    // Create JWT (HoD role)
+    const token = jwt.sign(
+      { role: "hod", email: HOD_EMAIL },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" },
+    );
+
+    return res.json({
+      ok: true,
+      token,
+      user: {
+        email: HOD_EMAIL,
+        role: "hod",
+        name: "Head of Department",
+      },
+    });
+  } catch (err) {
+    console.error("HoD login error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

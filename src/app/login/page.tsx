@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -13,9 +13,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [qrCode, setQrCode] = useState("");
 
   // ✅ NEW: Login Type Toggle
   const [loginType, setLoginType] = useState<"student" | "hod">("student");
+
+  useEffect(() => {
+    if (loginType === "hod") {
+      fetch("http://localhost:5000/auth/hod-qr")
+        .then((res) => res.json())
+        .then((data) => setQrCode(data.qr));
+    }
+  }, [loginType]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,35 +33,37 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const url =
+        loginType === "hod"
+          ? "http://localhost:5000/auth/hod-login"
+          : "http://localhost:5000/auth/login";
+
+      const body = loginType === "hod" ? { otp } : { email, password };
+
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Login failed");
 
-      // ✅ Store token
       localStorage.setItem("token", data.token);
 
-      const userPhase = data?.user?.phase || "1";
+      if (loginType === "hod") {
+        localStorage.setItem("userRole", "hod");
+        setTimeout(() => router.push("/StaticDashboard"), 1000);
+      } else {
+        const userPhase = data?.user?.phase || "1";
 
-      localStorage.setItem("userPhase", userPhase);
-      localStorage.setItem("userEmail", data?.user?.email || "");
-      localStorage.setItem("userName", data?.user?.name || "");
-      localStorage.setItem("userId", data?.user?.userId || "");
+        localStorage.setItem("userPhase", userPhase);
+        localStorage.setItem("userEmail", data?.user?.email || "");
+        localStorage.setItem("userName", data?.user?.name || "");
+        localStorage.setItem("userId", data?.user?.userId || "");
 
-      setMsg("Logged in successfully! Redirecting...");
-
-      // ✅ Role-based redirect (UI only for now)
-      setTimeout(() => {
-        if (loginType === "hod") {
-          router.push("/dashboard");
-        } else {
-          router.push(`/phase${userPhase}`);
-        }
-      }, 1500);
+        setTimeout(() => router.push(`/phase${userPhase}`), 1000);
+      }
     } catch (error: any) {
       setMsg(error.message || "Something went wrong");
     } finally {
@@ -134,25 +146,56 @@ const Login = () => {
             </h3>
           </div>
 
-          <label className="block text-sm text-gray-700 mb-2">Email</label>
-          <input
-            type="email"
-            className="w-full rounded-xl px-4 py-3 mb-5 bg-white/80 border border-gray-300 outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition text-zinc-700 shadow-inner"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          {loginType === "hod" ? (
+            <>
+              <p className="text-xs text-gray-500 text-center mb-2">
+                Scan once using Google Authenticator
+              </p>
+              {qrCode && (
+                <img
+                  src={qrCode}
+                  alt="Scan QR"
+                  className="mx-auto mb-4 w-40 h-40"
+                />
+              )}
 
-          <label className="block text-sm text-gray-700 mb-2">Password</label>
-          <input
-            type="password"
-            className="w-full rounded-xl px-4 py-3 mb-6 bg-white/80 border border-gray-300 outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition text-zinc-700 shadow-inner"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+              <label className="block text-sm text-gray-700 mb-2">
+                Enter OTP
+              </label>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full rounded-xl px-4 py-3 mb-6 bg-white/80 border border-gray-300 outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition text-zinc-700 shadow-inner"
+                placeholder="6-digit OTP"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <label className="block text-sm text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                className="w-full rounded-xl px-4 py-3 mb-5 bg-white/80 border border-gray-300 outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition text-zinc-700 shadow-inner"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+
+              <label className="block text-sm text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full rounded-xl px-4 py-3 mb-6 bg-white/80 border border-gray-300 outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition text-zinc-700 shadow-inner"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </>
+          )}
 
           <center>
             <button

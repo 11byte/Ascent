@@ -62,117 +62,34 @@ type Student = {
    
    ------------------------- */
 
-const DOMAIN_POOL = [
-  "Web",
-  "AI",
-  "Data Science",
-  "Systems",
-  "Cloud",
-  "SRE",
-  "Embedded",
-  "Security",
-  "Fullstack",
-  "ML",
-];
+/* -------------------------
+   Backend Data Fetching (REAL DATA)
+------------------------- */
 
-function randInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+const API_URL = "http://localhost:5000/dashboard/students";
+
+function useStudents() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStudents = useCallback(async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setStudents(data.students || []);
+    } catch (err) {
+      console.error("Dashboard fetch failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  return { students, loading, refresh: fetchStudents };
 }
-function pick<T>(arr: T[], n = 1) {
-  const copy = [...arr];
-  const out: T[] = [];
-  for (let i = 0; i < n; i++) {
-    const idx = Math.floor(Math.random() * copy.length);
-    out.push(copy.splice(idx, 1)[0]);
-  }
-  return out;
-}
-
-function generateStudent(i: number): Student {
-  const phases: Phase[] = [1, 2, 3, 4];
-  const phase = phases[randInt(0, phases.length - 1)] as Phase;
-  const name = `Student ${i.toString().padStart(4, "0")}`;
-  const roll = `${["FE", "SE", "TE", "BE"][phase - 1]}-${randInt(100, 999)}`;
-  const domains = pick(DOMAIN_POOL, randInt(1, 2));
-  const skillLog = domains
-    .map((d) => ({
-      name: `${d} Fundamentals`,
-      level: randInt(30, 95),
-    }))
-    .concat(
-      [
-        { name: "Communication", level: randInt(30, 85) },
-        { name: "Problem Solving", level: randInt(30, 95) },
-      ].slice(0, 2),
-    );
-  const timelineScore = [
-    randInt(10, 70),
-    randInt(20, 80),
-    randInt(20, 95),
-    randInt(40, 99),
-  ].map((s, idx) => (idx + 1 <= phase ? s : 0));
-  const swot = {
-    strengths: pick(
-      [
-        "Teamwork",
-        "Strong fundamentals",
-        "Quick learner",
-        "Open source experience",
-        "Leadership",
-      ],
-      randInt(1, 2),
-    ),
-    weaknesses: pick(
-      [
-        "Inconsistent practice",
-        "Low portfolio",
-        "Interview anxiety",
-        "Lack of research exposure",
-      ],
-      randInt(0, 2),
-    ),
-    opportunities: pick(
-      ["Hackathons", "Internships", "Research projects", "Clubs"],
-      randInt(1, 2),
-    ),
-    threats: pick(
-      ["Crowded placement pool", "Industry shifts", "Skill mismatch"],
-      randInt(0, 2),
-    ),
-  };
-
-  return {
-    id: `stu-${i}`,
-    name,
-    roll,
-    email: `${name.toLowerCase().replace(/\s/g, ".")}@example.edu`,
-    phase,
-    domains,
-    placementInterest: ["Placement", "Higher Studies", "Undecided"][
-      randInt(0, 2)
-    ] as Student["placementInterest"],
-    skillLog,
-    achievements: pick(
-      [
-        "Hackathon Winner",
-        "Intern",
-        "Top 10 FE",
-        "Published Article",
-        "Club Lead",
-      ],
-      randInt(0, 2),
-    ),
-    gitContribs: randInt(0, 600),
-    leetSolved: randInt(0, 1000),
-    behaviorScore: randInt(30, 95),
-    timelineScore,
-    swot,
-  };
-}
-
-const STUDENTS = Array.from({ length: 2000 }).map((_, i) =>
-  generateStudent(i + 1),
-);
 
 /* -------------------------
    Helpers & small UI
@@ -241,14 +158,17 @@ function StudentRow({
               {student.name}
             </div>
             <div className="text-xs text-emerald-300">
-              {student.roll} • {student.domains.join(" · ")}
+              {student.roll} •{" "}
+              {student.domains?.length
+                ? student.domains.join(" · ")
+                : "No domain"}
             </div>
           </div>
         </div>
       </div>
       <div className="text-right">
         <div className="text-sm text-emerald-200 font-semibold">
-          {student.gitContribs + student.leetSolved}
+          {student.gitContribs + student.leetSolved || 0}
         </div>
         <div className="text-xs text-emerald-400">{student.behaviorScore}%</div>
       </div>
@@ -260,11 +180,16 @@ function StudentRow({
    Dashboard Page component
 ------------------------- */
 export default function HODDashboardPage() {
-  const [students] = useState<Student[]>(STUDENTS);
+  const { students, loading, refresh } = useStudents();
+
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Student | null>(null);
   const [phaseFilter, setPhaseFilter] = useState<Phase | "all">("all");
   const jumpRef = useRef<HTMLInputElement | null>(null);
+
+  /* -------------------------
+     Loading Guard (IMPORTANT)
+  ------------------------- */
 
   // Phase-wise groups (memoized for performance)
   const grouped = useMemo(() => {
@@ -287,7 +212,7 @@ export default function HODDashboardPage() {
       }
     });
     // sort by (git+leet) desc for visibility
-    (Object.keys(groups) as unknown as Phase[]).forEach((p) =>
+    ([1, 2, 3, 4] as Phase[]).forEach((p) =>
       groups[p].sort(
         (a, b) => b.gitContribs + b.leetSolved - (a.gitContribs + a.leetSolved),
       ),
@@ -296,8 +221,10 @@ export default function HODDashboardPage() {
   }, [students, query, phaseFilter]);
 
   // Basic totals
-  const totals = useMemo(
-    () => ({
+  const totals = useMemo(() => {
+    const totalStudents = students.length || 1;
+
+    return {
       total: students.length,
       byPhase: [
         grouped[1].length,
@@ -306,14 +233,13 @@ export default function HODDashboardPage() {
         grouped[4].length,
       ],
       avgLeet: Math.round(
-        students.reduce((a, b) => a + b.leetSolved, 0) / students.length,
+        students.reduce((a, b) => a + b.leetSolved, 0) / totalStudents,
       ),
       avgGit: Math.round(
-        students.reduce((a, b) => a + b.gitContribs, 0) / students.length,
+        students.reduce((a, b) => a + b.gitContribs, 0) / totalStudents,
       ),
-    }),
-    [students, grouped],
-  );
+    };
+  }, [students, grouped]);
 
   const exportVisibleCSV = useCallback(() => {
     const visible = Object.values(grouped).flat();
@@ -341,19 +267,30 @@ export default function HODDashboardPage() {
     [grouped],
   );
 
-  const handleJumpTo = () => {
-    const val = jumpRef.current?.value?.trim();
-    if (!val) return;
-    // Try to find student by roll or name
-    const found = students.find(
-      (s) =>
-        s.roll.toLowerCase() === val.toLowerCase() ||
-        s.name.toLowerCase() === val.toLowerCase(),
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-emerald-200">
+        Loading dashboard...
+      </div>
     );
+  }
+
+  const handleJumpTo = () => {
+    const val = jumpRef.current?.value?.trim().toLowerCase();
+    if (!val) return;
+
+    const found = students.find((s) => {
+      const name = s.name?.toLowerCase() || "";
+      const roll = s.roll?.toLowerCase() || "";
+      const email = s.email?.toLowerCase() || "";
+
+      return name.includes(val) || roll.includes(val) || email.includes(val);
+    });
+
     if (found) {
       setSelected(found);
     } else {
-      alert("No student found for that roll/name (demo).");
+      console.warn("No student found:", val);
     }
   };
 
@@ -376,7 +313,7 @@ export default function HODDashboardPage() {
             <div className="flex gap-2">
               <div className="text-xs text-emerald-300">Total</div>
               <div className="text-xl font-semibold text-emerald-100">
-                {totals.total}
+                {totals.total || "--"}
               </div>
             </div>
 
@@ -385,6 +322,12 @@ export default function HODDashboardPage() {
               className="flex items-center gap-2 px-3 py-2 bg-emerald-700/20 border border-emerald-600 rounded-md text-emerald-100 hover:bg-emerald-700/30"
             >
               <Download size={16} /> Export visible CSV
+            </button>
+            <button
+              onClick={refresh}
+              className="flex items-center gap-2 px-3 py-2 bg-emerald-700/20 border border-emerald-600 rounded-md text-emerald-100 hover:bg-emerald-700/30"
+            >
+              Refresh
             </button>
 
             <button
@@ -406,7 +349,10 @@ export default function HODDashboardPage() {
             <Search className="text-emerald-400" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setTimeout(() => setQuery(val), 150);
+              }}
               placeholder="Search by name, roll, email or domain..."
               className="w-full bg-[#05251c] text-emerald-100 placeholder:emerald-400 rounded-md px-3 py-2 border border-[#0e3e2e] focus:ring-2 focus:ring-emerald-500"
             />
@@ -450,7 +396,7 @@ export default function HODDashboardPage() {
           {[1, 2, 3, 4].map((p) => (
             <div
               key={p}
-              className="bg-[#05251c] border border-[#0f3d2e] rounded-xl p-3 flex flex-col h-[700px]"
+              className="bg-[#05251c] border border-[#0f3d2e] rounded-xl p-3 flex flex-col min-h-[600px] max-h-[80vh]"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -477,12 +423,12 @@ export default function HODDashboardPage() {
               {/* Virtualized list for the phase */}
               <div className="flex-1">
                 {grouped[p as Phase].length === 0 ? (
-                  <div className="text-emerald-400 text-sm p-4">
+                  <div className="flex items-center justify-center h-full text-emerald-400 text-sm opacity-70">
                     No students found
                   </div>
                 ) : (
                   <Virtuoso
-                    style={{ height: 560 }}
+                    style={{ height: "100%" }}
                     totalCount={grouped[p as Phase].length}
                     itemContent={(index) => {
                       const stu = grouped[p as Phase][index];
@@ -506,6 +452,9 @@ export default function HODDashboardPage() {
         <AnimatePresence>
           {selected && (
             <motion.aside
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setSelected(null);
+              }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -567,10 +516,14 @@ export default function HODDashboardPage() {
                     </h4>
                     <div style={{ height: 220 }}>
                       <ResponsiveBar
-                        data={selected.skillLog.map((s) => ({
-                          skill: s.name,
-                          level: s.level,
-                        }))}
+                        data={
+                          selected.skillLog?.length
+                            ? selected.skillLog.map((s) => ({
+                                skill: s.name,
+                                level: s.level,
+                              }))
+                            : [{ skill: "No Data", level: 0 }]
+                        }
                         keys={["level"]}
                         indexBy="skill"
                         margin={{ top: 10, right: 10, bottom: 60, left: 60 }}
@@ -599,7 +552,7 @@ export default function HODDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="bg-[#05251c] rounded-xl p-3 h-[320px]">
+                  <div className="bg-[#05251c] border border-[#0f3d2e] rounded-xl p-3 flex flex-col transition hover:scale-[1.01] hover:shadow-lg">
                     <h4 className="text-emerald-200 text-sm mb-2">
                       SWOT (summary radar)
                     </h4>
@@ -610,7 +563,7 @@ export default function HODDashboardPage() {
                             dimension: "Strengths",
                             score: Math.min(
                               100,
-                              selected.swot.strengths.length * 30,
+                              (selected.swot?.strengths?.length || 0) * 30,
                             ),
                           },
                           {
@@ -765,8 +718,8 @@ export default function HODDashboardPage() {
                       Based on activity, recommended next steps:
                       <ul className="list-disc ml-5 mt-2">
                         <li>
-                          Enroll in a {selected.domains[0]} club and participate
-                          in macrothons.
+                          Enroll in a {selected.domains?.[0] || "general tech"}
+                          club and participate in macrothons.
                         </li>
                         <li>
                           Contribute to 2 small OSS issues to increase Git

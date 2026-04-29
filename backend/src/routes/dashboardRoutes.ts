@@ -1,22 +1,23 @@
 import { Router } from "express";
-import type { BlogInteraction } from "@prisma/client";
 import { prisma } from "../utils/prisma.js";
-
 import { getUserKafkaData } from "../services/kafkaConsumerService.js";
 
 const router = Router();
 
-router.get("/students", async (req, res) => {
+router.get("/students", async (_req, res) => {
   try {
     const users = await prisma.user.findMany({
       include: {
         skills: true,
         achievements: true,
-        trackerSessions: true, // 👈 IMPORTANT
+        trackerSessions: true,
       },
     });
 
     const students = users.map((u) => {
+      /* -------------------------
+         🔥 KAFKA DATA (USE userId)
+      ------------------------- */
       const kafkaData = getUserKafkaData(u.userId) || {
         quiz: [],
         github: [],
@@ -24,11 +25,17 @@ router.get("/students", async (req, res) => {
       };
 
       /* -------------------------
-         🔥 TRANSFORM LOGIC
+         🔥 LATEST TRACKER SESSION
       ------------------------- */
+      const latestSession = u.trackerSessions?.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )[0];
 
+      /* -------------------------
+         🔥 METRICS (IMPROVED)
+      ------------------------- */
       const gitContribs = kafkaData.github.length * 5;
-
       const leetSolved = kafkaData.quiz.length * 2;
 
       const behaviorScore = Math.min(
@@ -38,22 +45,53 @@ router.get("/students", async (req, res) => {
           kafkaData.blog.length * 2,
       );
 
-      const domains = u.trackerSessions?.[0]?.assignedDomain
-        ? [u.trackerSessions[0].assignedDomain]
+      /* -------------------------
+         🔥 DOMAIN (FROM ML)
+      ------------------------- */
+      const domains = latestSession?.assignedDomain
+        ? [latestSession.assignedDomain]
         : [];
 
-      const timelineScore = [20, 40, 60, behaviorScore];
+      /* -------------------------
+         🔥 SKILLS (FIXED)
+      ------------------------- */
+      const skillLog = u.skills.map((s) => ({
+        name: s.skillName, // ✅ correct field
+        level:
+          s.level === "advanced"
+            ? 90
+            : s.level === "intermediate"
+              ? 70
+              : s.level === "beginner"
+                ? 40
+                : 50,
+      }));
+
+      /* -------------------------
+         🔥 PHASE (FIXED)
+      ------------------------- */
+      const phase = Number(u.phase) as 1 | 2 | 3 | 4;
+
+      /* -------------------------
+         🔥 TIMELINE (SMART)
+      ------------------------- */
+      const timelineScore = [0, 0, 0, 0];
+      for (let i = 0; i < phase; i++) {
+        timelineScore[i] = Math.min(100, behaviorScore - i * 10);
+      }
 
       return {
-        id: u.id.toString(),
+        id: u.userId, // ✅ IMPORTANT: use userId
         name: u.name,
-        roll: `ROLL-${u.id}`,
+        roll: `ROLL-${u.userId}`,
         email: u.email,
-        phase: 4,
+
+        phase,
 
         domains,
-
         placementInterest: "Placement",
+
+        skillLog,
 
         achievements: u.achievements.map((a) => a.title),
 
@@ -65,9 +103,9 @@ router.get("/students", async (req, res) => {
 
         swot: {
           strengths: domains,
-          weaknesses: [],
-          opportunities: ["Hackathons"],
-          threats: [],
+          weaknesses: behaviorScore < 40 ? ["Low activity"] : [],
+          opportunities: ["Hackathons", "Clubs"],
+          threats: behaviorScore < 30 ? ["At Risk"] : [],
         },
       };
     });
