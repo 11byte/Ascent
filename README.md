@@ -295,7 +295,9 @@ docker compose down
 **Team Ascent**
 
 * Omkar Chandgaonkar *(Founder & Architect)*
-* [Add Contributors]
+* Paresh Gupta *(ML Integration & Scaling)*
+* Aaryan Ghawali *(Data Analytics & Pipeline Monitoring)*
+* Aditya Chaudhari *(Database architect & Documentation)*
 
 ---
 
